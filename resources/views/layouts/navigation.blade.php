@@ -33,7 +33,8 @@
                         </x-slot>
                         <x-slot name="content">
                             @can('produk.lihat')
-                            <x-dropdown-link :href="url('/produk')">Produk & Stok</x-dropdown-link>
+                            <x-dropdown-link :href="route('products.index')">Produk & Stok</x-dropdown-link>
+                            <x-dropdown-link :href="route('categories.index')">Kategori</x-dropdown-link>
                             @endcan
                             @can('pembelian.lihat')
                             <x-dropdown-link :href="url('/pembelian')">Pembelian</x-dropdown-link>
@@ -116,7 +117,7 @@
                 Dashboard
             </x-responsive-nav-link>
             @can('produk.lihat')
-            <x-responsive-nav-link :href="url('/produk')">Produk & Stok</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('products.index')">Produk & Stok</x-responsive-nav-link>
             @endcan
             @can('pembelian.lihat')
             <x-responsive-nav-link :href="url('/pembelian')">Pembelian</x-responsive-nav-link>
