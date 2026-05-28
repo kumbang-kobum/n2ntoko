@@ -4,16 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Str;
 
-class CategoryController extends Controller
+class CategoryController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('permission:produk.lihat')->only('index');
-        $this->middleware('permission:produk.tambah')->only(['store']);
-        $this->middleware('permission:produk.edit')->only(['update']);
-        $this->middleware('permission:produk.hapus')->only(['destroy']);
+        return [
+            new Middleware('permission:produk.lihat', only: ['index']),
+            new Middleware('permission:produk.tambah', only: ['store']),
+            new Middleware('permission:produk.edit', only: ['update']),
+            new Middleware('permission:produk.hapus', only: ['destroy']),
+        ];
     }
 
     public function index()

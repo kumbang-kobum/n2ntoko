@@ -103,9 +103,15 @@
                             </td>
                             <td class="px-5 py-3.5 text-gray-600">
                                 @if($unit->is_base)
-                                    <span class="text-gray-400">—</span>
+                                    <span class="text-xs bg-blue-50 text-blue-500 px-2 py-0.5 rounded">
+                                        Satuan terkecil
+                                    </span>
                                 @else
-                                    {{ number_format($unit->conversion, 0, ',', '.') }} {{ $product->baseUnit?->unit_name }}
+                                    <span class="font-medium">
+                                        1 {{ $unit->unit_name }}
+                                        = {{ number_format($unit->conversion, 0, ',', '.') }}
+                                        {{ $product->baseUnit?->unit_name }}
+                                    </span>
                                 @endif
                             </td>
                             <td class="px-5 py-3.5">

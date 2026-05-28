@@ -6,16 +6,20 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Models\Role;
 
-class UserController extends Controller
+class UserController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('permission:user.lihat')->only('index');
-        $this->middleware('permission:user.tambah')->only(['create', 'store']);
-        $this->middleware('permission:user.edit')->only(['edit', 'update']);
-        $this->middleware('permission:user.hapus')->only('destroy');
+        return [
+            new Middleware('permission:user.lihat', only: ['index']),
+            new Middleware('permission:user.tambah', only: ['create', 'store']),
+            new Middleware('permission:user.edit', only: ['edit', 'update']),
+            new Middleware('permission:user.hapus', only: ['destroy']),
+        ];
     }
 
     public function index(Request $request)

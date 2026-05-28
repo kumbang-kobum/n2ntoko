@@ -7,16 +7,20 @@ use App\Models\Product;
 use App\Models\ProductBarcode;
 use App\Models\ProductUnit;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 
-class ProductController extends Controller
+class ProductController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('permission:produk.lihat')->only(['index', 'show']);
-        $this->middleware('permission:produk.tambah')->only(['create', 'store']);
-        $this->middleware('permission:produk.edit')->only(['edit', 'update']);
-        $this->middleware('permission:produk.hapus')->only('destroy');
+        return [
+            new Middleware('permission:produk.lihat', only: ['index', 'show']),
+            new Middleware('permission:produk.tambah', only: ['create', 'store']),
+            new Middleware('permission:produk.edit', only: ['edit', 'update']),
+            new Middleware('permission:produk.hapus', only: ['destroy']),
+        ];
     }
 
     public function index(Request $request)

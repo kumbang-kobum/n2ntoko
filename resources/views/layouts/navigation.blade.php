@@ -23,7 +23,7 @@
                     <x-dropdown align="left" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md
-                                {{ request()->routeIs('produk.*', 'pembelian.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
+                                {{ request()->routeIs('products.*', 'categories.*', 'purchases.*', 'suppliers.*', 'stok-opname.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
                                 transition">
                                 Inventaris
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,27 +36,31 @@
                             <x-dropdown-link :href="route('products.index')">Produk & Stok</x-dropdown-link>
                             <x-dropdown-link :href="route('categories.index')">Kategori</x-dropdown-link>
                             @endcan
+                            @can('produk.edit')
+                            <x-dropdown-link :href="route('stok-opname.index')">Stok Opname</x-dropdown-link>
+                            @endcan
                             @can('pembelian.lihat')
-                            <x-dropdown-link :href="url('/pembelian')">Pembelian</x-dropdown-link>
+                            <x-dropdown-link :href="route('suppliers.index')">Supplier</x-dropdown-link>
+                            <x-dropdown-link :href="route('purchases.index')">Pembelian</x-dropdown-link>
                             @endcan
                         </x-slot>
                     </x-dropdown>
                     @endcanany
 
-                    @can('penjualan.lihat')
-                    <x-nav-link :href="url('/penjualan')" :active="request()->routeIs('penjualan.*')">
+                    @canany(['penjualan.lihat','penjualan.tambah'])
+                    <x-nav-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
                         Penjualan
                     </x-nav-link>
-                    @endcan
+                    @endcanany
 
                     @can('laporan.lihat')
-                    <x-nav-link :href="url('/laporan')" :active="request()->routeIs('laporan.*')">
+                    <x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
                         Laporan
                     </x-nav-link>
                     @endcan
 
                     @can('user.lihat')
-                    <x-nav-link :href="url('/users')" :active="request()->routeIs('users.*')">
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                         Pengguna
                     </x-nav-link>
                     @endcan
@@ -119,17 +123,20 @@
             @can('produk.lihat')
             <x-responsive-nav-link :href="route('products.index')">Produk & Stok</x-responsive-nav-link>
             @endcan
+            @can('produk.edit')
+            <x-responsive-nav-link :href="route('stok-opname.index')">Stok Opname</x-responsive-nav-link>
+            @endcan
             @can('pembelian.lihat')
-            <x-responsive-nav-link :href="url('/pembelian')">Pembelian</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('purchases.index')">Pembelian</x-responsive-nav-link>
             @endcan
             @can('penjualan.lihat')
-            <x-responsive-nav-link :href="url('/penjualan')">Penjualan</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('sales.index')">Penjualan</x-responsive-nav-link>
             @endcan
             @can('laporan.lihat')
-            <x-responsive-nav-link :href="url('/laporan')">Laporan</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('laporan.index')">Laporan</x-responsive-nav-link>
             @endcan
             @can('user.lihat')
-            <x-responsive-nav-link :href="url('/users')">Pengguna</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('users.index')">Pengguna</x-responsive-nav-link>
             @endcan
         </div>
         <div class="pt-4 pb-3 border-t border-gray-200 px-4">
