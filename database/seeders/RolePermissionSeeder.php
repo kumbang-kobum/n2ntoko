@@ -98,10 +98,10 @@ class RolePermissionSeeder extends Seeder
 
         // Buat akun admin default
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@n2ntoko.com'],
+            ['email' => env('ADMIN_EMAIL', 'admin@n2ntoko.com')],
             [
                 'name'     => 'Administrator',
-                'password' => bcrypt('admin123'),
+                'password' => bcrypt(env('ADMIN_PASSWORD', 'ChangeMe_' . substr(md5(uniqid()), 0, 8))),
                 'is_active'=> true,
             ]
         );

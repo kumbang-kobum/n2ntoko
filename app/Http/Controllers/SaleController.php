@@ -80,21 +80,25 @@ class SaleController extends Controller implements HasMiddleware
             'items.required'        => 'Minimal satu item harus ditambahkan.',
         ]);
 
+        try {
         $sale = DB::transaction(function () use ($request) {
             $total = 0;
             $itemData = [];
 
             foreach ($request->items as $item) {
-                $unit      = \App\Models\ProductUnit::find($item['unit_id']);
-                $product   = \App\Models\Product::find($item['product_id']);
-                $qty       = (float) $item['qty'];
-                $price     = (float) $item['sell_price'];
-                $qtyBase   = $qty * (float) $unit->conversion;
-                $subtotal  = $qty * $price;
-                $hppSnap   = (float) $product->avg_cost;
-                $profit    = $subtotal - ($qtyBase * $hppSnap);
+                // lockForUpdate: cegah race condition stok bersamaan
+                $product = \App\Models\Product::lockForUpdate()->findOrFail($item['product_id']);
+                $unit    = \App\Models\ProductUnit::findOrFail($item['unit_id']);
 
-                if ($product->stock_qty < $qtyBase) {
+                $qty      = (float) $item['qty'];
+                $price    = (float) $item['sell_price'];
+                $qtyBase  = $qty * (float) $unit->conversion;
+                $subtotal = $qty * $price;
+                $hppSnap  = (float) $product->avg_cost;
+                $profit   = $subtotal - ($qtyBase * $hppSnap);
+
+                // Validasi stok di dalam transaction (setelah lock)
+                if ((float) $product->stock_qty < $qtyBase) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'items' => "Stok {$product->name} tidak cukup. Tersedia: {$product->stock_qty} (base unit).",
                     ]);
@@ -156,6 +160,16 @@ class SaleController extends Controller implements HasMiddleware
 
             return $sale;
         });
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Sale creation failed', [
+                'user_id' => auth()->id(),
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return back()->withInput()->with('error', 'Transaksi gagal diproses. Silakan coba lagi.');
+        }
 
         return redirect()->route('sales.show', [$sale, 'print' => 1])
             ->with('success', "Penjualan {$sale->invoice_number} berhasil disimpan.");

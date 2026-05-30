@@ -77,27 +77,32 @@ class PurchaseController extends Controller implements HasMiddleware
     {
         $this->validatePurchase($request);
 
-        $purchase = DB::transaction(function () use ($request) {
-            $purchase = Purchase::create([
-                'supplier_id'    => $request->supplier_id ?: null,
-                'user_id'        => auth()->id(),
-                'invoice_number' => $request->invoice_number,
-                'purchase_date'  => $request->purchase_date,
-                'notes'          => $request->notes,
-                'status'         => 'draft',
-                'total_amount'   => 0,
-                'paid_amount'    => 0,
-            ]);
+        try {
+            $purchase = DB::transaction(function () use ($request) {
+                $purchase = Purchase::create([
+                    'supplier_id'    => $request->supplier_id ?: null,
+                    'user_id'        => auth()->id(),
+                    'invoice_number' => $request->invoice_number,
+                    'purchase_date'  => $request->purchase_date,
+                    'notes'          => $request->notes,
+                    'status'         => 'draft',
+                    'total_amount'   => 0,
+                    'paid_amount'    => 0,
+                ]);
 
-            $total = $this->saveItems($purchase, $request->items);
-            $purchase->update(['total_amount' => $total]);
+                $total = $this->saveItems($purchase, $request->items);
+                $purchase->update(['total_amount' => $total]);
 
-            if ($request->action === 'confirm') {
-                $this->confirmPurchase($purchase);
-            }
+                if ($request->action === 'confirm') {
+                    $this->confirmPurchase($purchase);
+                }
 
-            return $purchase;
-        });
+                return $purchase;
+            });
+        } catch (\Exception $e) {
+            \Log::error('Purchase creation failed', ['user_id' => auth()->id(), 'error' => $e->getMessage()]);
+            return back()->withInput()->with('error', 'Pembelian gagal disimpan. Silakan coba lagi.');
+        }
 
         $msg = $request->action === 'confirm'
             ? "Pembelian {$purchase->invoice_number} dikonfirmasi. Stok telah diperbarui."
@@ -337,10 +342,11 @@ class PurchaseController extends Controller implements HasMiddleware
 
     private function confirmPurchase(Purchase $purchase): void
     {
-        $purchase->load('items.product');
+        $purchase->load('items');
 
         foreach ($purchase->items as $item) {
-            $product = $item->product;
+            // lockForUpdate: cegah race condition saat konfirmasi bersamaan
+            $product = \App\Models\Product::lockForUpdate()->findOrFail($item->product_id);
 
             // Hitung avg_cost baru (moving average)
             $currentStock = (float) $product->stock_qty;

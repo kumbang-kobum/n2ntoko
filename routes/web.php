@@ -56,7 +56,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class);
 
     Route::resource('suppliers', SupplierController::class)->except(['create','edit','show']);
-    Route::get('api/suppliers', [SupplierController::class, 'apiList'])->name('api.suppliers');
 
     Route::resource('purchases', PurchaseController::class);
     Route::post('purchases/{purchase}/order',   [PurchaseController::class, 'order'])->name('purchases.order');
@@ -64,15 +63,18 @@ Route::middleware('auth')->group(function () {
     Route::post('purchases/{purchase}/pay',     [PurchaseController::class, 'pay'])->name('purchases.pay');
 
     // API endpoints for purchase form
-    Route::get('api/products/search', [PurchaseController::class, 'apiSearch'])->name('api.products.search');
-    Route::get('api/barcodes/{barcode}', [PurchaseController::class, 'apiBarcode'])->name('api.barcodes');
+    Route::middleware('throttle:120,1')->group(function () {
+        Route::get('api/products/search',        [PurchaseController::class, 'apiSearch'])->name('api.products.search');
+        Route::get('api/barcodes/{barcode}',     [PurchaseController::class, 'apiBarcode'])->name('api.barcodes');
+        Route::get('api/sales/search',           [SaleController::class,    'apiSearch'])->name('api.sales.search');
+        Route::get('api/sales/barcode/{barcode}',[SaleController::class,    'apiBarcode'])->name('api.sales.barcode');
+        Route::get('api/suppliers',              [SupplierController::class, 'apiList'])->name('api.suppliers');
+        Route::get('api/customers',              [CustomerController::class, 'apiList'])->name('api.customers');
+    });
 
     Route::resource('sales', SaleController::class)->only(['index','create','store','show','destroy']);
-    Route::get('api/sales/search',          [SaleController::class, 'apiSearch'])->name('api.sales.search');
-    Route::get('api/sales/barcode/{barcode}',[SaleController::class, 'apiBarcode'])->name('api.sales.barcode');
 
     Route::resource('customers', CustomerController::class)->except(['create','edit','show']);
-    Route::get('api/customers', [CustomerController::class, 'apiList'])->name('api.customers');
 
     Route::resource('expenses', ExpenseController::class)->except(['create','edit','show']);
 
