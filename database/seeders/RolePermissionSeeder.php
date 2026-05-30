@@ -29,6 +29,11 @@ class RolePermissionSeeder extends Seeder
             'penjualan.lihat',
             'penjualan.tambah',
             'penjualan.batal',
+            // Pelanggan
+            'pelanggan.lihat',
+            'pelanggan.tambah',
+            'pelanggan.edit',
+            'pelanggan.hapus',
             // Beban/Pengeluaran
             'pengeluaran.lihat',
             'pengeluaran.tambah',
@@ -61,18 +66,22 @@ class RolePermissionSeeder extends Seeder
             'produk.lihat',
             'pembelian.lihat',
             'penjualan.lihat',
+            'pelanggan.lihat',
             'pengeluaran.lihat',
             'laporan.lihat',
             'laporan.ekspor',
         ]);
 
-        // Kasir: penjualan + lihat produk/stok
+        // Kasir: penjualan + lihat produk/stok + pelanggan
         $kasir = Role::firstOrCreate(['name' => 'kasir']);
         $kasir->syncPermissions([
             'produk.lihat',
             'penjualan.lihat',
             'penjualan.tambah',
             'penjualan.batal',
+            'pelanggan.lihat',
+            'pelanggan.tambah',
+            'pelanggan.edit',
         ]);
 
         // Gudang: pembelian + produk + stok

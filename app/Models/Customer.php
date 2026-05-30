@@ -9,7 +9,7 @@ class Customer extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'phone', 'address', 'is_active'];
+    protected $fillable = ['name', 'phone', 'address', 'type', 'is_active'];
     protected $casts    = ['is_active' => 'boolean'];
 
     public function sales() { return $this->hasMany(Sale::class); }

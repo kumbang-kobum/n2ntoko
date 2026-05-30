@@ -136,6 +136,74 @@
                 </div>
             </div>
 
+            {{-- Pembayaran Hutang --}}
+            @if($purchase->status === 'confirmed' && $purchase->hutang > 0)
+            @can('pembelian.edit')
+            <div class="bg-white rounded-xl shadow-sm border border-orange-200 p-5" x-data="{ open: false }">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-orange-700">Sisa Hutang ke Supplier</p>
+                        <p class="text-2xl font-bold text-orange-600 mt-0.5">
+                            Rp {{ number_format($purchase->hutang, 0, ',', '.') }}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Sudah dibayar: Rp {{ number_format($purchase->paid_amount, 0, ',', '.') }}
+                            dari Rp {{ number_format($purchase->total_amount, 0, ',', '.') }}
+                        </p>
+                    </div>
+                    <button @click="open = !open"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Catat Pembayaran
+                    </button>
+                </div>
+
+                <div x-show="open" x-cloak class="mt-4 pt-4 border-t border-orange-100">
+                    <form method="POST" action="{{ route('purchases.pay', $purchase) }}" class="flex items-end gap-3">
+                        @csrf
+                        <div class="flex-1">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">
+                                Jumlah Bayar (maks Rp {{ number_format($purchase->hutang, 0, ',', '.') }})
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Rp</span>
+                                <input type="number" name="bayar"
+                                       value="{{ old('bayar', $purchase->hutang) }}"
+                                       min="1" max="{{ $purchase->hutang }}" step="500"
+                                       class="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm
+                                              focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            </div>
+                            @error('bayar')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <button type="submit"
+                                onclick="return confirm('Konfirmasi pembayaran ini?')"
+                                class="px-5 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition">
+                            Simpan
+                        </button>
+                        <button type="button" @click="open = false"
+                                class="px-5 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
+                            Batal
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endcan
+            @endif
+
+            @if($purchase->status === 'paid')
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-green-800">Pembelian ini sudah LUNAS</p>
+                    <p class="text-xs text-green-600">Total dibayar: Rp {{ number_format($purchase->paid_amount, 0, ',', '.') }}</p>
+                </div>
+            </div>
+            @endif
+
         </div>
     </div>
 </x-app-layout>

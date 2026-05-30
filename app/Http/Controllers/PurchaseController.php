@@ -19,7 +19,7 @@ class PurchaseController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:pembelian.lihat', only: ['index', 'show']),
             new Middleware('permission:pembelian.tambah', only: ['create', 'store']),
-            new Middleware('permission:pembelian.edit', only: ['edit', 'update', 'order']),
+            new Middleware('permission:pembelian.edit', only: ['edit', 'update', 'order', 'pay']),
             new Middleware('permission:pembelian.konfirmasi', only: ['confirm']),
             new Middleware('permission:pembelian.hapus', only: ['destroy']),
         ];
@@ -182,6 +182,34 @@ class PurchaseController extends Controller implements HasMiddleware
         DB::transaction(fn() => $this->confirmPurchase($purchase));
 
         return back()->with('success', "Pembelian {$purchase->invoice_number} dikonfirmasi. Stok telah diperbarui.");
+    }
+
+    public function pay(Request $request, Purchase $purchase)
+    {
+        if ($purchase->status !== 'confirmed') {
+            return back()->with('error', 'Hanya pembelian berstatus Diterima yang bisa dibayar.');
+        }
+
+        $request->validate([
+            'bayar' => ['required', 'numeric', 'min:1', 'max:' . $purchase->hutang],
+        ], [
+            'bayar.required' => 'Jumlah bayar wajib diisi.',
+            'bayar.max'      => 'Jumlah bayar melebihi sisa hutang.',
+        ]);
+
+        $newPaid  = (float) $purchase->paid_amount + (float) $request->bayar;
+        $lunas    = $newPaid >= (float) $purchase->total_amount;
+
+        $purchase->update([
+            'paid_amount' => $newPaid,
+            'status'      => $lunas ? 'paid' : 'confirmed',
+        ]);
+
+        $msg = $lunas
+            ? "Pembelian {$purchase->invoice_number} telah LUNAS."
+            : "Pembayaran Rp " . number_format($request->bayar, 0, ',', '.') . " berhasil dicatat. Sisa hutang: Rp " . number_format($purchase->total_amount - $newPaid, 0, ',', '.') . ".";
+
+        return back()->with('success', $msg);
     }
 
     public function destroy(Purchase $purchase)

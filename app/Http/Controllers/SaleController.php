@@ -64,11 +64,13 @@ class SaleController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $request->validate([
-            'invoice_number' => 'required|string|unique:sales,invoice_number',
-            'sale_date'      => 'required|date',
-            'price_type'     => 'required|in:eceran,grosir',
-            'paid_amount'    => 'required|numeric|min:0',
-            'items'          => 'required|array|min:1',
+            'invoice_number'  => 'required|string|unique:sales,invoice_number',
+            'sale_date'       => 'required|date',
+            'price_type'      => 'required|in:eceran,grosir',
+            'payment_method'  => 'required|in:cash,debit,qris',
+            'tax_rate'        => 'required|numeric|min:0|max:100',
+            'paid_amount'     => 'required|numeric|min:0',
+            'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.unit_id'    => 'required|exists:product_units,id',
             'items.*.qty'        => 'required|numeric|min:0.0001',
@@ -102,16 +104,24 @@ class SaleController extends Controller implements HasMiddleware
                 $total += $subtotal;
             }
 
+            $taxRate   = (float) $request->tax_rate;
+            $taxAmount = round($total * $taxRate / 100, 2);
+            $grandTotal = $total + $taxAmount;
+
             $sale = Sale::create([
-                'user_id'        => auth()->id(),
-                'invoice_number' => $request->invoice_number,
-                'sale_date'      => $request->sale_date,
-                'price_type'     => $request->price_type,
-                'total_amount'   => $total,
-                'paid_amount'    => $request->paid_amount,
-                'change_amount'  => max(0, $request->paid_amount - $total),
-                'status'         => 'paid',
-                'notes'          => $request->notes,
+                'user_id'             => auth()->id(),
+                'invoice_number'      => $request->invoice_number,
+                'sale_date'           => $request->sale_date,
+                'price_type'          => $request->price_type,
+                'payment_method'      => $request->payment_method,
+                'subtotal_before_tax' => $total,
+                'tax_rate'            => $taxRate,
+                'tax_amount'          => $taxAmount,
+                'total_amount'        => $grandTotal,
+                'paid_amount'         => $request->paid_amount,
+                'change_amount'       => max(0, (float) $request->paid_amount - $grandTotal),
+                'status'              => 'paid',
+                'notes'               => $request->notes,
             ]);
 
             foreach ($itemData as $d) {
@@ -147,7 +157,7 @@ class SaleController extends Controller implements HasMiddleware
             return $sale;
         });
 
-        return redirect()->route('sales.show', $sale)
+        return redirect()->route('sales.show', [$sale, 'print' => 1])
             ->with('success', "Penjualan {$sale->invoice_number} berhasil disimpan.");
     }
 
@@ -199,8 +209,9 @@ class SaleController extends Controller implements HasMiddleware
                 'unit_name'    => $u->unit_name,
                 'conversion'   => (float) $u->conversion,
                 'is_base'      => $u->is_base,
-                'price_eceran' => (float) ($u->prices->where('price_type','eceran')->first()?->price ?? 0),
-                'price_grosir' => (float) ($u->prices->where('price_type','grosir')->first()?->price ?? 0),
+                'price_eceran'    => (float) ($u->prices->where('price_type','eceran')->first()?->price ?? 0),
+                'price_grosir'    => (float) ($u->prices->where('price_type','grosir')->first()?->price ?? 0),
+                'min_qty_grosir'  => (float) ($u->prices->where('price_type','grosir')->first()?->min_qty ?? 0),
                 'stock_display'=> $u->is_base
                     ? (float) $p->stock_qty
                     : round((float) $p->stock_qty / (float) $u->conversion, 2),

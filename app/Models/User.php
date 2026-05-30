@@ -33,4 +33,9 @@ class User extends Authenticatable
             'is_active'         => 'boolean',
         ];
     }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
 }

@@ -47,16 +47,52 @@
                     </x-dropdown>
                     @endcanany
 
-                    @canany(['penjualan.lihat','penjualan.tambah'])
-                    <x-nav-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
-                        Penjualan
-                    </x-nav-link>
+                    @canany(['penjualan.lihat','penjualan.tambah','pelanggan.lihat'])
+                    <x-dropdown align="left" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md
+                                {{ request()->routeIs('sales.*', 'customers.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
+                                transition">
+                                Penjualan
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            @canany(['penjualan.lihat','penjualan.tambah'])
+                            <x-dropdown-link :href="route('sales.index')">Transaksi Penjualan</x-dropdown-link>
+                            @endcanany
+                            @can('pelanggan.lihat')
+                            <x-dropdown-link :href="route('customers.index')">Pelanggan</x-dropdown-link>
+                            @endcan
+                        </x-slot>
+                    </x-dropdown>
                     @endcanany
 
-                    @can('laporan.lihat')
-                    <x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
-                        Laporan
+                    @can('pengeluaran.lihat')
+                    <x-nav-link :href="route('expenses.index')" :active="request()->routeIs('expenses.*')">
+                        Pengeluaran
                     </x-nav-link>
+                    @endcan
+
+                    @can('laporan.lihat')
+                    <x-dropdown align="left" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md
+                                {{ request()->routeIs('laporan.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
+                                transition">
+                                Laporan
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('laporan.index')">Laporan Keuangan</x-dropdown-link>
+                            <x-dropdown-link :href="route('laporan.shift')">Laporan Per Shift</x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
                     @endcan
 
                     @can('user.lihat')
@@ -129,11 +165,18 @@
             @can('pembelian.lihat')
             <x-responsive-nav-link :href="route('purchases.index')">Pembelian</x-responsive-nav-link>
             @endcan
-            @can('penjualan.lihat')
-            <x-responsive-nav-link :href="route('sales.index')">Penjualan</x-responsive-nav-link>
+            @canany(['penjualan.lihat','penjualan.tambah'])
+            <x-responsive-nav-link :href="route('sales.index')">Transaksi Penjualan</x-responsive-nav-link>
+            @endcanany
+            @can('pelanggan.lihat')
+            <x-responsive-nav-link :href="route('customers.index')">Pelanggan</x-responsive-nav-link>
+            @endcan
+            @can('pengeluaran.lihat')
+            <x-responsive-nav-link :href="route('expenses.index')">Pengeluaran</x-responsive-nav-link>
             @endcan
             @can('laporan.lihat')
-            <x-responsive-nav-link :href="route('laporan.index')">Laporan</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('laporan.index')">Laporan Keuangan</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('laporan.shift')">Laporan Per Shift</x-responsive-nav-link>
             @endcan
             @can('user.lihat')
             <x-responsive-nav-link :href="route('users.index')">Pengguna</x-responsive-nav-link>

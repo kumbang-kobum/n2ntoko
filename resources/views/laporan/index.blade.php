@@ -79,8 +79,7 @@
                     </p>
                     <p class="text-xs text-gray-400 mt-1">Akumulasi HPP terjual</p>
                 </div>
-                <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm
-                    {{ $labaKotor >= 0 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100' }}">
+                <div class="rounded-xl p-4 border shadow-sm {{ $labaKotor >= 0 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100' }}">
                     <p class="text-xs text-gray-400 mb-1">Laba Kotor</p>
                     <p class="text-xl font-bold {{ $labaKotor >= 0 ? 'text-green-600' : 'text-red-600' }}">
                         Rp {{ number_format($labaKotor, 0, ',', '.') }}
@@ -93,12 +92,14 @@
                     <p class="text-xs text-gray-400 mt-1">—</p>
                     @endif
                 </div>
-                <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-400 mb-1">Pembelian Diterima</p>
-                    <p class="text-xl font-bold text-gray-700">
-                        Rp {{ number_format($totalPembelian, 0, ',', '.') }}
+                <div class="rounded-xl p-4 border shadow-sm {{ $labaBersih >= 0 ? 'bg-blue-50 border-blue-100' : 'bg-red-50 border-red-100' }}">
+                    <p class="text-xs text-gray-400 mb-1">Laba Bersih</p>
+                    <p class="text-xl font-bold {{ $labaBersih >= 0 ? 'text-blue-600' : 'text-red-600' }}">
+                        Rp {{ number_format($labaBersih, 0, ',', '.') }}
                     </p>
-                    <p class="text-xs text-gray-400 mt-1">Stok masuk periode ini</p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Pengeluaran: Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}
+                    </p>
                 </div>
             </div>
 
@@ -212,27 +213,58 @@
             </div>
 
             {{-- Ringkasan L/R --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <h3 class="font-semibold text-gray-700 text-sm mb-4">Ringkasan Laba Rugi</h3>
-                <div class="space-y-2 max-w-sm">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Pendapatan Penjualan</span>
-                        <span class="font-medium text-gray-800">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</span>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {{-- Laporan L/R --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-semibold text-gray-700 text-sm mb-4">Ringkasan Laba Rugi</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Pendapatan Penjualan</span>
+                            <span class="font-medium text-gray-800">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">(-) HPP / Harga Pokok Penjualan</span>
+                            <span class="font-medium text-red-600">Rp {{ number_format($totalHpp, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-2 flex justify-between text-sm font-semibold">
+                            <span class="text-gray-700">= Laba Kotor</span>
+                            <span class="{{ $labaKotor >= 0 ? 'text-green-700' : 'text-red-600' }}">
+                                Rp {{ number_format($labaKotor, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">(-) Total Pengeluaran</span>
+                            <span class="font-medium text-orange-600">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="border-t-2 border-gray-300 pt-2 flex justify-between text-sm font-bold">
+                            <span class="text-gray-800">= Laba Bersih</span>
+                            <span class="{{ $labaBersih >= 0 ? 'text-blue-700' : 'text-red-600' }} text-base">
+                                Rp {{ number_format($labaBersih, 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">(-) HPP / Harga Pokok Penjualan</span>
-                        <span class="font-medium text-red-600">Rp {{ number_format($totalHpp, 0, ',', '.') }}</span>
+                </div>
+
+                {{-- Pengeluaran per Kategori --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-semibold text-gray-700 text-sm mb-4">Pengeluaran per Kategori</h3>
+                    @if($pengeluaranPerKategori->isEmpty())
+                    <p class="text-sm text-gray-400">Tidak ada pengeluaran di periode ini.</p>
+                    @else
+                    <div class="space-y-2">
+                        @php $labels = \App\Models\Expense::categoryLabels(); @endphp
+                        @foreach($pengeluaranPerKategori as $row)
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600">{{ $labels[$row->category] ?? $row->category }}</span>
+                            <span class="font-medium text-orange-600">Rp {{ number_format($row->total, 0, ',', '.') }}</span>
+                        </div>
+                        @endforeach
+                        <div class="border-t border-gray-200 pt-2 flex justify-between text-sm font-semibold">
+                            <span class="text-gray-700">Total</span>
+                            <span class="text-orange-700">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</span>
+                        </div>
                     </div>
-                    <div class="border-t border-gray-200 pt-2 flex justify-between text-sm font-semibold">
-                        <span class="text-gray-700">= Laba Kotor</span>
-                        <span class="{{ $labaKotor >= 0 ? 'text-green-700' : 'text-red-600' }}">
-                            Rp {{ number_format($labaKotor, 0, ',', '.') }}
-                        </span>
-                    </div>
-                    <p class="text-xs text-gray-400 pt-1">
-                        * Pengeluaran operasional (gaji, sewa, dll) belum diperhitungkan.
-                        Laba ini adalah laba kotor dari selisih harga jual dan HPP rata-rata.
-                    </p>
+                    @endif
                 </div>
             </div>
 

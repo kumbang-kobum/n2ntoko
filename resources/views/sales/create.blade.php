@@ -120,8 +120,15 @@
                                                 <input type="number" :name="'items['+idx+'][sell_price]'"
                                                        x-model="item.sell_price" @input="calcItem(idx)"
                                                        min="0" step="500"
-                                                       class="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm
-                                                              text-right focus:ring-2 focus:ring-blue-500 bg-white">
+                                                       :class="item.auto_grosir ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white'"
+                                                       class="w-full border rounded-lg px-2 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500">
+                                                <div x-show="item.auto_grosir" class="text-center mt-0.5">
+                                                    <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-medium">★ Auto Grosir</span>
+                                                </div>
+                                                <div x-show="!item.auto_grosir && item.min_qty_grosir > 0" class="text-center mt-0.5">
+                                                    <span class="text-xs text-gray-400"
+                                                          x-text="'Grosir ≥ ' + item.min_qty_grosir + ' ' + item.unit_name"></span>
+                                                </div>
                                             </td>
                                             <td class="px-3 py-2 text-right font-semibold text-gray-800"
                                                 x-text="'Rp '+formatNum(item.subtotal)"></td>
@@ -194,6 +201,46 @@
                                 </div>
                             </div>
 
+                            {{-- PPN --}}
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-2">PPN</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <template x-for="rate in taxOptions" :key="rate">
+                                        <label class="flex items-center justify-center px-2 py-2 rounded-xl border-2 cursor-pointer transition text-xs font-medium"
+                                               :class="taxRate === rate ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'">
+                                            <input type="radio" x-model.number="taxRate" :value="rate" @change="calcTax" class="sr-only">
+                                            <span x-text="rate === 0 ? 'Non-PPN' : rate + '%'"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                                <input type="hidden" name="tax_rate" :value="taxRate">
+                            </div>
+
+                            {{-- Metode Pembayaran --}}
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-2">Metode Bayar</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 cursor-pointer transition"
+                                           :class="payMethod==='cash' ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'">
+                                        <input type="radio" name="payment_method" value="cash" x-model="payMethod" class="sr-only">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                        <span class="text-xs font-medium">Tunai</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 cursor-pointer transition"
+                                           :class="payMethod==='debit' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'">
+                                        <input type="radio" name="payment_method" value="debit" x-model="payMethod" class="sr-only">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                        <span class="text-xs font-medium">Debit</span>
+                                    </label>
+                                    <label class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 cursor-pointer transition"
+                                           :class="payMethod==='qris' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'">
+                                        <input type="radio" name="payment_method" value="qris" x-model="payMethod" class="sr-only">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                        <span class="text-xs font-medium">QRIS</span>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Catatan</label>
                                 <input type="text" name="notes" placeholder="Opsional..."
@@ -202,23 +249,29 @@
                         </div>
 
                         {{-- Ringkasan & Bayar --}}
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-gray-600 text-sm">Total Belanja</span>
-                                <span class="font-bold text-lg text-gray-900" x-text="'Rp '+formatNum(grandTotal)"></span>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-3">
+                            <div class="flex justify-between items-center text-sm text-gray-500">
+                                <span>Subtotal</span>
+                                <span x-text="'Rp '+formatNum(grandTotal)"></span>
+                            </div>
+                            <div x-show="taxRate > 0" class="flex justify-between items-center text-sm text-yellow-600">
+                                <span x-text="'PPN ' + taxRate + '%'"></span>
+                                <span x-text="'Rp '+formatNum(taxAmount)"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-t border-gray-100">
+                                <span class="text-gray-700 font-semibold text-sm">Total Bayar</span>
+                                <span class="font-bold text-lg text-gray-900" x-text="'Rp '+formatNum(grandTotal + taxAmount)"></span>
                             </div>
 
-                            <div>
+                            <div x-show="payMethod === 'cash'">
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Uang Diterima</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">Rp</span>
-                                    <input type="number" name="paid_amount" x-model.number="paidAmount"
-                                           @input="calcChange"
+                                    <input type="number" x-model.number="paidAmount" @input="calcChange"
                                            min="0" step="500" placeholder="0"
                                            class="w-full border-2 border-gray-300 rounded-xl pl-9 pr-4 py-3 text-lg font-bold
                                                   text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </div>
-                                {{-- Quick buttons --}}
                                 <div class="grid grid-cols-3 gap-2 mt-2">
                                     <template x-for="n in quickAmounts" :key="n">
                                         <button type="button" @click="paidAmount = n; calcChange()"
@@ -228,27 +281,25 @@
                                 </div>
                             </div>
 
-                            <div class="flex justify-between items-center py-3 rounded-xl px-3"
+                            <div x-show="payMethod === 'cash'" class="flex justify-between items-center py-3 rounded-xl px-3"
                                  :class="change >= 0 ? 'bg-green-50' : 'bg-red-50'">
-                                <span class="text-sm font-medium" :class="change >= 0 ? 'text-green-700' : 'text-red-700'">
-                                    Kembalian
-                                </span>
+                                <span class="text-sm font-medium" :class="change >= 0 ? 'text-green-700' : 'text-red-700'">Kembalian</span>
                                 <span class="font-bold text-xl" :class="change >= 0 ? 'text-green-700' : 'text-red-700'"
                                       x-text="'Rp '+formatNum(Math.max(0,change))"></span>
                             </div>
 
-                            <input type="hidden" name="paid_amount" :value="paidAmount">
+                            <input type="hidden" name="paid_amount" :value="payMethod !== 'cash' ? (grandTotal + taxAmount) : paidAmount">
 
                             <button type="submit"
-                                    :disabled="items.length === 0 || paidAmount < grandTotal"
+                                    :disabled="items.length === 0 || (payMethod === 'cash' && paidAmount < grandTotal + taxAmount)"
                                     class="w-full py-3.5 rounded-xl text-sm font-bold transition
                                            disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
                                            bg-green-600 text-white hover:bg-green-700">
                                 <span x-show="items.length === 0">Tambahkan item dulu</span>
-                                <span x-show="items.length > 0 && paidAmount < grandTotal">
-                                    Uang kurang Rp <span x-text="formatNum(grandTotal - paidAmount)"></span>
+                                <span x-show="items.length > 0 && payMethod === 'cash' && paidAmount < grandTotal + taxAmount">
+                                    Uang kurang Rp <span x-text="formatNum(grandTotal + taxAmount - paidAmount)"></span>
                                 </span>
-                                <span x-show="items.length > 0 && paidAmount >= grandTotal">
+                                <span x-show="items.length > 0 && (payMethod !== 'cash' || paidAmount >= grandTotal + taxAmount)">
                                     ✓ Proses Pembayaran
                                 </span>
                             </button>
@@ -269,17 +320,25 @@ function kasirForm() {
         barcodeInput:'',
         results:     [],
         showSearch:  false,
-        priceType:  'eceran',
+        priceType:   'eceran',
+        payMethod:   'cash',
+        taxRate:     0,
+        taxAmount:   0,
+        taxOptions:  [0, 11, 12],
         paidAmount:  0,
         _key:        0,
 
         get grandTotal() { return this.items.reduce((s, i) => s + (parseFloat(i.subtotal)||0), 0); },
-        get change()     { return this.paidAmount - this.grandTotal; },
+        get change()     { return this.paidAmount - (this.grandTotal + this.taxAmount); },
         get quickAmounts() {
-            const t = this.grandTotal;
+            const t = this.grandTotal + this.taxAmount;
             if (!t) return [10000,20000,50000];
             const ceil = (v, r) => Math.ceil(v/r)*r;
             return [ceil(t,1000), ceil(t,5000), ceil(t,10000)].filter((v,i,a) => a.indexOf(v)===i).slice(0,3);
+        },
+
+        calcTax() {
+            this.taxAmount = Math.round(this.grandTotal * this.taxRate / 100);
         },
 
         init() {},
@@ -318,26 +377,62 @@ function kasirForm() {
         },
 
         addProductWithUnit(product, unitId) {
-            // Jika sudah ada di cart dengan unit yang sama, tambah qty
             const existing = this.items.find(i => i.product_id === product.id && i.unit_id == unitId);
-            if (existing) { existing.qty++; this.calcItemObj(existing); return; }
+            if (existing) {
+                existing.qty++;
+                this.calcItemObj(existing);
+                this.autoPrice(existing);
+                this.calcTax();
+                return;
+            }
 
             const unit  = product.units.find(u => u.id == unitId) ?? product.units[0];
-            const price = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
+            const price = this.resolvePrice(unit, 1);
 
             this.items.push({
-                _key:         ++this._key,
-                product_id:   product.id,
-                product_name: product.name,
-                unit_id:      unit.id,
-                unit_name:    unit.unit_name,
-                units:        product.units,
-                stock_qty:    product.stock_qty,
-                stock_display:unit.stock_display ?? product.stock_qty,
-                qty:          1,
-                sell_price:   price,
-                subtotal:     price,
+                _key:          ++this._key,
+                product_id:    product.id,
+                product_name:  product.name,
+                unit_id:       unit.id,
+                unit_name:     unit.unit_name,
+                units:         product.units,
+                stock_qty:     product.stock_qty,
+                stock_display: unit.stock_display ?? product.stock_qty,
+                qty:           1,
+                sell_price:    price,
+                subtotal:      price,
+                auto_grosir:   false,
+                min_qty_grosir:unit.min_qty_grosir ?? 0,
             });
+        },
+
+        // Tentukan harga: grosir jika qty >= min_qty_grosir, else eceran
+        resolvePrice(unit, qty) {
+            const minQty = unit.min_qty_grosir ?? 0;
+            if (minQty > 0 && qty >= minQty && unit.price_grosir > 0) {
+                return unit.price_grosir;
+            }
+            if (this.priceType === 'grosir' && unit.price_grosir > 0) {
+                return unit.price_grosir;
+            }
+            return unit.price_eceran;
+        },
+
+        // Cek dan terapkan auto-switch harga untuk satu item
+        autoPrice(item) {
+            const unit = item.units.find(u => u.id == item.unit_id);
+            if (!unit) return;
+            const minQty  = unit.min_qty_grosir ?? 0;
+            const wasAuto = item.auto_grosir;
+            if (minQty > 0 && parseFloat(item.qty) >= minQty && unit.price_grosir > 0) {
+                item.sell_price  = unit.price_grosir;
+                item.auto_grosir = true;
+            } else if (item.auto_grosir) {
+                // Qty turun di bawah threshold — kembalikan ke eceran
+                item.sell_price  = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
+                item.auto_grosir = false;
+            }
+            item.min_qty_grosir = minQty;
         },
 
         removeItem(idx) { this.items.splice(idx, 1); },
@@ -346,21 +441,36 @@ function kasirForm() {
             const item = this.items[idx];
             const unit = item.units.find(u => u.id == item.unit_id);
             if (!unit) return;
-            item.unit_name    = unit.unit_name;
-            item.stock_display= unit.stock_display ?? item.stock_qty;
-            item.sell_price   = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
-            this.calcItem(idx);
+            item.unit_name      = unit.unit_name;
+            item.stock_display  = unit.stock_display ?? item.stock_qty;
+            item.min_qty_grosir = unit.min_qty_grosir ?? 0;
+            item.auto_grosir    = false;
+            item.sell_price     = this.resolvePrice(unit, parseFloat(item.qty) || 1);
+            this.autoPrice(item);
+            this.calcItemObj(item);
+            this.calcTax();
         },
 
-        calcItem(idx) { this.calcItemObj(this.items[idx]); },
+        calcItem(idx) {
+            const item = this.items[idx];
+            this.autoPrice(item);
+            this.calcItemObj(item);
+            this.calcTax();
+        },
         calcItemObj(item) { item.subtotal = (parseFloat(item.qty)||0) * (parseFloat(item.sell_price)||0); },
 
         updateAllPrices() {
             this.items.forEach(item => {
                 const unit = item.units.find(u => u.id == item.unit_id);
-                if (unit) item.sell_price = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
+                if (!unit) return;
+                // Harga manual override kecuali ada auto-grosir aktif
+                if (!item.auto_grosir) {
+                    item.sell_price = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
+                }
+                this.autoPrice(item);
                 this.calcItemObj(item);
             });
+            this.calcTax();
         },
 
         calcChange() {},

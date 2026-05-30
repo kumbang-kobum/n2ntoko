@@ -14,18 +14,27 @@
                 <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-medium">Dibatalkan</span>
                 @endif
             </div>
-            @if($sale->status === 'paid')
-            @can('penjualan.batal')
-            <form method="POST" action="{{ route('sales.destroy', $sale) }}"
-                  onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
-                @csrf @method('DELETE')
-                <button type="submit"
-                        class="px-4 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 transition">
-                    Batalkan Transaksi
+            <div class="flex gap-2">
+                @if($sale->status === 'paid')
+                <button onclick="window.print()"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 transition no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Cetak Struk
                 </button>
-            </form>
-            @endcan
-            @endif
+                @can('penjualan.batal')
+                <form method="POST" action="{{ route('sales.destroy', $sale) }}"
+                      onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
+                    @csrf @method('DELETE')
+                    <button type="submit"
+                            class="px-4 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 transition no-print">
+                        Batalkan Transaksi
+                    </button>
+                </form>
+                @endcan
+                @endif
+            </div>
         </div>
     </x-slot>
 
@@ -124,4 +133,110 @@
 
         </div>
     </div>
+
+    {{-- ══ STRUK 80mm THERMAL (hanya muncul saat print) ══ --}}
+    <div class="struk-80mm" style="display:none">
+        <div style="font-family:'Courier New',monospace; font-size:11px; width:72mm; margin:0 auto; line-height:1.4;">
+
+            {{-- Header --}}
+            <div style="text-align:center; margin-bottom:4px;">
+                <div style="font-size:14px; font-weight:bold; letter-spacing:1px;">{{ strtoupper(config('app.name')) }}</div>
+                <div style="font-size:9px; color:#555;">Sistem POS & Manajemen Grosir</div>
+                <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+            </div>
+
+            {{-- Info Transaksi --}}
+            <table style="width:100%; font-size:10px; border-collapse:collapse;">
+                <tr><td>No</td><td>:</td><td style="font-weight:bold;">{{ $sale->invoice_number }}</td></tr>
+                <tr><td>Tgl</td><td>:</td><td>{{ $sale->sale_date->format('d/m/Y') }} {{ $sale->created_at->format('H:i') }}</td></tr>
+                <tr><td>Kasir</td><td>:</td><td>{{ $sale->user?->name }}</td></tr>
+                <tr><td>Tipe</td><td>:</td><td>{{ ucfirst($sale->price_type) }}</td></tr>
+                <tr><td>Bayar</td><td>:</td><td>{{ $sale->payment_method_label }}</td></tr>
+            </table>
+
+            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+
+            {{-- Item --}}
+            @foreach($sale->items as $item)
+            <div style="font-size:10px;">
+                <div style="font-weight:bold;">{{ $item->product->name }}</div>
+                <div style="display:flex; justify-content:space-between; padding-left:4px;">
+                    <span>{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->sell_price,0,',','.') }}</span>
+                    <span style="font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</span>
+                </div>
+            </div>
+            @endforeach
+
+            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+
+            {{-- Total --}}
+            <table style="width:100%; font-size:10px; border-collapse:collapse;">
+                <tr>
+                    <td>Subtotal</td>
+                    <td style="text-align:right;">Rp {{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
+                </tr>
+                @if($sale->tax_amount > 0)
+                <tr>
+                    <td>PPN {{ number_format($sale->tax_rate,0) }}%</td>
+                    <td style="text-align:right;">Rp {{ number_format($sale->tax_amount,0,',','.') }}</td>
+                </tr>
+                @endif
+                <tr style="font-weight:bold; font-size:12px; border-top:1px solid #000;">
+                    <td style="padding-top:3px;">TOTAL</td>
+                    <td style="text-align:right; padding-top:3px;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                </tr>
+                @if($sale->payment_method === 'cash')
+                <tr>
+                    <td>Tunai</td>
+                    <td style="text-align:right;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td>
+                </tr>
+                <tr>
+                    <td>Kembali</td>
+                    <td style="text-align:right; font-weight:bold;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td>
+                </tr>
+                @else
+                <tr>
+                    <td colspan="2" style="text-align:center; font-size:9px; padding-top:2px;">
+                        Lunas via {{ $sale->payment_method_label }}
+                    </td>
+                </tr>
+                @endif
+            </table>
+
+            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+
+            {{-- Footer --}}
+            <div style="text-align:center; font-size:9px; margin-top:4px;">
+                <div>Terima kasih atas kunjungan Anda!</div>
+                <div style="margin-top:2px; color:#555;">Barang yang sudah dibeli</div>
+                <div style="color:#555;">tidak dapat dikembalikan</div>
+                @if($sale->notes)
+                <div style="margin-top:4px; font-style:italic;">{{ $sale->notes }}</div>
+                @endif
+            </div>
+
+        </div>
+    </div>
 </x-app-layout>
+
+@push('styles')
+<style>
+@media print {
+    @page { size: 80mm auto; margin: 3mm; }
+    .no-print, nav, header { display: none !important; }
+    body > div { display: none !important; }
+    .struk-80mm { display: block !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+@endpush
+
+@if(request('print'))
+@push('scripts')
+<script>
+    window.addEventListener('load', function () {
+        setTimeout(function () { window.print(); }, 400);
+    });
+</script>
+@endpush
+@endif

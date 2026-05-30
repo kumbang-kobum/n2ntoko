@@ -28,8 +28,8 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900">Rp 0</div>
-                    <div class="text-xs text-gray-400 mt-1">0 transaksi</div>
+                    <div class="text-2xl font-bold text-gray-900">Rp {{ number_format($omzetHariIni, 0, ',', '.') }}</div>
+                    <div class="text-xs text-gray-400 mt-1">{{ $transaksiHariIni }} transaksi</div>
                 </div>
 
                 <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
@@ -42,7 +42,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900">Rp 0</div>
+                    <div class="text-2xl font-bold text-gray-900">Rp {{ number_format($labaHariIni, 0, ',', '.') }}</div>
                     <div class="text-xs text-gray-400 mt-1">laba kotor</div>
                 </div>
 
@@ -56,7 +56,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900">0</div>
+                    <div class="text-2xl font-bold text-gray-900">{{ $totalProduk }}</div>
                     <div class="text-xs text-gray-400 mt-1">jenis produk</div>
                 </div>
 
@@ -70,7 +70,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900">0</div>
+                    <div class="text-2xl font-bold text-gray-900">{{ $stokMenipis }}</div>
                     <div class="text-xs text-gray-400 mt-1">produk perlu restok</div>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                 <h4 class="font-semibold text-gray-700 mb-4">Akses Cepat</h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     @can('penjualan.tambah')
-                    <a href="{{ url('/penjualan/create') }}"
+                    <a href="{{ route('sales.create') }}"
                         class="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 hover:bg-green-100 transition text-center">
                         <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +93,7 @@
                     @endcan
 
                     @can('pembelian.tambah')
-                    <a href="{{ url('/pembelian/create') }}"
+                    <a href="{{ route('purchases.create') }}"
                         class="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-center">
                         <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +106,7 @@
                     @endcan
 
                     @can('produk.tambah')
-                    <a href="{{ url('/produk/create') }}"
+                    <a href="{{ route('products.create') }}"
                         class="flex flex-col items-center gap-2 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition text-center">
                         <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +119,7 @@
                     @endcan
 
                     @can('laporan.lihat')
-                    <a href="{{ url('/laporan') }}"
+                    <a href="{{ route('laporan.index') }}"
                         class="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition text-center">
                         <div class="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
