@@ -12,7 +12,7 @@ class Purchase extends Model
     protected $fillable = [
         'supplier_id', 'user_id', 'invoice_number',
         'purchase_date', 'total_amount', 'paid_amount',
-        'status', 'notes',
+        'status', 'notes', 'buyer_name',
     ];
 
     protected $casts = [

@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\HakAksesController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StokOpnameController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -22,27 +26,34 @@ Route::get('/', function () {
         : view('welcome');
 });
 
+// Absensi publik (tanpa login)
+Route::get('/absensi',        [AttendanceController::class, 'publicPage'])->name('absensi.public');
+Route::post('/absensi/masuk', [AttendanceController::class, 'checkIn'])->name('absensi.masuk');
+Route::post('/absensi/pulang',[AttendanceController::class, 'checkOut'])->name('absensi.pulang');
+
 Route::get('/dashboard', function () {
-    $omzetHariIni = \App\Models\Sale::whereDate('sale_date', today())
+    $omzetHariIni = Sale::whereDate('sale_date', today())
         ->where('status', 'paid')->sum('total_amount');
 
-    $labaHariIni = \App\Models\SaleItem::whereHas('sale', fn($q) =>
+    $labaHariIni = SaleItem::whereHas('sale', fn($q) =>
         $q->whereDate('sale_date', today())->where('status', 'paid'))
         ->sum('profit');
 
-    $transaksiHariIni = \App\Models\Sale::whereDate('sale_date', today())
+    $transaksiHariIni = Sale::whereDate('sale_date', today())
         ->where('status', 'paid')->count();
 
-    $totalProduk = \App\Models\Product::where('is_active', true)->count();
+    $totalProduk = Product::where('is_active', true)->count();
 
-    $stokMenipis = \App\Models\Product::where('is_active', true)
+    $stokMenipis = Product::where('is_active', true)
         ->where('stock_qty', '>', 0)
         ->whereColumn('stock_qty', '<=', 'min_stock')
         ->count();
 
+    $tokoNama = \App\Models\Setting::get('toko_nama', config('app.name'));
+
     return view('dashboard', compact(
         'omzetHariIni', 'labaHariIni', 'transaksiHariIni',
-        'totalProduk', 'stokMenipis'
+        'totalProduk', 'stokMenipis', 'tokoNama'
     ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -51,7 +62,23 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('users', UserController::class)->except('show');
+    Route::resource('users',     UserController::class)->except('show');
+    Route::resource('employees', EmployeeController::class)->except(['create','edit','show']);
+
+    // Absensi admin
+    Route::get('absensi/rekap/export', [AttendanceController::class, 'exportCsv'])->name('absensi.export');
+    Route::get('absensi/rekap',        [AttendanceController::class, 'rekap'])->name('absensi.rekap');
+    Route::get('absensi/harian',       [AttendanceController::class, 'admin'])->name('absensi.admin');
+    Route::post('absensi/harian',      [AttendanceController::class, 'store'])->name('absensi.store');
+    Route::delete('absensi/{attendance}', [AttendanceController::class, 'destroy'])->name('absensi.destroy');
+
+    Route::get('hak-akses',                [HakAksesController::class, 'index'])->name('hakakses.index');
+    Route::post('hak-akses/roles',         [HakAksesController::class, 'storeRole'])->name('hakakses.storeRole');
+    Route::delete('hak-akses/roles/{role}',[HakAksesController::class, 'destroyRole'])->name('hakakses.destroyRole');
+    Route::put('hak-akses/{role}',         [HakAksesController::class, 'update'])->name('hakakses.update');
+
+    Route::get('pengaturan',  [SettingController::class, 'index'])->name('settings.index');
+    Route::put('pengaturan',  [SettingController::class, 'update'])->name('settings.update');
     Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
     Route::resource('products', ProductController::class);
 

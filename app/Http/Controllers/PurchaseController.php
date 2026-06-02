@@ -85,6 +85,7 @@ class PurchaseController extends Controller implements HasMiddleware
                     'invoice_number' => $request->invoice_number,
                     'purchase_date'  => $request->purchase_date,
                     'notes'          => $request->notes,
+                    'buyer_name'     => $request->buyer_name ?: null,
                     'status'         => 'draft',
                     'total_amount'   => 0,
                     'paid_amount'    => 0,
@@ -155,6 +156,7 @@ class PurchaseController extends Controller implements HasMiddleware
                 'invoice_number'=> $request->invoice_number,
                 'purchase_date' => $request->purchase_date,
                 'notes'         => $request->notes,
+                'buyer_name'    => $request->buyer_name ?: null,
             ]);
 
             $total = $this->saveItems($purchase, $request->items);
@@ -298,6 +300,7 @@ class PurchaseController extends Controller implements HasMiddleware
             'invoice_number'         => $invoiceRule,
             'purchase_date'          => 'required|date',
             'supplier_id'            => 'nullable|exists:suppliers,id',
+            'buyer_name'             => 'nullable|string|max:150',
             'items'                  => 'required|array|min:1',
             'items.*.product_id'     => 'required|exists:products,id',
             'items.*.unit_id'        => 'required|exists:product_units,id',

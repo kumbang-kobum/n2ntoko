@@ -195,9 +195,13 @@ class ProductController extends Controller implements HasMiddleware
 
     private function syncUnits(Product $product, array $units, int $baseIndex, bool $update = false): void
     {
+        $existingUnits = $update ? $product->units->keyBy('id') : collect();
+        $formUnitIds   = collect($units)->pluck('id')->filter()->values();
+
         if ($update) {
-            // Hapus semua unit lama yang tidak direferensikan transaksi
-            $product->units->each(function ($unit) {
+            // Hapus unit yang tidak ada di form DAN tidak sedang dipakai transaksi
+            $product->units->each(function ($unit) use ($formUnitIds) {
+                if ($formUnitIds->contains($unit->id)) return; // masih ada di form, skip
                 $inUse = DB::table('purchase_items')->where('unit_id', $unit->id)->exists()
                     || DB::table('sale_items')->where('unit_id', $unit->id)->exists();
                 if (!$inUse) {
@@ -211,18 +215,36 @@ class ProductController extends Controller implements HasMiddleware
         $baseUnitId = null;
 
         foreach ($units as $i => $data) {
-            $isBase = ($i === $baseIndex);
+            $isBase     = ($i === $baseIndex);
+            // Base unit SELALU conversion=1 (satuan terkecil)
+            $conversion = $isBase ? 1 : (float) $data['conversion'];
 
-            $unit = $product->units()->create([
-                'unit_name'  => $data['unit_name'],
-                'conversion' => $data['conversion'],
-                'is_base'    => $isBase,
-            ]);
+            $existingId = $data['id'] ?? null;
+            $existing   = $existingId ? $existingUnits->get($existingId) : null;
+
+            if ($existing) {
+                // Update unit yang sudah ada (termasuk yang sedang dipakai transaksi)
+                $existing->update([
+                    'unit_name'  => $data['unit_name'],
+                    'conversion' => $conversion,
+                    'is_base'    => $isBase,
+                ]);
+                $unit = $existing;
+            } else {
+                // Buat unit baru
+                $unit = $product->units()->create([
+                    'unit_name'  => $data['unit_name'],
+                    'conversion' => $conversion,
+                    'is_base'    => $isBase,
+                ]);
+            }
 
             if ($isBase) {
                 $baseUnitId = $unit->id;
             }
 
+            // Sinkron barcode
+            $unit->barcodes()->delete();
             if (!empty($data['barcode'])) {
                 $product->barcodes()->create([
                     'unit_id' => $unit->id,
@@ -230,6 +252,8 @@ class ProductController extends Controller implements HasMiddleware
                 ]);
             }
 
+            // Sinkron harga
+            $unit->prices()->delete();
             if (!empty($data['price_eceran'])) {
                 $product->prices()->create([
                     'unit_id'    => $unit->id,
@@ -238,7 +262,6 @@ class ProductController extends Controller implements HasMiddleware
                     'min_qty'    => 1,
                 ]);
             }
-
             if (!empty($data['price_grosir'])) {
                 $product->prices()->create([
                     'unit_id'    => $unit->id,

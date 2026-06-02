@@ -14,7 +14,7 @@ class Sale extends Model
         'sale_date', 'price_type', 'payment_method',
         'subtotal_before_tax', 'tax_rate', 'tax_amount',
         'total_amount', 'paid_amount', 'change_amount',
-        'status', 'notes',
+        'status', 'notes', 'buyer_name',
     ];
 
     protected $casts = [

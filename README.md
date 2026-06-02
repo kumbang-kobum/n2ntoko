@@ -1,8 +1,8 @@
 # N2N Toko — Sistem Manajemen Grosir & Gudang
 
-Aplikasi POS (Point of Sale) berbasis web untuk mengelola pembelian, penjualan, stok, dan laporan laba rugi. Mendukung multi-satuan produk, harga grosir & eceran, barcode scanner, dan manajemen hak akses per peran.
+Aplikasi POS (Point of Sale) berbasis web untuk mengelola pembelian, penjualan, stok, dan laporan laba rugi. Mendukung multi-satuan produk, harga grosir & eceran, barcode scanner, PPN, metode pembayaran, dan manajemen hak akses per peran.
 
-**Stack:** Laravel 12 · Tailwind CSS · Alpine.js · Spatie Permission
+**Stack:** Laravel 12 · MySQL · Tailwind CSS · Alpine.js · Spatie Permission
 
 ---
 
@@ -10,74 +10,435 @@ Aplikasi POS (Point of Sale) berbasis web untuk mengelola pembelian, penjualan, 
 
 | Modul | Fitur |
 |---|---|
-| **Produk** | Multi-satuan (Pcs/Slop/Box/dll), barcode per satuan, harga eceran & grosir, stok minimum |
-| **Pembelian** | Draft → Dipesan → Diterima, update HPP average cost otomatis |
-| **Penjualan** | Kasir barcode scanner, pilih satuan, kembalian otomatis |
-| **Pelanggan** | CRUD pelanggan, tipe Umum/Grosir/Langganan |
-| **Supplier** | CRUD supplier, riwayat pembelian |
-| **Stok Opname** | Penyesuaian stok fisik vs sistem, tercatat di kartu stok |
+| **Produk** | Multi-satuan (Pcs/Slop/Box/dll), barcode per satuan, harga eceran & grosir, auto-switch harga grosir otomatis |
+| **Pembelian** | Draft → Dipesan → Diterima, HPP average cost otomatis, bayar hutang cicil |
+| **Penjualan** | Barcode scanner, auto-harga grosir berdasarkan qty, PPN 0/11/12%, Cash/Debit/QRIS, cetak struk 80mm otomatis |
+| **Pelanggan** | CRUD, tipe Umum/Grosir/Langganan |
+| **Supplier** | CRUD, riwayat pembelian |
+| **Stok Opname** | Penyesuaian stok fisik vs sistem |
 | **Pengeluaran** | Catat beban operasional (sewa, listrik, gaji, dll) |
-| **Laporan** | Laba rugi harian, top produk, HPP otomatis per periode |
+| **Laporan Keuangan** | Laba kotor, laba bersih, PPN, top produk, breakdown metode bayar per periode |
+| **Laporan Per Kasir** | Rekap harian per kasir, cetak A4 |
 | **Pengguna** | CRUD user, assign role, aktif/nonaktif |
 
 ---
 
 ## Instalasi
 
+Pilih metode sesuai lingkungan Anda:
+
+| Metode | Cocok untuk |
+|---|---|
+| [aaPanel (VPS)](#-instalasi-via-aapanel-vps--production) | Server production, VPS Ubuntu/CentOS |
+| [XAMPP (Windows)](#-instalasi-via-xampp-windows--lokal) | Development lokal di Windows |
+| [Git + CLI (Linux/Mac)](#-instalasi-via-git--cli-linuxmac) | Developer, server manual |
+
+---
+
+## 🖥️ Instalasi via aaPanel (VPS) — Production
+
+**Rekomendasi:** Ubuntu 22.04 LTS, minimal 1 CPU, 1 GB RAM, 20 GB disk.
+
+### Langkah 1 — Install aaPanel di VPS
+
+SSH ke VPS lalu jalankan:
+
+```bash
+wget -O install.sh http://www.aapanel.com/script/install_6.0_en.sh
+sudo bash install.sh
+```
+
+Setelah selesai, catat URL, username, dan password aaPanel yang muncul di terminal.
+Buka URL tersebut di browser dan login.
+
+### Langkah 2 — Install Software via aaPanel
+
+Masuk ke menu **App Store** (atau Software Store), install:
+- ✅ **Nginx** (versi terbaru)
+- ✅ **MySQL 8.0**
+- ✅ **PHP 8.2** — setelah install, klik **Settings → Install Extension**, tambahkan:
+  `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`
+
+### Langkah 3 — Buat Database
+
+**Database → MySQL → Add Database:**
+- Database Name: `n2ntoko`
+- Username: `n2ntoko_user`
+- Password: buat password kuat, catat
+- Klik **Submit**
+
+### Langkah 4 — Buat Website
+
+**Website → Add Site:**
+- Domain: isi domain atau IP VPS (misal: `toko.namadomain.com`)
+- Root Directory: biarkan default dulu (misal: `/www/wwwroot/toko.namadomain.com`)
+- PHP Version: **8.2**
+- Klik **Submit**
+
+### Langkah 5 — Deploy Aplikasi
+
+Buka **Terminal** di aaPanel (atau SSH), lalu:
+
+```bash
+# Masuk ke direktori website
+cd /www/wwwroot/toko.namadomain.com
+
+# Hapus file default
+rm -rf *
+
+# Clone repositori
+git clone https://github.com/USERNAME/n2ntoko.git .
+# Atau upload file zip → Extract di sini via File Manager aaPanel
+
+# Install Composer (jika belum ada)
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+
+# Install dependensi PHP
+composer install --no-dev --optimize-autoloader
+
+# Install Node.js & NPM (jika belum ada)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install dependensi JS & build
+npm install
+npm run build
+
+# Salin dan edit .env
+cp .env.example .env
+```
+
+Edit `.env` via aaPanel File Manager atau `nano .env`:
+
+```env
+APP_NAME="N2N Toko"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://toko.namadomain.com
+APP_TIMEZONE=Asia/Jakarta
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=n2ntoko
+DB_USERNAME=n2ntoko_user
+DB_PASSWORD=password_database_anda
+
+ADMIN_EMAIL=admin@namadomain.com
+ADMIN_PASSWORD=PasswordKuatAnda123!
+```
+
+```bash
+# Generate app key
+php artisan key:generate
+
+# Migrasi & seeder
+php artisan migrate --seed
+
+# Set permission folder
+chmod -R 755 /www/wwwroot/toko.namadomain.com
+chown -R www:www /www/wwwroot/toko.namadomain.com
+chmod -R 775 storage bootstrap/cache
+
+# Optimize untuk production
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Langkah 6 — Konfigurasi Nginx di aaPanel
+
+**Website → toko.namadomain.com → Config → Nginx Config:**
+
+Ganti isi config dengan:
+
+```nginx
+server {
+    listen 80;
+    server_name toko.namadomain.com;
+    root /www/wwwroot/toko.namadomain.com/public;
+
+    index index.php index.html;
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/tmp/php-cgi-82.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+Klik **Save**, lalu **Reload Nginx**.
+
+### Langkah 7 — SSL (HTTPS) — Opsional tapi Dianjurkan
+
+**Website → toko.namadomain.com → SSL → Let's Encrypt:**
+- Centang domain → klik **Apply**
+- Aktifkan **Force HTTPS**
+
+### ✅ Selesai
+
+Buka browser: `https://toko.namadomain.com`
+Login dengan email dan password dari `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+
+---
+
+## 🪟 Instalasi via XAMPP (Windows) — Lokal
+
 ### Prasyarat
-- PHP 8.2+
-- Composer
-- Node.js & NPM
-- MySQL / SQLite
+
+- **XAMPP** dengan PHP 8.2+ — download di [apachefriends.org](https://www.apachefriends.org)
+- **Composer** — download di [getcomposer.org](https://getcomposer.org)
+- **Node.js 20+** — download di [nodejs.org](https://nodejs.org)
+- **Git** — download di [git-scm.com](https://git-scm.com)
+
+### Langkah 1 — Jalankan XAMPP
+
+Buka **XAMPP Control Panel**, klik **Start** pada:
+- ✅ **Apache**
+- ✅ **MySQL**
+
+### Langkah 2 — Buat Database
+
+Buka browser → `http://localhost/phpmyadmin`
+- Klik **New** di sidebar kiri
+- Database name: `n2ntoko`
+- Collation: `utf8mb4_unicode_ci`
+- Klik **Create**
+
+### Langkah 3 — Clone / Download Repositori
+
+Buka **Git Bash** atau **Command Prompt**, lalu:
+
+```bash
+# Masuk ke folder htdocs XAMPP
+cd C:\xampp\htdocs
+
+# Clone repositori
+git clone https://github.com/USERNAME/n2ntoko.git
+cd n2ntoko
+```
+
+Atau download ZIP dari GitHub → Extract ke `C:\xampp\htdocs\n2ntoko\`
+
+### Langkah 4 — Install Dependensi
+
+Buka **Command Prompt** atau **Git Bash** di folder `n2ntoko`:
+
+```bash
+# Install dependensi PHP
+composer install
+
+# Install dependensi JS
+npm install
+
+# Build aset
+npm run build
+```
+
+### Langkah 5 — Konfigurasi .env
+
+```bash
+# Salin file environment
+copy .env.example .env
+```
+
+Edit file `.env` dengan Notepad atau VS Code:
+
+```env
+APP_NAME="N2N Toko"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost/n2ntoko/public
+APP_TIMEZONE=Asia/Jakarta
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=n2ntoko
+DB_USERNAME=root
+DB_PASSWORD=
+# Catatan: password MySQL XAMPP default kosong
+
+ADMIN_EMAIL=admin@n2ntoko.com
+ADMIN_PASSWORD=Admin123!
+```
+
+### Langkah 6 — Setup Aplikasi
+
+```bash
+# Generate app key
+php artisan key:generate
+
+# Migrasi database & seeder
+php artisan migrate --seed
+```
+
+### Langkah 7 — Buka Aplikasi
+
+Buka browser: `http://localhost/n2ntoko/public`
+
+Login dengan `ADMIN_EMAIL` dan `ADMIN_PASSWORD` dari `.env`.
+
+> **Tips:** Untuk URL yang lebih rapi tanpa `/n2ntoko/public`, buat Virtual Host di XAMPP:
+> Edit `C:\xampp\apache\conf\extra\httpd-vhosts.conf`, tambahkan:
+> ```apache
+> <VirtualHost *:80>
+>     DocumentRoot "C:/xampp/htdocs/n2ntoko/public"
+>     ServerName n2ntoko.test
+>     <Directory "C:/xampp/htdocs/n2ntoko/public">
+>         AllowOverride All
+>         Require all granted
+>     </Directory>
+> </VirtualHost>
+> ```
+> Tambahkan `127.0.0.1 n2ntoko.test` di file `C:\Windows\System32\drivers\etc\hosts`.
+> Restart Apache, buka `http://n2ntoko.test`.
+
+---
+
+## 🐧 Instalasi via Git + CLI (Linux/Mac)
+
+### Prasyarat
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install -y php8.2 php8.2-{fpm,mbstring,xml,bcmath,curl,mysql,zip,gd,fileinfo} \
+     mysql-server nginx nodejs npm git unzip
+
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# macOS (Homebrew)
+brew install php@8.2 mysql node composer git
+```
 
 ### Langkah Instalasi
 
 ```bash
 # 1. Clone repositori
-git clone <repo-url> n2ntoko
+git clone https://github.com/USERNAME/n2ntoko.git
 cd n2ntoko
 
-# 2. Install dependensi PHP
-composer install
+# 2. Install dependensi
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
 
-# 3. Install dependensi JavaScript
-npm install
-
-# 4. Salin file environment
+# 3. Setup environment
 cp .env.example .env
+nano .env   # edit konfigurasi database dan app
+```
 
-# 5. Generate app key
+Isi `.env`:
+
+```env
+APP_NAME="N2N Toko"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://domain-atau-ip-anda
+APP_TIMEZONE=Asia/Jakarta
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=n2ntoko
+DB_USERNAME=n2ntoko_user
+DB_PASSWORD=password_kuat_anda
+
+ADMIN_EMAIL=admin@tokoku.com
+ADMIN_PASSWORD=PasswordKuatAnda123!
+```
+
+```bash
+# 4. Buat database MySQL
+mysql -u root -p -e "
+  CREATE DATABASE n2ntoko CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  CREATE USER 'n2ntoko_user'@'localhost' IDENTIFIED BY 'password_kuat_anda';
+  GRANT ALL PRIVILEGES ON n2ntoko.* TO 'n2ntoko_user'@'localhost';
+  FLUSH PRIVILEGES;
+"
+
+# 5. Setup aplikasi
 php artisan key:generate
-
-# 6. Konfigurasi database di .env
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=n2ntoko
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# 7. Jalankan migrasi & seeder
 php artisan migrate --seed
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
-# 8. Build aset frontend
-npm run build
+# 6. Permission storage
+chmod -R 775 storage bootstrap/cache
+sudo chown -R www-data:www-data .   # Ubuntu (ganti dengan user Nginx/Apache)
 
-# 9. Jalankan server
+# 7. Jalankan (development)
 php artisan serve
 ```
 
-### Akun Default Setelah Seeder
+Konfigurasi Nginx (production):
 
-| Email | Password | Role |
-|---|---|---|
-| admin@n2ntoko.com | admin123 | Admin |
+```nginx
+server {
+    listen 80;
+    server_name domain-atau-ip-anda;
+    root /path/ke/n2ntoko/public;
 
-> Segera ganti password setelah login pertama kali melalui menu **Profil Saya**.
+    index index.php;
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+```
 
 ---
 
-## Menjalankan untuk Development
+## ♻️ Update Aplikasi (Semua Platform)
+
+Ketika ada update dari repositori:
+
+```bash
+# Tarik perubahan terbaru
+git pull origin main
+
+# Update dependensi
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+
+# Jalankan migrasi baru (jika ada)
+php artisan migrate
+
+# Refresh cache (production)
+php artisan optimize
+php artisan permission:cache-reset
+```
+
+---
+
+## Development (Local)
 
 ```bash
 # Terminal 1 — Backend
@@ -87,128 +448,265 @@ php artisan serve
 npm run dev
 ```
 
-Buka browser: `http://localhost:8000`
+Buka `http://localhost:8000`
 
 ---
 
-## Panduan Penggunaan
+## Panduan Pemakaian
 
-### 1. Setup Awal (lakukan sekali)
+### Urutan Setup Awal (lakukan sekali saat pertama kali)
 
-#### A. Buat Kategori Produk
-**Inventaris → Kategori** → tambahkan kategori seperti: Rokok, Minuman, Snack, Sembako, dll.
+```
+1. Login sebagai Admin
+2. Buat Kategori produk
+3. Daftarkan Supplier
+4. Tambah Produk beserta satuan & harga
+5. Buat akun untuk kasir dan petugas gudang
+6. Lakukan Pembelian pertama untuk mengisi stok
+```
 
-#### B. Daftarkan Supplier
-**Inventaris → Supplier** → isi nama, telepon, dan kontak person distributor.
+---
 
-#### C. Tambah Produk dengan Multi-Satuan
+### 1. Kelola Kategori
+
+**Inventaris → Kategori**
+
+- Klik kolom input di atas → ketik nama kategori → klik **+ Tambah**
+- Contoh: `Rokok`, `Minuman`, `Snack`, `Sembako`, `Kebersihan`
+- Edit nama: klik ikon pensil di kanan baris
+- Hapus: klik ikon tempat sampah (hanya bisa jika tidak ada produk)
+
+---
+
+### 2. Kelola Supplier
+
+**Inventaris → Supplier**
+
+- Isi form di sebelah kiri: Nama, Telepon, Kontak Person, Alamat → klik **Tambah Supplier**
+- Edit: klik tombol **Edit** di baris supplier → ubah data → klik **Simpan**
+- Nonaktifkan supplier dengan uncheck kotak **Aktif** saat edit
+
+---
+
+### 3. Tambah Produk dengan Multi-Satuan
+
 **Inventaris → Produk → Tambah Produk**
 
-Contoh setup **Rokok Sampoerna Mild 16**:
+#### Informasi Produk
+- Isi **Nama Produk** (wajib)
+- SKU otomatis terisi, bisa diubah manual
+- Pilih **Kategori**
+- Isi **Stok Minimum** — notifikasi muncul di dashboard jika stok di bawah angka ini
 
-| # | Satuan | Konversi ke Dasar | Keterangan |
-|---|---|---|---|
-| 1 | **Pcs** *(Satuan Dasar)* | 1 | 1 bungkus rokok — stok dihitung di sini |
-| 2 | Slop | 10 | 1 Slop = 10 Pcs |
-| 3 | Box | 500 | 1 Box = 50 Slop × 10 Pcs |
+#### Setup Satuan (bagian terpenting)
 
-> **Aturan penting:** Konversi selalu dihitung ke satuan dasar (terkecil yang dijual).
-> Stok sistem disimpan dalam satuan dasar.
+Contoh produk **Rokok Sampoerna Mild 16**:
 
-**Cara isi form satuan:**
-1. Klik tombol **radio** di kiri baris → tandai sebagai Satuan Dasar
-2. Pilih nama satuan dari dropdown atau ketik manual
-3. Isi angka **konversi ke satuan dasar**
-4. Isi **barcode** (scan atau ketik) untuk tiap satuan
-5. Isi **harga eceran** dan **harga grosir** per satuan
-6. Klik **+ Tambah Satuan** untuk baris berikutnya
+| Baris | Satuan | Konversi | Barcode | Harga Eceran | Harga Grosir | Min Qty Grosir |
+|---|---|---|---|---|---|---|
+| 1 *(radio dipilih = Dasar)* | Pcs | 1 | 8999999100016 | 28.000 | 26.500 | 10 |
+| 2 | Slop | 10 | 8999999100023 | 270.000 | 260.000 | 1 |
+| 3 | Box | 500 | — | 13.000.000 | 12.500.000 | 1 |
+
+**Penjelasan kolom:**
+- **Radio di kiri** → klik untuk jadikan **Satuan Dasar** (stok dihitung dalam satuan ini)
+- **Konversi** → berapa kali satuan dasar. Pcs=1, Slop=10 Pcs, Box=500 Pcs
+- **Min Qty Grosir** → jika kasir input qty ≥ angka ini, harga otomatis pindah ke harga grosir
+- **+ Tambah Satuan** → klik untuk tambah baris satuan baru
+
+> **Aturan:** Konversi selalu ke satuan dasar. Stok tersimpan dalam satuan dasar.
 
 ---
 
-### 2. Alur Pembelian (Stok Masuk)
+### 4. Kelola Pelanggan
+
+**Penjualan → Pelanggan**
+
+- Isi form di kiri: Nama, Tipe (Umum/Grosir/Langganan), Telepon, Alamat → **Tambah Pelanggan**
+- Tipe berguna untuk filter dan identifikasi pelanggan saat kasir
+- Edit inline: klik **Edit** di baris pelanggan
+
+---
+
+### 5. Alur Pembelian (Stok Masuk dari Supplier)
 
 **Inventaris → Pembelian → Tambah Pembelian**
 
+#### Status Pembelian
+
 ```
-Buat Draft  →  Dipesan (opsional)  →  Konfirmasi Diterima (stok masuk)
+Draft  →  Dipesan  →  Diterima (stok masuk)
+  ↑            ↑
+(bisa edit)  (hanya ubah status)
 ```
 
-| Status | Stok Berubah? | Keterangan |
+| Status | Stok | Bisa Edit? |
 |---|---|---|
-| Draft | ❌ | PO dalam proses pembuatan, bisa diedit |
-| Dipesan | ❌ | Barang sudah dipesan ke supplier |
-| Diterima | ✅ | Stok masuk, HPP diperbarui otomatis |
+| **Draft** | Belum berubah | ✅ Bisa diedit penuh |
+| **Dipesan** | Belum berubah | ❌ Hanya ubah status |
+| **Diterima** | ✅ Masuk ke stok | ❌ Tidak bisa diubah |
 
-**Contoh beli 2 Box Sampoerna dari supplier:**
-1. Tambah Pembelian → pilih supplier
-2. Cari produk "Sampoerna" → pilih satuan **Box** → qty `2` → isi harga beli per Box
-3. Simpan sebagai Draft atau langsung Konfirmasi
-4. Setelah dikonfirmasi → stok bertambah **1.000 Pcs** (2 Box × 500)
-5. HPP otomatis dihitung ulang dengan metode **Average Cost**
+#### Cara Input Pembelian
+
+1. Pilih **Supplier** (opsional)
+2. Isi **Tanggal** dan **No. Faktur**
+3. Ketik nama produk di kolom pencarian → pilih dari dropdown
+4. Pilih **Satuan** (misal: Box) → isi **Qty** → isi **Harga Beli** per satuan
+5. Tambah baris item lain jika perlu
+6. Pilih aksi:
+   - **Simpan Draft** → belum masuk stok, bisa edit kembali
+   - **Konfirmasi & Simpan** → stok langsung masuk, HPP diperbarui
+
+#### Bayar Hutang Supplier
+
+Jika pembelian belum lunas (harga beli belum dibayar penuh):
+- Buka detail pembelian → lihat panel oranye **Sisa Hutang**
+- Klik **Catat Pembayaran** → isi jumlah bayar → **Simpan**
+- Bisa dicicil beberapa kali sampai status berubah **Lunas**
 
 ---
 
-### 3. Alur Penjualan (Kasir)
+### 6. Alur Penjualan (Kasir)
 
 **Penjualan → Transaksi Baru**
 
-1. **Cari produk** — ketik nama/SKU di kolom pencarian, atau
-2. **Scan barcode** — arahkan scanner ke barcode → produk otomatis masuk keranjang
-3. **Pilih satuan** — ganti di dropdown (Pcs / Slop / Box sesuai kebutuhan)
-4. **Pilih tipe harga** — Eceran atau Grosir (harga berubah otomatis)
-5. **Input uang diterima** → kembalian dihitung otomatis
-6. Klik **Proses Pembayaran**
+#### Cara Transaksi
 
-> Stok langsung berkurang saat transaksi berhasil disimpan.
+**A. Cari produk manual:**
+- Ketik nama atau SKU di kolom **Cari produk** → pilih dari dropdown
 
-**Contoh jual ke warung 1 Slop Sampoerna:**
-- Cari "Sampoerna" atau scan barcode slop
-- Pilih satuan **Slop**, qty `1`, tipe harga **Grosir**
-- Stok berkurang **10 Pcs**
-- Profit dicatat otomatis: harga jual − (HPP × 10 Pcs)
+**B. Scan barcode:**
+- Klik kolom **Scan barcode** → arahkan scanner → produk otomatis masuk keranjang
+
+#### Mengatur Item di Keranjang
+
+| Kolom | Cara Pakai |
+|---|---|
+| **Satuan** | Klik dropdown → pilih Pcs / Slop / Box |
+| **Qty** | Ketik jumlah — harga otomatis pindah ke grosir jika qty ≥ batas |
+| **Harga** | Bisa diubah manual jika perlu |
+| **★ Auto Grosir** | Badge ungu muncul jika qty memenuhi syarat grosir |
+
+#### Opsi Transaksi (panel kanan)
+
+| Opsi | Pilihan |
+|---|---|
+| **Tipe Harga** | Eceran / Grosir (berlaku untuk semua item) |
+| **PPN** | Non-PPN / 11% / 12% |
+| **Metode Bayar** | Tunai / Debit / QRIS |
+
+**Untuk pembayaran Tunai:**
+- Isi **Uang Diterima** → kembalian otomatis dihitung
+- Gunakan tombol cepat (Rp 10.000 / 50.000 / 100.000)
+
+**Untuk Debit/QRIS:**
+- Kolom uang diterima disembunyikan — total langsung dianggap lunas
+
+Klik **✓ Proses Pembayaran** → struk 80mm otomatis terbuka untuk dicetak.
+
+#### Membatalkan Transaksi
+
+- Buka detail penjualan → klik **Batalkan Transaksi**
+- Stok otomatis dikembalikan ke gudang
 
 ---
 
-### 4. Stok Opname
+### 7. Stok Opname
 
 **Inventaris → Stok Opname**
 
-Digunakan ketika stok fisik berbeda dengan stok di sistem (susut, rusak, salah input).
+Digunakan saat stok fisik berbeda dengan sistem (susut, rusak, hilang).
 
 1. Hitung stok fisik di gudang
-2. Isi kolom **Stok Fisik** untuk produk yang ada selisih
-3. Klik **Simpan Penyesuaian**
-4. Sistem otomatis catat selisih di kartu stok sebagai `adjustment`
+2. Isi angka stok fisik di kolom **Stok Fisik** untuk produk yang berbeda
+3. Produk yang sama dengan sistem bisa dikosongkan (tidak akan diproses)
+4. Klik **Simpan Penyesuaian**
+5. Selisih otomatis dicatat di kartu stok sebagai `adjustment`
 
 ---
 
-### 5. Laporan
+### 8. Catat Pengeluaran
 
-**Laporan** → pilih periode (Hari Ini / Minggu Ini / Bulan Ini / Kustom)
+**Pengeluaran → Catat Pengeluaran**
 
-| Data | Keterangan |
+1. Klik tombol **Catat Pengeluaran** (pojok kanan atas)
+2. Isi:
+   - **Tanggal** — tanggal pengeluaran terjadi
+   - **Kategori** — Sewa / Listrik / Air / Gaji / Transport / Pemeliharaan / Lainnya
+   - **Keterangan** — deskripsi singkat (misal: "Bayar listrik Mei")
+   - **Jumlah** — nominal dalam Rupiah
+   - **No. Bukti** — nomor kwitansi/nota (opsional)
+3. Klik **Simpan**
+
+Pengeluaran akan masuk ke perhitungan **Laba Bersih** di laporan.
+
+---
+
+### 9. Melihat Laporan
+
+#### Laporan Keuangan
+**Laporan → Laporan Keuangan**
+
+Pilih periode: **Hari Ini / Minggu Ini / Bulan Ini / Bulan Lalu / Tahun Ini / Kustom**
+
+| Kartu | Isi |
 |---|---|
-| Total Penjualan | Omzet periode yang dipilih |
-| HPP | Harga pokok semua barang terjual |
-| Laba Kotor | Penjualan − HPP |
-| Tabel Harian | Omzet, laba, dan margin per hari |
-| Top 10 Produk | Produk terlaris berdasarkan omzet |
+| Total Penjualan | Omzet kotor (termasuk PPN) |
+| PPN Terpungut | Total PPN dari semua transaksi |
+| Laba Kotor | Pendapatan bersih − HPP |
+| Laba Bersih | Laba Kotor − Total Pengeluaran |
+
+Bagian bawah menampilkan:
+- Tabel penjualan harian dengan laba per hari
+- Top 10 produk terlaris
+- Breakdown pengeluaran per kategori
+- Ringkasan Laba Rugi lengkap
+
+#### Laporan Per Kasir
+**Laporan → Laporan Per Kasir**
+
+1. Pilih **Tanggal**
+2. Pilih **Kasir** (atau biarkan "Semua Kasir")
+3. Klik **Tampilkan**
+
+Menampilkan setiap kasir dalam blok terpisah:
+- Jumlah transaksi
+- Rincian per metode bayar (Tunai / Debit / QRIS)
+- Total penjualan dan PPN
+
+**Cetak A4:** Klik tombol **Cetak A4** → laporan terformat untuk printer biasa (Epson LX310/laser).
 
 ---
 
-### 6. Pengeluaran Operasional
+### 10. Kelola Pengguna
 
-**Pengeluaran** → klik **Catat Pengeluaran**
+**Pengguna** *(hanya Admin)*
 
-Kategori: Sewa, Listrik, Air, Gaji, Transport, Pemeliharaan, Lainnya
+#### Tambah Pengguna Baru
+1. Klik **Tambah Pengguna**
+2. Isi Nama, Email, Password
+3. Pilih **Role**: Admin / Manajer / Kasir / Gudang
+4. Aktifkan toggle **Aktif**
+5. Klik **Simpan**
 
-Setiap catatan pengeluaran menyimpan tanggal, kategori, keterangan, jumlah, dan nomor bukti.
+#### Nonaktifkan Pengguna
+Edit pengguna → matikan toggle **Aktif** → Simpan.
+Pengguna tidak bisa login tetapi data transaksinya tetap tersimpan.
 
 ---
 
 ## Hak Akses Per Role
 
-### Matrix Permission
+### Deskripsi Role
+
+| Role | Untuk Siapa | Akses |
+|---|---|---|
+| **Admin** | Pemilik / Pengelola | Semua fitur tanpa batasan |
+| **Manajer** | Kepala Toko / Supervisor | Lihat semua data & laporan, tidak bisa ubah |
+| **Kasir** | Petugas Kasir | Transaksi penjualan, kelola pelanggan |
+| **Gudang** | Petugas Gudang | Kelola produk, input & konfirmasi pembelian |
+
+### Matrix Permission Lengkap
 
 | Permission | Admin | Manajer | Kasir | Gudang |
 |---|:---:|:---:|:---:|:---:|
@@ -239,18 +737,9 @@ Setiap catatan pengeluaran menyimpan tanggal, kategori, keterangan, jumlah, dan 
 | user.edit | ✅ | — | — | — |
 | user.hapus | ✅ | — | — | — |
 
-### Deskripsi Role
-
-| Role | Untuk Siapa |
-|---|---|
-| **Admin** | Pemilik / pengelola penuh — akses semua fitur |
-| **Manajer** | Kepala toko — lihat semua data & laporan, tidak bisa ubah |
-| **Kasir** | Petugas kasir — transaksi penjualan & kelola pelanggan |
-| **Gudang** | Petugas gudang — kelola produk, pembelian, konfirmasi stok masuk |
-
 ### Menambah Role / Permission Kustom
 
-Edit `database/seeders/RolePermissionSeeder.php`, tambahkan permission dan assign ke role, lalu:
+Edit `database/seeders/RolePermissionSeeder.php` lalu jalankan:
 
 ```bash
 php artisan db:seed --class=RolePermissionSeeder
@@ -263,93 +752,91 @@ php artisan permission:cache-reset
 
 ### HPP Average Cost (Rata-rata Bergerak)
 
+Setiap pembelian dikonfirmasi, HPP produk dihitung ulang:
+
 ```
-HPP Baru = (Stok Lama × HPP Lama + Qty Masuk × Harga Beli Per Dasar)
-           ─────────────────────────────────────────────────────────────
-                           Stok Lama + Qty Masuk
+HPP Baru = (Stok Lama × HPP Lama) + (Qty Masuk × Harga Beli per Dasar)
+           ────────────────────────────────────────────────────────────────
+                              Stok Lama + Qty Masuk
 ```
 
-Diperbarui otomatis setiap pembelian dikonfirmasi.
+HPP ini yang digunakan untuk menghitung profit di setiap transaksi penjualan.
+
+### Auto-Switch Harga Grosir
+
+Sistem otomatis pindah ke harga grosir berdasarkan **Min Qty Grosir** per satuan:
+
+```
+Kasir input 12 Pcs  →  Min Qty Grosir = 10  →  Harga Grosir aktif (★ Auto Grosir)
+Kasir input  8 Pcs  →  Min Qty Grosir = 10  →  Harga Eceran tetap digunakan
+```
+
+Setting **Min Qty Grosir** dikonfigurasi per satuan saat tambah/edit produk.
 
 ### Kartu Stok (Stock Ledger)
 
-Setiap perubahan stok tercatat otomatis dengan tipe:
+Setiap pergerakan stok tercatat otomatis:
 
-| Tipe | Dari |
+| Tipe | Sumber |
 |---|---|
 | `in` | Pembelian dikonfirmasi |
 | `out` | Penjualan |
 | `adjustment` | Stok opname atau pembatalan penjualan |
 
-### Konversi Satuan
+### PPN (Pajak Pertambahan Nilai)
 
-```
-Qty Base (stok berkurang/bertambah) = Qty Input × Konversi Satuan
-```
+- Dipilih per transaksi: **Non-PPN / 11% / 12%**
+- `total_amount` = subtotal + PPN
+- Laporan memisahkan subtotal, PPN, dan total secara terpisah
+- Struk mencantumkan PPN jika berlaku
 
-Contoh: jual 2 Slop (konversi=10) → stok berkurang 20 (satuan dasar)
+### Format Cetak
+
+| Format | Untuk | Ukuran |
+|---|---|---|
+| **Struk Thermal** | Nota penjualan, otomatis muncul setelah bayar | 80mm × auto |
+| **Laporan A4** | Laporan per kasir, tombol "Cetak A4" | A4 portrait |
 
 ---
 
 ## Struktur Navigasi
 
 ```
-/                → Welcome (belum login) | Dashboard (sudah login)
-/dashboard       → Ringkasan omzet, laba, total produk, stok menipis
-/products        → Daftar & kelola produk
-/categories      → Kategori produk
-/stok-opname     → Penyesuaian stok fisik
-/suppliers       → Data supplier
-/purchases       → Pembelian dari supplier
-/sales           → Transaksi penjualan (kasir)
-/customers       → Data pelanggan
-/expenses        → Pengeluaran operasional
-/laporan         → Laporan laba rugi
-/users           → Manajemen pengguna & role
+/                  → Welcome (belum login) | Dashboard (sudah login)
+/dashboard         → Ringkasan omzet, laba, produk, stok menipis
+/products          → Daftar & kelola produk
+/categories        → Kategori produk
+/stok-opname       → Penyesuaian stok fisik
+/suppliers         → Data supplier
+/purchases         → Pembelian dari supplier
+/sales             → Transaksi penjualan (kasir)
+/customers         → Data pelanggan
+/expenses          → Pengeluaran operasional
+/laporan           → Laporan keuangan per periode
+/laporan/shift     → Laporan per kasir harian
+/users             → Manajemen pengguna & role
 ```
 
 ---
 
-## Apakah Aplikasi Ini Bisa Digunakan Selain untuk Grosir?
-
-**Ya — aplikasi ini fleksibel dan bisa digunakan untuk berbagai jenis usaha.**
-
-Aplikasi ini dirancang dengan konsep umum manajemen stok dan penjualan, bukan terikat pada model bisnis grosir saja. Berikut kesesuaiannya:
+## Kesesuaian Jenis Usaha
 
 | Jenis Usaha | Dukungan | Catatan |
 |---|---|---|
-| **Toko Grosir** | ✅ Penuh | Harga grosir/eceran, multi-satuan, pelanggan tipe grosir |
-| **Penjualan Gudang / Distributor** | ✅ Penuh | Beli dalam Box/Karton, jual per Slop/Pcs ke warung/toko |
-| **Toko Retail / Warung** | ✅ Penuh | Gunakan hanya satuan eceran, hilangkan harga grosir |
-| **Toko Campuran (retail + grosir)** | ✅ Penuh | Pilih tipe harga Eceran/Grosir saat transaksi |
-| **Mini Market** | ✅ Baik | Tambahkan lebih banyak kategori & produk |
-| **Apotek / Toko Bahan** | ✅ Baik | Gunakan satuan berat (Kg, Gram, Ons, Liter) |
-| **Toko dengan Kasir Banyak** | ✅ Baik | Buat akun kasir terpisah per orang |
+| Toko Grosir | ✅ Penuh | Harga grosir/eceran, multi-satuan, pelanggan tipe grosir |
+| Distributor / Gudang | ✅ Penuh | Beli per Box/Karton, jual per Slop/Pcs ke warung |
+| Toko Retail / Warung | ✅ Penuh | Pakai satuan eceran saja |
+| Toko Campuran | ✅ Penuh | Pilih tipe harga per transaksi |
+| Mini Market | ✅ Baik | Tambah banyak kategori & produk |
+| Apotek / Toko Bahan | ✅ Baik | Gunakan satuan berat (Kg, Gram, Liter) |
 
-### Untuk Penjualan Gudang (Distributor)
+---
 
-Alur yang cocok:
-```
-Beli dari pabrik/agen  →  Stok di gudang (dalam Box/Karton)
-                       ↓
-Jual ke warung/toko    →  Per Slop, Per Kotak, Per Pcs
-                       ↓
-Laporan omzet & laba   →  Per periode
-```
-
-Yang perlu disesuaikan:
-1. **Nama role** — "Kasir" bisa diubah menjadi "Sales" atau "Admin Penjualan"
-2. **Pelanggan** — gunakan tipe **Grosir** atau **Langganan** untuk warung/toko pelanggan tetap
-3. **Satuan produk** — sesuaikan dengan kemasan gudang (Box, Karton, Karung, dll)
-4. **Harga grosir** — aktifkan dan isi harga khusus untuk pelanggan grosir/langganan
-
-### Yang Belum Tersedia (Roadmap)
+## Roadmap
 
 | Fitur | Status |
 |---|---|
-| Cetak struk / nota penjualan | Belum ada |
-| Laporan laba bersih (sudah kurangi pengeluaran) | Belum otomatis |
 | Piutang pelanggan (jual kredit) | Belum ada |
-| Hutang supplier (bayar cicilan) | Belum ada |
 | Ekspor laporan ke Excel/PDF | Belum ada |
+| Pengaturan toko (nama, alamat, logo di struk) | Belum ada |
 | Multi-cabang / multi-gudang | Belum ada |

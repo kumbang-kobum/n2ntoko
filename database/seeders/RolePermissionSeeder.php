@@ -42,14 +42,26 @@ class RolePermissionSeeder extends Seeder
             // Laporan
             'laporan.lihat',
             'laporan.ekspor',
+            // Pegawai
+            'pegawai.lihat',
+            'pegawai.tambah',
+            'pegawai.edit',
+            'pegawai.hapus',
             // Manajemen User
             'user.lihat',
             'user.tambah',
             'user.edit',
             'user.hapus',
+            // Hak Akses
+            'hakakses.lihat',
+            'hakakses.edit',
             // Pengaturan
             'pengaturan.lihat',
             'pengaturan.edit',
+            // Absensi
+            'absensi.lihat',
+            'absensi.tambah',
+            'absensi.rekap',
         ];
 
         foreach ($permissions as $perm) {
@@ -60,7 +72,7 @@ class RolePermissionSeeder extends Seeder
         $admin = Role::firstOrCreate(['name' => 'admin']);
         $admin->syncPermissions(Permission::all());
 
-        // Manajer: lihat semua + ekspor, tidak bisa ubah user/pengaturan
+        // Manajer: lihat semua + ekspor + absensi
         $manajer = Role::firstOrCreate(['name' => 'manajer']);
         $manajer->syncPermissions([
             'produk.lihat',
@@ -68,8 +80,12 @@ class RolePermissionSeeder extends Seeder
             'penjualan.lihat',
             'pelanggan.lihat',
             'pengeluaran.lihat',
+            'pegawai.lihat',
             'laporan.lihat',
             'laporan.ekspor',
+            'absensi.lihat',
+            'absensi.tambah',
+            'absensi.rekap',
         ]);
 
         // Kasir: penjualan + lihat produk/stok + pelanggan

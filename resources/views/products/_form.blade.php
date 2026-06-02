@@ -136,6 +136,9 @@
                         <div class="w-2 h-2 rounded-full bg-white" x-show="baseUnitIndex === index"></div>
                     </button>
 
+                    {{-- ID tersembunyi (dipakai saat update agar unit lama dikenali) --}}
+                    <input type="hidden" :name="`units[${index}][id]`" :value="unit.id ?? ''">
+
                     {{-- Nama Satuan (dropdown enum) --}}
                     <div class="flex-1 min-w-0">
                         <label class="block text-xs text-gray-400 mb-1">Nama Satuan *</label>

@@ -72,7 +72,8 @@
 
             {{-- Tabel --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table class="w-full text-sm">
+                <div class="overflow-x-auto">
+                <table class="w-full text-sm min-w-[640px]">
                     <thead>
                         <tr class="border-b border-gray-100 bg-gray-50">
                             <th class="text-left px-5 py-3 font-semibold text-gray-600">Produk</th>
@@ -182,6 +183,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>{{-- /overflow-x-auto --}}
                 @if($products->hasPages())
                 <div class="px-5 py-4 border-t border-gray-100">{{ $products->links() }}</div>
                 @endif

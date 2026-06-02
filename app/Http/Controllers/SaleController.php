@@ -57,8 +57,9 @@ class SaleController extends Controller implements HasMiddleware
 
     public function create()
     {
-        $invoice = Sale::generateInvoiceNumber();
-        return view('sales.create', compact('invoice'));
+        $invoice    = Sale::generateInvoiceNumber();
+        $ppnDefault = (int) \App\Models\Setting::get('ppn_default', 0);
+        return view('sales.create', compact('invoice', 'ppnDefault'));
     }
 
     public function store(Request $request)
@@ -70,6 +71,7 @@ class SaleController extends Controller implements HasMiddleware
             'payment_method'  => 'required|in:cash,debit,qris',
             'tax_rate'        => 'required|numeric|min:0|max:100',
             'paid_amount'     => 'required|numeric|min:0',
+            'buyer_name'      => 'nullable|string|max:150',
             'items'           => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.unit_id'    => 'required|exists:product_units,id',
@@ -126,6 +128,7 @@ class SaleController extends Controller implements HasMiddleware
                 'change_amount'       => max(0, (float) $request->paid_amount - $grandTotal),
                 'status'              => 'paid',
                 'notes'               => $request->notes,
+                'buyer_name'          => $request->buyer_name ?: null,
             ]);
 
             foreach ($itemData as $d) {
@@ -226,9 +229,7 @@ class SaleController extends Controller implements HasMiddleware
                 'price_eceran'    => (float) ($u->prices->where('price_type','eceran')->first()?->price ?? 0),
                 'price_grosir'    => (float) ($u->prices->where('price_type','grosir')->first()?->price ?? 0),
                 'min_qty_grosir'  => (float) ($u->prices->where('price_type','grosir')->first()?->min_qty ?? 0),
-                'stock_display'=> $u->is_base
-                    ? (float) $p->stock_qty
-                    : round((float) $p->stock_qty / (float) $u->conversion, 2),
+                'stock_display'=> round((float) $p->stock_qty / max((float) $u->conversion, 0.0001), 2),
             ]),
         ])->toArray();
     }

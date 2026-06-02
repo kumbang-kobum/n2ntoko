@@ -81,6 +81,16 @@
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
                                           focus:ring-2 focus:ring-blue-500">
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Nama Pembeli
+                                <span class="text-gray-400 font-normal text-xs">(opsional — ditampilkan di nota)</span>
+                            </label>
+                            <input type="text" name="buyer_name" value="{{ old('buyer_name') }}"
+                                   placeholder="Nama pembeli jika ingin dicantumkan..."
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                                          focus:ring-2 focus:ring-blue-500">
+                        </div>
                     </div>
                 </div>
 
