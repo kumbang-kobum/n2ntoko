@@ -39,7 +39,7 @@ class AttendanceController extends Controller implements HasMiddleware
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'photo'       => 'nullable|string',
+            'photo'       => 'nullable|string|max:1500000', // ~1 MB gambar
         ]);
 
         $employee = Employee::findOrFail($request->employee_id);
@@ -68,7 +68,7 @@ class AttendanceController extends Controller implements HasMiddleware
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'photo'       => 'nullable|string',
+            'photo'       => 'nullable|string|max:1500000',
         ]);
 
         $employee   = Employee::findOrFail($request->employee_id);
@@ -103,11 +103,27 @@ class AttendanceController extends Controller implements HasMiddleware
         }
 
         try {
-            $data     = substr($base64, strpos($base64, 'base64,') + 7);
-            $decoded  = base64_decode($data);
+            $raw     = substr($base64, strpos($base64, 'base64,') + 7);
+            $decoded = base64_decode($raw, strict: true);
+
+            // Tolak jika bukan binary valid
+            if ($decoded === false || strlen($decoded) < 3) {
+                return null;
+            }
+
+            // Validasi magic bytes: harus JPEG (FF D8 FF)
+            if (substr($decoded, 0, 3) !== "\xFF\xD8\xFF") {
+                return null;
+            }
+
+            // Nama file acak agar tidak bisa ditebak
+            $token    = bin2hex(random_bytes(8));
             $dir      = "absensi/{$date}";
-            $filename = "{$employeeId}_{$type}.jpg";
+            $filename = "{$employeeId}_{$type}_{$token}.jpg";
             $path     = "{$dir}/{$filename}";
+
+            // Hapus foto lama jika ada (update selfie hari yang sama)
+            $this->deleteOldPhoto($employeeId, $date, $type);
 
             \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($dir);
             \Illuminate\Support\Facades\Storage::disk('public')->put($path, $decoded);
@@ -115,6 +131,18 @@ class AttendanceController extends Controller implements HasMiddleware
             return $path;
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    private function deleteOldPhoto(int $employeeId, string $date, string $type): void
+    {
+        $field = $type === 'in' ? 'photo_in' : 'photo_out';
+        $old   = Attendance::where('employee_id', $employeeId)
+                    ->whereDate('date', $date)
+                    ->value($field);
+
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
         }
     }
 

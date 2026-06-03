@@ -26,10 +26,12 @@ Route::get('/', function () {
         : view('welcome');
 });
 
-// Absensi publik (tanpa login)
+// Absensi publik (tanpa login) — dibatasi 15 request/menit per IP
 Route::get('/absensi',        [AttendanceController::class, 'publicPage'])->name('absensi.public');
-Route::post('/absensi/masuk', [AttendanceController::class, 'checkIn'])->name('absensi.masuk');
-Route::post('/absensi/pulang',[AttendanceController::class, 'checkOut'])->name('absensi.pulang');
+Route::middleware('throttle:15,1')->group(function () {
+    Route::post('/absensi/masuk', [AttendanceController::class, 'checkIn'])->name('absensi.masuk');
+    Route::post('/absensi/pulang',[AttendanceController::class, 'checkOut'])->name('absensi.pulang');
+});
 
 Route::get('/dashboard', function () {
     $omzetHariIni = Sale::whereDate('sale_date', today())
