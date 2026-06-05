@@ -92,17 +92,19 @@ cd /www/wwwroot/retail.n2n.com
 rm -rf index.html 404.html .htaccess
 git clone https://github.com/chandrair/n2ntoko.git .
 
-# 3. Setup Composer & Dependensi
+# 3. Pastikan Node.js minimal v20 (SANGAT PENTING)
+# Cek versi: node -v. Jika masih v12/v14, jalankan:
+# npm install -g n && n 20 && hash -r
+
+# 4. Setup Composer & Dependensi
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 composer install --no-dev --optimize-autoloader
 
-# 4. Setup Node.js & Build Aset
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# 5. Setup Node.js & Build Aset
 npm install && npm run build
 
-# 5. Setup Environment
+# 6. Setup Environment
 cp .env.example .env
 ```
 
@@ -120,6 +122,9 @@ Buka **File Manager** aaPanel, cari file `.env` di masing-masing folder, dan ses
 ```env
 APP_NAME="N2N Retail"
 APP_URL=http://retail.n2n.com
+SESSION_COOKIE=n2n_retail_session
+SESSION_DOMAIN=retail.n2n.com
+
 DB_DATABASE=n2n_retail
 DB_USERNAME=user_retail
 DB_PASSWORD=Rahasia123!
@@ -129,6 +134,9 @@ DB_PASSWORD=Rahasia123!
 ```env
 APP_NAME="N2N Grosir"
 APP_URL=http://grosir.n2n.com
+SESSION_COOKIE=n2n_grosir_session
+SESSION_DOMAIN=grosir.n2n.com
+
 DB_DATABASE=n2n_grosir
 DB_USERNAME=user_grosir
 DB_PASSWORD=Rahasia123!
@@ -147,7 +155,9 @@ php artisan key:generate
 php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize
+chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
+chattr +i public/.user.ini
 
 # --- Eksekusi di folder GROSIR ---
 cd /www/wwwroot/grosir.n2n.com
@@ -155,7 +165,9 @@ php artisan key:generate
 php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize
+chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
+chattr +i public/.user.ini
 ```
 
 ---
@@ -182,7 +194,9 @@ npm install && npm run build
 php artisan migrate --force
 php artisan db:seed --class=RolePermissionSeeder --force
 php artisan optimize
+chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
+chattr +i public/.user.ini
 ```
 
 **Update GROSIR:**
