@@ -40,198 +40,158 @@ Pilih metode sesuai lingkungan Anda:
 
 ---
 
-## 🖥️ Instalasi via aaPanel (VPS) — Production
+---
 
-**Rekomendasi:** Ubuntu 22.04 LTS, minimal 1 CPU, 1 GB RAM, 20 GB disk.
+## 🖥️ Panduan Instalasi aaPanel (Multi-Instance: Retail & Grosir)
 
-### 1️⃣ Persiapan Awal di aaPanel
+Panduan ini ditujukan untuk menginstal **dua atau lebih** website N2N Toko dalam satu server aaPanel (misal: satu untuk Retail dan satu untuk Grosir) menggunakan Ubuntu 22.04.
 
-1. Masuk ke menu **App Store** (Software Store), pastikan Anda sudah menginstall:
-   - ✅ **Nginx** (versi terbaru)
-   - ✅ **MySQL 8.0**
-   - ✅ **PHP 8.2**
-2. Buka menu **App Store** > **PHP 8.2** > **Settings**:
-   - **Install Extension:** Pastikan `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, dan `ctype` terinstall.
-   - **Disabled functions (SANGAT PENTING):** Hapus fungsi-fungsi berikut agar proses instalasi dan build tidak error: `putenv`, `pcntl_signal`, `pcntl_alarm`, `proc_open`, `proc_get_status`.
-   - Buka tab **Service** lalu klik **Restart**.
+### 🚩 Langkah 1: Persiapan Global Server (Sekali Saja)
 
-### 2️⃣ Buat Database & Website
+Sebelum membuat website, pastikan software di aaPanel sudah siap:
 
-1. Buka menu **Database** > **MySQL** > **Add Database**:
-   - Database Name: `n2ntoko`
-   - Username: `n2ntoko_user` (atau sesuai keinginan)
-   - Password: buat password yang kuat dan catat.
-2. Buka menu **Website** > **Add Site**:
-   - **Domain:** Isi dengan IP VPS atau Domain Anda (misal: `192.168.100.5` atau `toko.domainanda.com`).
-   - **PHP Version:** Pilih **8.2**.
-   - Klik **Submit**.
+1.  **Install Software:** Buka **App Store** dan install:
+    - ✅ **Nginx** (versi terbaru)
+    - ✅ **MySQL 8.0**
+    - ✅ **PHP 8.2**
+2.  **Konfigurasi PHP 8.2 (SANGAT PENTING):**
+    - Buka **App Store** > **PHP 8.2** > **Settings**.
+    - **Install Extension:** Tambahkan `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`.
+    - **Disabled functions:** Hapus (delete) fungsi berikut: `putenv`, `pcntl_signal`, `pcntl_alarm`, `proc_open`, `proc_get_status`.
+    - Buka tab **Service** > Klik **Restart**.
 
-### 3️⃣ Deploy Aplikasi via Terminal aaPanel
+---
 
-Buka **Terminal** di aaPanel (pastikan Anda login sebagai `root`), lalu jalankan perintah berikut secara berurutan. Salin-tempel (copy-paste) per blok:
+### 📦 Langkah 2: Membuat Database & Website (GUI aaPanel)
 
+Lakukan langkah ini untuk **setiap** aplikasi yang ingin diinstal.
+
+#### A. Buat Database
+Buka menu **Database** > **Add Database**:
+- **Retail:** Name: `n2n_retail`, User: `user_retail`, Pass: `Rahasia123!`
+- **Grosir:** Name: `n2n_grosir`, User: `user_grosir`, Pass: `Rahasia123!`
+
+#### B. Buat Website
+Buka menu **Website** > **Add Site**:
+- **Retail:** Domain: `retail.n2n.com` (Root: `/www/wwwroot/retail.n2n.com`)
+- **Grosir:** Domain: `grosir.n2n.com` (Root: `/www/wwwroot/grosir.n2n.com`)
+- *Catatan: Jika akses via IP lokal, tambahkan port berbeda (misal: `192.168.100.5:81` dan `192.168.100.5:82`)*.
+
+---
+
+### 🚀 Langkah 3: Script Instalasi via Terminal
+
+Buka **Terminal** di aaPanel. Jalankan perintah di bawah ini **per website**. Ganti bagian `FOLDER_NAME` sesuai folder website Anda.
+
+#### 🏁 Jalankan untuk RETAIL:
 ```bash
-# 1. Masuk ke direktori website (Ganti 192.168.100.5 dengan Domain/IP website Anda)
-cd /www/wwwroot/192.168.100.5
+# 1. Masuk ke folder retail
+cd /www/wwwroot/retail.n2n.com
 
-# 2. Hapus file default bawaan aaPanel (WAJIB)
+# 2. Bersihkan file default & Clone kode
 rm -rf index.html 404.html .htaccess
-
-# 3. Clone repositori (PENTING: Pastikan ada spasi dan TITIK (.) di akhir perintah!)
 git clone https://github.com/chandrair/n2ntoko.git .
 
-# 4. Install Composer (jika server belum memilikinya)
+# 3. Setup Composer & Dependensi
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
-
-# 5. Install dependensi PHP
 composer install --no-dev --optimize-autoloader
 
-# 6. Salin file environment
+# 4. Setup Node.js & Build Aset
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install && npm run build
+
+# 5. Setup Environment
 cp .env.example .env
 ```
 
-### 4️⃣ Konfigurasi .env & Build Aset
+#### 🏁 Jalankan untuk GROSIR:
+Ulangi perintah di atas, hanya baris pertama yang diganti:
+`cd /www/wwwroot/grosir.n2n.com` ... (lanjutkan langkah 2-5).
 
-1. Kembali ke **aaPanel File Manager**, buka folder website Anda (`/www/wwwroot/192.168.100.5`).
-2. Cari file `.env` (pastikan pengaturan "Show hidden files" aktif), edit dan sesuaikan bagian ini:
+---
 
+### ⚙️ Langkah 4: Konfigurasi File .env (Masing-masing)
+
+Buka **File Manager** aaPanel, cari file `.env` di masing-masing folder, dan sesuaikan isinya:
+
+**File `.env` di /retail.n2n.com:**
 ```env
-APP_NAME="N2N Toko"
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=http://192.168.100.5
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=n2ntoko
-DB_USERNAME=n2ntoko_user
-DB_PASSWORD=password_database_yang_dibuat_tadi
-
-ADMIN_EMAIL=admin@toko.com
-ADMIN_PASSWORD=PasswordKuat123!
+APP_NAME="N2N Retail"
+APP_URL=http://retail.n2n.com
+DB_DATABASE=n2n_retail
+DB_USERNAME=user_retail
+DB_PASSWORD=Rahasia123!
 ```
-3. Simpan file `.env`.
-4. Kembali ke **Terminal**, jalankan sisa perintah berikut:
+
+**File `.env` di /grosir.n2n.com:**
+```env
+APP_NAME="N2N Grosir"
+APP_URL=http://grosir.n2n.com
+DB_DATABASE=n2n_grosir
+DB_USERNAME=user_grosir
+DB_PASSWORD=Rahasia123!
+```
+
+---
+
+### 🛠️ Langkah 5: Finalisasi & Permission (Terminal)
+
+Kembali ke Terminal, jalankan perintah ini untuk **masing-masing folder**:
 
 ```bash
-# 1. Install Node.js v20 (jika belum ada)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# 2. Install dependensi Node & Build aset Tailwind/Vite
-npm install
-npm run build
-
-# 3. Setup Laravel (Key, Storage, Database, Seed)
+# --- Eksekusi di folder RETAIL ---
+cd /www/wwwroot/retail.n2n.com
 php artisan key:generate
 php artisan storage:link
-php artisan migrate --seed
+php artisan migrate --seed --force
+php artisan optimize
+chown -R www:www . && chmod -R 775 storage bootstrap/cache
 
-# 4. Optimasi Cache Laravel
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# 5. Perbaiki Izin Folder (SANGAT PENTING agar web tidak error 500/Permission Denied)
-chown -R www:www /www/wwwroot/192.168.100.5
-chmod -R 775 storage bootstrap/cache
+# --- Eksekusi di folder GROSIR ---
+cd /www/wwwroot/grosir.n2n.com
+php artisan key:generate
+php artisan storage:link
+php artisan migrate --seed --force
+php artisan optimize
+chown -R www:www . && chmod -R 775 storage bootstrap/cache
 ```
-*(Ingat: Ubah `/www/wwwroot/192.168.100.5` dengan direktori asli Anda jika menggunakan domain)*
-
-### 5️⃣ Konfigurasi Website Akhir (GUI aaPanel)
-
-Kembali ke menu **Website** di aaPanel, klik pada nama Domain/IP Anda:
-1. **Site directory:**
-   - Site directory: `/www/wwwroot/192.168.100.5`
-   - Running directory: Pilih `/public`
-   - Klik **Save**.
-2. **URL rewrite:**
-   - Pilih template **laravel** dari dropdown.
-   - Klik **Save**.
-3. Buka browser dan akses alamat web Anda (misal: `http://192.168.100.5`). Login dengan email dan password yang Anda isi di file `.env`.
 
 ---
 
-## 🏗️ Setup Multi-Instance (Dua Aplikasi dalam Satu Server)
+### 🌐 Langkah 6: Pengaturan Akhir Website (GUI aaPanel)
 
-Jika Anda ingin menginstall dua aplikasi (misal: satu untuk **Retail** dan satu untuk **Grosir**) dengan database yang berbeda di satu server aaPanel, ikuti panduan ini:
+Untuk **setiap website** (Retail & Grosir), klik nama website di menu **Website**:
+1.  **Site directory:** Ubah **Running directory** ke `/public`. Klik Save.
+2.  **URL rewrite:** Pilih template **laravel**. Klik Save.
+3.  **SSL (Opsional):** Aktifkan Let's Encrypt jika domain sudah mengarah ke IP VPS.
 
-### 1. Buat Dua Database Berbeda
-Di menu **Database**, buat dua database:
-- `db_retail` (User: `user_retail`)
-- `db_grosir` (User: `user_grosir`)
+---
 
-### 2. Buat Dua Website Berbeda
-Di menu **Website** > **Add Site**, buat dua entri:
+## ♻️ Cara Update Aplikasi (Sangat Mudah)
 
-| No | Domain / Hostname | Root Directory |
-|---|---|---|
-| **1** | `retail.n2n.com` (atau `192.168.100.5:81`) | `/www/wwwroot/retail.n2n.com` |
-| **2** | `grosir.n2n.com` (atau `192.168.100.5:82`) | `/www/wwwroot/grosir.n2n.com` |
+Jika ada update terbaru dari GitHub, Anda hanya perlu menjalankan satu blok perintah ini di Terminal aaPanel.
 
-> **Tips Jika Menggunakan IP (Lokal):** Jika Anda tidak menggunakan domain, Anda bisa menggunakan nomor port yang berbeda (misal `:81` dan `:82`) saat menambahkan site di aaPanel.
-
-### 3. Deploy ke Masing-Masing Folder
-Anda harus menjalankan proses **Langkah 3 & 4** pada bagian Instalasi di atas untuk **setiap folder**.
-
-**Terminal untuk Retail:**
+**Update RETAIL:**
 ```bash
 cd /www/wwwroot/retail.n2n.com
-# ... jalankan git clone . , composer install, npm install, dll ...
-```
-
-**Terminal untuk Grosir:**
-```bash
-cd /www/wwwroot/grosir.n2n.com
-# ... jalankan git clone . , composer install, npm install, dll ...
-```
-
-### 4. Konfigurasi .env yang Berbeda
-PENTING: Edit file `.env` di masing-masing folder melalui File Manager:
-- Di folder **retail**, hubungkan ke `DB_DATABASE=db_retail`
-- Di folder **grosir**, hubungkan ke `DB_DATABASE=db_grosir`
-
-### 5. Cron Job Terpisah
-Tambahkan dua Cron Job di menu **Cron** aaPanel:
-- Task 1: `php /www/wwwroot/retail.n2n.com/artisan schedule:run >> /dev/null 2>&1`
-- Task 2: `php /www/wwwroot/grosir.n2n.com/artisan schedule:run >> /dev/null 2>&1`
-
----
-
-## ♻️ Update Aplikasi (aaPanel)
-
-Untuk memastikan pembaruan aplikasi berjalan lancar, aman, dan struktur folder tidak rusak, jalankan script ini di **Terminal aaPanel**.
-
-*(Ganti `192.168.100.5` dengan direktori website Anda yang sebenarnya)*
-
-```bash
-# 1. Masuk ke direktori web
-cd /www/wwwroot/192.168.100.5
-
-# 2. Tarik kode terbaru dari GitHub (Paksa timpa jika ada perubahan lokal)
-git fetch origin
-git reset --hard origin/main
-
-# 3. Update dependensi PHP & JS
+git fetch origin && git reset --hard origin/main
 composer install --no-dev --optimize-autoloader
 npm install && npm run build
-
-# 4. Migrasi Database & Bersihkan Cache
 php artisan migrate --force
 php artisan db:seed --class=RolePermissionSeeder --force
-php artisan optimize:clear
 php artisan optimize
-
-# 5. Fix Permission Ulang (Menghindari file hasil pull tidak bisa dibaca Nginx)
-chown -R www:www .
-chmod -R 775 storage bootstrap/cache
+chown -R www:www . && chmod -R 775 storage bootstrap/cache
 ```
+
+**Update GROSIR:**
+Ganti baris pertama menjadi `cd /www/wwwroot/grosir.n2n.com` lalu jalankan perintah sisanya sama seperti di atas.
 
 ---
 
 ## 🪟 Instalasi via XAMPP (Windows) — Lokal
+
 
 ### Prasyarat
 
