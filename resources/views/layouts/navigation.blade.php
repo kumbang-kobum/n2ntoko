@@ -119,11 +119,11 @@
                     </x-dropdown>
                     @endcanany
 
-                    @canany(['user.lihat','pegawai.lihat','hakakses.lihat','pengaturan.lihat'])
+                    @canany(['user.lihat','pegawai.lihat','hakakses.lihat','pengaturan.lihat','activity-log.lihat'])
                     <x-dropdown align="right" width="56">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md
-                                {{ request()->routeIs('users.*','employees.*','hakakses.*','settings.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
+                                {{ request()->routeIs('users.*','employees.*','hakakses.*','settings.*','activity-log.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
                                 transition">
                                 Admin
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,6 +143,9 @@
                             @endcan
                             @can('pengaturan.lihat')
                             <x-dropdown-link :href="route('settings.index')">Pengaturan Toko</x-dropdown-link>
+                            @endcan
+                            @can('activity-log.lihat')
+                            <x-dropdown-link :href="route('activity-log.index')">Riwayat Aktivitas</x-dropdown-link>
                             @endcan
                         </x-slot>
                     </x-dropdown>
@@ -244,6 +247,9 @@
             @endcan
             @can('pengaturan.lihat')
             <x-responsive-nav-link :href="route('settings.index')">Pengaturan Toko</x-responsive-nav-link>
+            @endcan
+            @can('activity-log.lihat')
+            <x-responsive-nav-link :href="route('activity-log.index')">Riwayat Aktivitas</x-responsive-nav-link>
             @endcan
         </div>
 

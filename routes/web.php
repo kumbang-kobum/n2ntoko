@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
@@ -112,6 +113,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('stok-opname',  [StokOpnameController::class, 'index'])->name('stok-opname.index');
     Route::post('stok-opname', [StokOpnameController::class, 'store'])->name('stok-opname.store');
+
+    Route::get('activity-log',                        [ActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::delete('activity-log/clear',               [ActivityLogController::class, 'destroyAll'])->name('activity-log.destroyAll');
+    Route::delete('activity-log/{activity}',          [ActivityLogController::class, 'destroy'])->name('activity-log.destroy');
 });
 
 require __DIR__.'/auth.php';

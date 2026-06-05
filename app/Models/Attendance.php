@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
+    use HasActivityLog;
     protected $fillable = [
         'employee_id', 'date', 'check_in', 'check_out',
         'status', 'notes', 'input_by', 'photo_in', 'photo_out',

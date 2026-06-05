@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductPrice extends Model
 {
+    use HasActivityLog;
     protected $fillable = ['product_id', 'unit_id', 'price_type', 'min_qty', 'price'];
 
     protected $casts = [

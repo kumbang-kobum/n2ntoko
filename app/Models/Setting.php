@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
+    use HasActivityLog;
     protected $primaryKey = 'key';
     protected $keyType    = 'string';
     public $incrementing  = false;

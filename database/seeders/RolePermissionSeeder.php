@@ -62,6 +62,9 @@ class RolePermissionSeeder extends Seeder
             'absensi.lihat',
             'absensi.tambah',
             'absensi.rekap',
+            // Activity Log
+            'activity-log.lihat',
+            'activity-log.hapus',
         ];
 
         foreach ($permissions as $perm) {
@@ -86,6 +89,7 @@ class RolePermissionSeeder extends Seeder
             'absensi.lihat',
             'absensi.tambah',
             'absensi.rekap',
+            'activity-log.lihat',
         ]);
 
         // Kasir: penjualan + lihat produk/stok + pelanggan

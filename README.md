@@ -2,7 +2,7 @@
 
 Aplikasi POS (Point of Sale) berbasis web untuk mengelola pembelian, penjualan, stok, dan laporan laba rugi. Mendukung multi-satuan produk, harga grosir & eceran, barcode scanner, PPN, metode pembayaran, dan manajemen hak akses per peran.
 
-**Stack:** Laravel 12 · MySQL · Tailwind CSS · Alpine.js · Spatie Permission
+**Stack:** Laravel 12 · MySQL · Tailwind CSS · Alpine.js · Spatie Permission · Spatie ActivityLog
 
 ---
 
@@ -19,7 +19,12 @@ Aplikasi POS (Point of Sale) berbasis web untuk mengelola pembelian, penjualan, 
 | **Pengeluaran** | Catat beban operasional (sewa, listrik, gaji, dll) |
 | **Laporan Keuangan** | Laba kotor, laba bersih, PPN, top produk, breakdown metode bayar per periode |
 | **Laporan Per Kasir** | Rekap harian per kasir, cetak A4 |
+| **Pegawai** | CRUD data karyawan, jabatan, tanggal bergabung |
+| **Absensi** | Absensi mandiri via QR/link publik (tanpa login), rekap bulanan, ekspor CSV |
 | **Pengguna** | CRUD user, assign role, aktif/nonaktif |
+| **Hak Akses** | Kelola role & permission kustom via UI |
+| **Pengaturan Toko** | Nama toko, alamat, nomor telepon, catatan struk |
+| **Riwayat Aktivitas** | Audit trail otomatis — catat semua tambah/edit/hapus beserta nama pengguna & nilai sebelum–sesudah |
 
 ---
 
@@ -424,17 +429,26 @@ Ketika ada update dari repositori:
 # Tarik perubahan terbaru
 git pull origin main
 
-# Update dependensi
+# Update dependensi PHP
 composer install --no-dev --optimize-autoloader
+
+# Update dependensi JS & build ulang aset
 npm install && npm run build
 
 # Jalankan migrasi baru (jika ada)
 php artisan migrate
 
+# Jalankan seeder permission (wajib jika ada fitur/permission baru)
+php artisan db:seed --class=RolePermissionSeeder
+
 # Refresh cache (production)
 php artisan optimize
 php artisan permission:cache-reset
 ```
+
+> **Kapan perlu jalankan seeder?**
+> Jalankan `db:seed --class=RolePermissionSeeder` setiap kali ada update yang menambahkan fitur baru dengan permission baru.
+> Aman dijalankan berulang kali — tidak akan membuat duplikat data.
 
 ---
 
@@ -732,10 +746,52 @@ Pengguna tidak bisa login tetapi data transaksinya tetap tersimpan.
 | pengeluaran.hapus | ✅ | — | — | — |
 | laporan.lihat | ✅ | ✅ | — | — |
 | laporan.ekspor | ✅ | ✅ | — | — |
+| pegawai.lihat | ✅ | ✅ | — | — |
+| pegawai.tambah | ✅ | — | — | — |
+| pegawai.edit | ✅ | — | — | — |
+| pegawai.hapus | ✅ | — | — | — |
+| absensi.lihat | ✅ | ✅ | — | — |
+| absensi.tambah | ✅ | ✅ | — | — |
+| absensi.rekap | ✅ | ✅ | — | — |
 | user.lihat | ✅ | — | — | — |
 | user.tambah | ✅ | — | — | — |
 | user.edit | ✅ | — | — | — |
 | user.hapus | ✅ | — | — | — |
+| hakakses.lihat | ✅ | — | — | — |
+| hakakses.edit | ✅ | — | — | — |
+| pengaturan.lihat | ✅ | — | — | — |
+| pengaturan.edit | ✅ | — | — | — |
+| activity-log.lihat | ✅ | ✅ | — | — |
+| activity-log.hapus | ✅ | — | — | — |
+
+### 11. Riwayat Aktivitas (Audit Trail)
+
+**Admin → Riwayat Aktivitas** *(Admin & Manajer)*
+
+Semua perubahan data dicatat otomatis: tambah, edit, dan hapus pada seluruh modul (Produk, Penjualan, Pembelian, Pelanggan, Supplier, Karyawan, Pengeluaran, Absensi, Harga, Pengaturan, Pengguna).
+
+Setiap entri log mencatat:
+- **Waktu** — tanggal dan jam persis perubahan terjadi
+- **Pengguna** — nama lengkap yang melakukan aksi
+- **Aksi** — Tambah / Edit / Hapus
+- **Modul** — modul mana yang diubah
+- **ID Data** — ID record yang terdampak
+- **Perubahan** — nilai sebelum dan sesudah (khusus Edit)
+
+#### Filter Log
+Gunakan filter di bagian atas untuk mempersempit pencarian:
+- Nama pengguna (pencarian sebagian)
+- Modul (Produk, Penjualan, dll)
+- Aksi (Tambah / Edit / Hapus)
+- Rentang tanggal (Dari — Sampai)
+
+#### Hapus Log *(khusus Admin)*
+- **Hapus per baris** — klik ikon sampah di baris log yang ingin dihapus
+- **Hapus semua (filter aktif)** — tombol di atas tabel, menghapus semua log sesuai filter yang sedang aktif; berguna untuk membersihkan log lama per periode atau per modul tertentu
+
+> **Perhatian:** Penghapusan log tidak bisa dibatalkan. Gunakan dengan hati-hati.
+
+---
 
 ### Menambah Role / Permission Kustom
 
@@ -814,7 +870,14 @@ Setiap pergerakan stok tercatat otomatis:
 /expenses          → Pengeluaran operasional
 /laporan           → Laporan keuangan per periode
 /laporan/shift     → Laporan per kasir harian
+/employees         → Data karyawan
+/absensi           → Absensi mandiri (publik, tanpa login)
+/absensi/harian    → Input absensi harian (admin)
+/absensi/rekap     → Rekap bulanan per karyawan
 /users             → Manajemen pengguna & role
+/hak-akses         → Kelola role & permission
+/pengaturan        → Pengaturan nama toko, alamat, struk
+/activity-log      → Riwayat semua aktivitas (audit trail)
 ```
 
 ---
@@ -838,5 +901,6 @@ Setiap pergerakan stok tercatat otomatis:
 |---|---|
 | Piutang pelanggan (jual kredit) | Belum ada |
 | Ekspor laporan ke Excel/PDF | Belum ada |
-| Pengaturan toko (nama, alamat, logo di struk) | Belum ada |
+| Pengaturan toko (nama, alamat, catatan struk) | ✅ Tersedia |
+| Audit trail / riwayat aktivitas | ✅ Tersedia |
 | Multi-cabang / multi-gudang | Belum ada |
