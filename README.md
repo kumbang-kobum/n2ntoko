@@ -44,217 +44,187 @@ Pilih metode sesuai lingkungan Anda:
 
 **Rekomendasi:** Ubuntu 22.04 LTS, minimal 1 CPU, 1 GB RAM, 20 GB disk.
 
-### Langkah 1 — Install aaPanel di VPS
+### 1️⃣ Persiapan Awal di aaPanel
 
-SSH ke VPS lalu jalankan:
+1. Masuk ke menu **App Store** (Software Store), pastikan Anda sudah menginstall:
+   - ✅ **Nginx** (versi terbaru)
+   - ✅ **MySQL 8.0**
+   - ✅ **PHP 8.2**
+2. Buka menu **App Store** > **PHP 8.2** > **Settings**:
+   - **Install Extension:** Pastikan `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, dan `ctype` terinstall.
+   - **Disabled functions (SANGAT PENTING):** Hapus fungsi-fungsi berikut agar proses instalasi dan build tidak error: `putenv`, `pcntl_signal`, `pcntl_alarm`, `proc_open`, `proc_get_status`.
+   - Buka tab **Service** lalu klik **Restart**.
 
-```bash
-wget -O install.sh http://www.aapanel.com/script/install_6.0_en.sh
-sudo bash install.sh
-```
+### 2️⃣ Buat Database & Website
 
-Setelah selesai, catat URL, username, dan password aaPanel yang muncul di terminal.
-Buka URL tersebut di browser dan login.
+1. Buka menu **Database** > **MySQL** > **Add Database**:
+   - Database Name: `n2ntoko`
+   - Username: `n2ntoko_user` (atau sesuai keinginan)
+   - Password: buat password yang kuat dan catat.
+2. Buka menu **Website** > **Add Site**:
+   - **Domain:** Isi dengan IP VPS atau Domain Anda (misal: `192.168.100.5` atau `toko.domainanda.com`).
+   - **PHP Version:** Pilih **8.2**.
+   - Klik **Submit**.
 
-### Langkah 2 — Install Software via aaPanel
+### 3️⃣ Deploy Aplikasi via Terminal aaPanel
 
-Masuk ke menu **App Store** (atau Software Store), install:
-- ✅ **Nginx** (versi terbaru)
-- ✅ **MySQL 8.0**
-- ✅ **PHP 8.2** — setelah install, klik **Settings → Install Extension**, tambahkan:
-  `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`
-
-> **PENTING (Langkah Wajib):** 
-> Secara default aaPanel mematikan fungsi yang dibutuhkan Laravel. Klik **Settings PHP 8.2 → Disabled functions**, lalu **HAPUS** fungsi-fungsi berikut dari daftar:
-> `putenv`, `pcntl_signal`, `pcntl_alarm`, `proc_open`, `proc_get_status`.
-> Setelah itu, klik tab **Service** dan klik **Restart**.
-
-### Langkah 3 — Buat Database
-
-**Database → MySQL → Add Database:**
-- Database Name: `n2ntoko`
-- Username: `n2ntoko_user`
-- Password: buat password kuat, catat
-- Klik **Submit**
-
-### Langkah 4 — Buat Website
-
-**Website → Add Site:**
-- Domain: isi domain atau IP VPS (misal: `toko.namadomain.com`)
-- Root Directory: biarkan default dulu (misal: `/www/wwwroot/toko.namadomain.com`)
-- PHP Version: **8.2**
-- Klik **Submit**
-
-### Langkah 5 — Deploy Aplikasi
-
-Buka **Terminal** di aaPanel (atau SSH), lalu:
+Buka **Terminal** di aaPanel (pastikan Anda login sebagai `root`), lalu jalankan perintah berikut secara berurutan. Salin-tempel (copy-paste) per blok:
 
 ```bash
-# Masuk ke direktori website
-cd /www/wwwroot/toko.namadomain.com
+# 1. Masuk ke direktori website (Ganti 192.168.100.5 dengan Domain/IP website Anda)
+cd /www/wwwroot/192.168.100.5
 
-# Hapus file default
-rm -rf *
-# Clone repositori (PENTING: tambahkan titik di akhir agar clone ke folder aktif)
-# Jika folder tidak kosong, hapus dulu: rm index.html 404.html .htaccess
-git clone https://github.com/USERNAME/n2ntoko.git .
+# 2. Hapus file default bawaan aaPanel (WAJIB)
+rm -rf index.html 404.html .htaccess
 
-# Jika muncul error "Permission Denied" saat clone, pastikan SSH Key sudah terpasang
-# atau gunakan HTTPS jika repo publik.
+# 3. Clone repositori (PENTING: Pastikan ada spasi dan TITIK (.) di akhir perintah!)
+git clone https://github.com/chandrair/n2ntoko.git .
 
-# Install Composer (jika belum ada secara global)
+# 4. Install Composer (jika server belum memilikinya)
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
-# Install dependensi PHP (Gunakan PHP 8.2 secara eksplisit jika perlu)
-# /www/server/php/82/bin/php /usr/local/bin/composer install --no-dev --optimize-autoloader
+# 5. Install dependensi PHP
 composer install --no-dev --optimize-autoloader
-```
 
-> **Tips:** Jika muncul pesan `Composer could not find a composer.json`, pastikan Anda sudah menjalankan `git clone` di atas dan berada di folder yang tepat. Gunakan `ls -la` untuk memastikan file `composer.json` terlihat di daftar.
-
-### Langkah 5.5 — Install Node.js & NPM
-
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Install dependensi JS & build
-npm install
-npm run build
-
-# Salin dan edit .env
+# 6. Salin file environment
 cp .env.example .env
 ```
 
-Edit `.env` via aaPanel File Manager atau `nano .env`:
+### 4️⃣ Konfigurasi .env & Build Aset
+
+1. Kembali ke **aaPanel File Manager**, buka folder website Anda (`/www/wwwroot/192.168.100.5`).
+2. Cari file `.env` (pastikan pengaturan "Show hidden files" aktif), edit dan sesuaikan bagian ini:
 
 ```env
 APP_NAME="N2N Toko"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://toko.namadomain.com
-APP_TIMEZONE=Asia/Jakarta
+APP_URL=http://192.168.100.5
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=n2ntoko
 DB_USERNAME=n2ntoko_user
-DB_PASSWORD=password_database_anda
+DB_PASSWORD=password_database_yang_dibuat_tadi
 
-ADMIN_EMAIL=admin@namadomain.com
-ADMIN_PASSWORD=PasswordKuatAnda123!
+ADMIN_EMAIL=admin@toko.com
+ADMIN_PASSWORD=PasswordKuat123!
 ```
+3. Simpan file `.env`.
+4. Kembali ke **Terminal**, jalankan sisa perintah berikut:
 
 ```bash
-# Generate app key
+# 1. Install Node.js v20 (jika belum ada)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# 2. Install dependensi Node & Build aset Tailwind/Vite
+npm install
+npm run build
+
+# 3. Setup Laravel (Key, Storage, Database, Seed)
 php artisan key:generate
-
-# Link storage
 php artisan storage:link
-
-# Migrasi & seeder
 php artisan migrate --seed
 
-# Set permission folder
-# Di aaPanel, user default adalah 'www'
-chown -R www:www /www/wwwroot/toko.namadomain.com
-chmod -R 755 /www/wwwroot/toko.namadomain.com
-chmod -R 775 storage bootstrap/cache
-
-# Optimize untuk production
+# 4. Optimasi Cache Laravel
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+# 5. Perbaiki Izin Folder (SANGAT PENTING agar web tidak error 500/Permission Denied)
+chown -R www:www /www/wwwroot/192.168.100.5
+chmod -R 775 storage bootstrap/cache
+```
+*(Ingat: Ubah `/www/wwwroot/192.168.100.5` dengan direktori asli Anda jika menggunakan domain)*
+
+### 5️⃣ Konfigurasi Website Akhir (GUI aaPanel)
+
+Kembali ke menu **Website** di aaPanel, klik pada nama Domain/IP Anda:
+1. **Site directory:**
+   - Site directory: `/www/wwwroot/192.168.100.5`
+   - Running directory: Pilih `/public`
+   - Klik **Save**.
+2. **URL rewrite:**
+   - Pilih template **laravel** dari dropdown.
+   - Klik **Save**.
+3. Buka browser dan akses alamat web Anda (misal: `http://192.168.100.5`). Login dengan email dan password yang Anda isi di file `.env`.
+
+---
+
+## 🏗️ Setup Multi-Instance (Dua Aplikasi dalam Satu Server)
+
+Jika Anda ingin menginstall dua aplikasi (misal: satu untuk **Retail** dan satu untuk **Grosir**) dengan database yang berbeda di satu server aaPanel, ikuti panduan ini:
+
+### 1. Buat Dua Database Berbeda
+Di menu **Database**, buat dua database:
+- `db_retail` (User: `user_retail`)
+- `db_grosir` (User: `user_grosir`)
+
+### 2. Buat Dua Website Berbeda
+Di menu **Website** > **Add Site**, buat dua entri:
+
+| No | Domain / Hostname | Root Directory |
+|---|---|---|
+| **1** | `retail.n2n.com` (atau `192.168.100.5:81`) | `/www/wwwroot/retail.n2n.com` |
+| **2** | `grosir.n2n.com` (atau `192.168.100.5:82`) | `/www/wwwroot/grosir.n2n.com` |
+
+> **Tips Jika Menggunakan IP (Lokal):** Jika Anda tidak menggunakan domain, Anda bisa menggunakan nomor port yang berbeda (misal `:81` dan `:82`) saat menambahkan site di aaPanel.
+
+### 3. Deploy ke Masing-Masing Folder
+Anda harus menjalankan proses **Langkah 3 & 4** pada bagian Instalasi di atas untuk **setiap folder**.
+
+**Terminal untuk Retail:**
+```bash
+cd /www/wwwroot/retail.n2n.com
+# ... jalankan git clone . , composer install, npm install, dll ...
 ```
 
-### Langkah 6 — Konfigurasi Nginx di aaPanel
-
-**Website → toko.namadomain.com → Config → Nginx Config:**
-
-Ganti isi config dengan:
-
-```nginx
-server {
-    listen 80;
-    server_name toko.namadomain.com;
-    root /www/wwwroot/toko.namadomain.com/public;
-
-    index index.php index.html;
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        # Pastikan versi PHP sesuai (8.2 -> php-cgi-82.sock)
-        fastcgi_pass unix:/tmp/php-cgi-82.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-}
+**Terminal untuk Grosir:**
+```bash
+cd /www/wwwroot/grosir.n2n.com
+# ... jalankan git clone . , composer install, npm install, dll ...
 ```
 
-Klik **Save**, lalu **Reload Nginx**.
+### 4. Konfigurasi .env yang Berbeda
+PENTING: Edit file `.env` di masing-masing folder melalui File Manager:
+- Di folder **retail**, hubungkan ke `DB_DATABASE=db_retail`
+- Di folder **grosir**, hubungkan ke `DB_DATABASE=db_grosir`
 
-### Langkah 7 — SSL (HTTPS) — Opsional tapi Dianjurkan
-
-**Website → toko.namadomain.com → SSL → Let's Encrypt:**
-- Centang domain → klik **Apply**
-- Aktifkan **Force HTTPS**
-
-### Langkah 8 — Setup Cron Job (Laravel Schedule)
-
-Agar fitur otomatis (jika ada) berjalan lancar, tambahkan Cron Job di aaPanel:
-1. Menu **Cron** di sidebar aaPanel.
-2. Type of Task: **Shell Script**.
-3. Name of Task: `Laravel Schedule (n2ntoko)`.
-4. Execution cycle: **N Minute** (1 Minute).
-5. Script content:
-   ```bash
-   php /www/wwwroot/toko.namadomain.com/artisan schedule:run >> /dev/null 2>&1
-   ```
-6. Klik **Add Task**.
-
-### ✅ Selesai
-
-Buka browser: `https://toko.namadomain.com`
-Login dengan email dan password dari `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+### 5. Cron Job Terpisah
+Tambahkan dua Cron Job di menu **Cron** aaPanel:
+- Task 1: `php /www/wwwroot/retail.n2n.com/artisan schedule:run >> /dev/null 2>&1`
+- Task 2: `php /www/wwwroot/grosir.n2n.com/artisan schedule:run >> /dev/null 2>&1`
 
 ---
 
 ## ♻️ Update Aplikasi (aaPanel)
 
-Jika ada update terbaru di GitHub, jalankan perintah ini di **Terminal** aaPanel:
+Untuk memastikan pembaruan aplikasi berjalan lancar, aman, dan struktur folder tidak rusak, jalankan script ini di **Terminal aaPanel**.
+
+*(Ganti `192.168.100.5` dengan direktori website Anda yang sebenarnya)*
 
 ```bash
-cd /www/wwwroot/toko.namadomain.com
+# 1. Masuk ke direktori web
+cd /www/wwwroot/192.168.100.5
 
-# 1. Ambil update terbaru
-git pull origin main
+# 2. Tarik kode terbaru dari GitHub (Paksa timpa jika ada perubahan lokal)
+git fetch origin
+git reset --hard origin/main
 
-# 2. Update dependensi
+# 3. Update dependensi PHP & JS
 composer install --no-dev --optimize-autoloader
 npm install && npm run build
 
-# 3. Update Database & Cache
+# 4. Migrasi Database & Bersihkan Cache
 php artisan migrate --force
 php artisan db:seed --class=RolePermissionSeeder --force
-php artisan storage:link # jika belum
+php artisan optimize:clear
 php artisan optimize
 
-# 4. Reset Permission (jika terjadi error file)
+# 5. Fix Permission Ulang (Menghindari file hasil pull tidak bisa dibaca Nginx)
 chown -R www:www .
 chmod -R 775 storage bootstrap/cache
 ```
