@@ -81,36 +81,43 @@ Buka menu **Website** > **Add Site**:
 
 ### 🚀 Langkah 3: Script Instalasi via Terminal
 
-Buka **Terminal** di aaPanel. Jalankan perintah di bawah ini **per website**. Ganti bagian `FOLDER_NAME` sesuai folder website Anda.
+Buka **Terminal** di aaPanel (pastikan login sebagai `root`). Jalankan perintah ini **per website**.
 
-#### 🏁 Jalankan untuk RETAIL:
+#### 🏁 Eksekusi untuk RETAIL:
 ```bash
-# 1. Masuk ke folder retail
 cd /www/wwwroot/retail.n2n.com
 
-# 2. Bersihkan file default & Clone kode
+# 1. Bersihkan folder & Clone (PENTING: Gunakan TITIK di akhir!)
 rm -rf index.html 404.html .htaccess
 git clone https://github.com/chandrair/n2ntoko.git .
 
-# 3. Pastikan Node.js minimal v20 (SANGAT PENTING)
-# Cek versi: node -v. Jika masih v12/v14, jalankan:
-# npm install -g n && n 20 && hash -r
+# 2. Update Node.js ke v20 (Wajib agar build sukses)
+npm install -g n && n 20 && hash -r
 
-# 4. Setup Composer & Dependensi
-curl -sS https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
+# 3. Install Dependensi & Build
 composer install --no-dev --optimize-autoloader
-
-# 5. Setup Node.js & Build Aset
 npm install && npm run build
-
-# 6. Setup Environment
 cp .env.example .env
+
+# --- STOP: Edit file .env via File Manager aaPanel sekarang ---
+# Isikan Database, APP_URL, SESSION_COOKIE, dll. (Lihat Langkah 4)
+# --------------------------------------------------------------
+
+# 4. Finalisasi Laravel
+php artisan key:generate
+php artisan storage:link
+php artisan migrate --seed --force
+php artisan optimize
+
+# 5. Fix Permission (Anti Error 500)
+chattr -i .user.ini public/.user.ini
+chown -R www:www .
+chmod -R 775 storage bootstrap/cache
+chattr +i .user.ini public/.user.ini
 ```
 
-#### 🏁 Jalankan untuk GROSIR:
-Ulangi perintah di atas, hanya baris pertama yang diganti:
-`cd /www/wwwroot/grosir.n2n.com` ... (lanjutkan langkah 2-5).
+#### 🏁 Eksekusi untuk GROSIR:
+Ulangi langkah di atas pada folder `/www/wwwroot/grosir.n2n.com`.
 
 ---
 
