@@ -89,7 +89,7 @@ cd /www/wwwroot/retail.n2n.com
 
 # 1. Bersihkan folder & Clone (PENTING: Gunakan TITIK di akhir!)
 rm -rf index.html 404.html .htaccess
-git clone https://github.com/chandrair/n2ntoko.git .
+git clone https://github.com/kumbang-kobum/n2ntoko.git .
 
 # 2. Update Node.js ke v20 (Wajib agar build sukses)
 npm install -g n && n 20 && hash -r
