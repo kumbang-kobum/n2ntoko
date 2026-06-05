@@ -114,7 +114,7 @@ php artisan optimize
 [ -f .user.ini ] && chattr -i .user.ini; [ -f public/.user.ini ] && chattr -i public/.user.ini
 chown -R www:www .
 chmod -R 775 storage bootstrap/cache
-chattr +i .user.ini public/.user.ini
+[ -f .user.ini ] && chattr +i .user.ini; [ -f public/.user.ini ] && chattr +i public/.user.ini
 ```
 
 #### 🏁 Eksekusi untuk GROSIR:
