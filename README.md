@@ -64,6 +64,11 @@ Masuk ke menu **App Store** (atau Software Store), install:
 - ✅ **PHP 8.2** — setelah install, klik **Settings → Install Extension**, tambahkan:
   `fileinfo`, `bcmath`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`
 
+> **PENTING (Langkah Wajib):** 
+> Secara default aaPanel mematikan fungsi yang dibutuhkan Laravel. Klik **Settings PHP 8.2 → Disabled functions**, lalu **HAPUS** fungsi-fungsi berikut dari daftar:
+> `putenv`, `pcntl_signal`, `pcntl_alarm`, `proc_open`, `proc_get_status`.
+> Setelah itu, klik tab **Service** dan klik **Restart**.
+
 ### Langkah 3 — Buat Database
 
 **Database → MySQL → Add Database:**
@@ -90,19 +95,26 @@ cd /www/wwwroot/toko.namadomain.com
 
 # Hapus file default
 rm -rf *
-
-# Clone repositori
+# Clone repositori (PENTING: tambahkan titik di akhir agar clone ke folder aktif)
+# Jika folder tidak kosong, hapus dulu: rm index.html 404.html .htaccess
 git clone https://github.com/USERNAME/n2ntoko.git .
-# Atau upload file zip → Extract di sini via File Manager aaPanel
 
-# Install Composer (jika belum ada)
+# Jika muncul error "Permission Denied" saat clone, pastikan SSH Key sudah terpasang
+# atau gunakan HTTPS jika repo publik.
+
+# Install Composer (jika belum ada secara global)
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
-# Install dependensi PHP
+# Install dependensi PHP (Gunakan PHP 8.2 secara eksplisit jika perlu)
+# /www/server/php/82/bin/php /usr/local/bin/composer install --no-dev --optimize-autoloader
 composer install --no-dev --optimize-autoloader
+```
 
-# Install Node.js & NPM (jika belum ada)
+> **Tips:** Jika muncul pesan `Composer could not find a composer.json`, pastikan Anda sudah menjalankan `git clone` di atas dan berada di folder yang tepat. Gunakan `ls -la` untuk memastikan file `composer.json` terlihat di daftar.
+
+### Langkah 5.5 — Install Node.js & NPM
+
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
