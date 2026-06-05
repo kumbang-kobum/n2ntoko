@@ -88,6 +88,7 @@ Buka **Terminal** di aaPanel (pastikan login sebagai `root`). Jalankan perintah 
 cd /www/wwwroot/retail.n2n.com
 
 # 1. Bersihkan folder & Clone (PENTING: Gunakan TITIK di akhir!)
+[ -f .user.ini ] && chattr -i .user.ini; [ -f public/.user.ini ] && chattr -i public/.user.ini
 rm -rf index.html 404.html .htaccess
 git clone https://github.com/kumbang-kobum/n2ntoko.git .
 
@@ -110,7 +111,7 @@ php artisan migrate --seed --force
 php artisan optimize
 
 # 5. Fix Permission (Anti Error 500)
-chattr -i .user.ini public/.user.ini
+[ -f .user.ini ] && chattr -i .user.ini; [ -f public/.user.ini ] && chattr -i public/.user.ini
 chown -R www:www .
 chmod -R 775 storage bootstrap/cache
 chattr +i .user.ini public/.user.ini
@@ -162,9 +163,9 @@ php artisan key:generate
 php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize
-chattr -i public/.user.ini
+[ -f public/.user.ini ] && chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
-chattr +i public/.user.ini
+[ -f public/.user.ini ] && chattr +i public/.user.ini
 
 # --- Eksekusi di folder GROSIR ---
 cd /www/wwwroot/grosir.n2n.com
@@ -172,9 +173,9 @@ php artisan key:generate
 php artisan storage:link
 php artisan migrate --seed --force
 php artisan optimize
-chattr -i public/.user.ini
+[ -f public/.user.ini ] && chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
-chattr +i public/.user.ini
+[ -f public/.user.ini ] && chattr +i public/.user.ini
 ```
 
 ---
@@ -201,9 +202,9 @@ npm install && npm run build
 php artisan migrate --force
 php artisan db:seed --class=RolePermissionSeeder --force
 php artisan optimize
-chattr -i public/.user.ini
+[ -f public/.user.ini ] && chattr -i public/.user.ini
 chown -R www:www . && chmod -R 775 storage bootstrap/cache
-chattr +i public/.user.ini
+[ -f public/.user.ini ] && chattr +i public/.user.ini
 ```
 
 **Update GROSIR:**
