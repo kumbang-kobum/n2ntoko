@@ -138,12 +138,16 @@ ADMIN_PASSWORD=PasswordKuatAnda123!
 # Generate app key
 php artisan key:generate
 
+# Link storage
+php artisan storage:link
+
 # Migrasi & seeder
 php artisan migrate --seed
 
 # Set permission folder
-chmod -R 755 /www/wwwroot/toko.namadomain.com
+# Di aaPanel, user default adalah 'www'
 chown -R www:www /www/wwwroot/toko.namadomain.com
+chmod -R 755 /www/wwwroot/toko.namadomain.com
 chmod -R 775 storage bootstrap/cache
 
 # Optimize untuk production
@@ -177,6 +181,7 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
+        # Pastikan versi PHP sesuai (8.2 -> php-cgi-82.sock)
         fastcgi_pass unix:/tmp/php-cgi-82.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
@@ -197,10 +202,50 @@ Klik **Save**, lalu **Reload Nginx**.
 - Centang domain → klik **Apply**
 - Aktifkan **Force HTTPS**
 
+### Langkah 8 — Setup Cron Job (Laravel Schedule)
+
+Agar fitur otomatis (jika ada) berjalan lancar, tambahkan Cron Job di aaPanel:
+1. Menu **Cron** di sidebar aaPanel.
+2. Type of Task: **Shell Script**.
+3. Name of Task: `Laravel Schedule (n2ntoko)`.
+4. Execution cycle: **N Minute** (1 Minute).
+5. Script content:
+   ```bash
+   php /www/wwwroot/toko.namadomain.com/artisan schedule:run >> /dev/null 2>&1
+   ```
+6. Klik **Add Task**.
+
 ### ✅ Selesai
 
 Buka browser: `https://toko.namadomain.com`
 Login dengan email dan password dari `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+
+---
+
+## ♻️ Update Aplikasi (aaPanel)
+
+Jika ada update terbaru di GitHub, jalankan perintah ini di **Terminal** aaPanel:
+
+```bash
+cd /www/wwwroot/toko.namadomain.com
+
+# 1. Ambil update terbaru
+git pull origin main
+
+# 2. Update dependensi
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+
+# 3. Update Database & Cache
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+php artisan storage:link # jika belum
+php artisan optimize
+
+# 4. Reset Permission (jika terjadi error file)
+chown -R www:www .
+chmod -R 775 storage bootstrap/cache
+```
 
 ---
 
@@ -418,37 +463,6 @@ server {
     }
 }
 ```
-
----
-
-## ♻️ Update Aplikasi (Semua Platform)
-
-Ketika ada update dari repositori:
-
-```bash
-# Tarik perubahan terbaru
-git pull origin main
-
-# Update dependensi PHP
-composer install --no-dev --optimize-autoloader
-
-# Update dependensi JS & build ulang aset
-npm install && npm run build
-
-# Jalankan migrasi baru (jika ada)
-php artisan migrate
-
-# Jalankan seeder permission (wajib jika ada fitur/permission baru)
-php artisan db:seed --class=RolePermissionSeeder
-
-# Refresh cache (production)
-php artisan optimize
-php artisan permission:cache-reset
-```
-
-> **Kapan perlu jalankan seeder?**
-> Jalankan `db:seed --class=RolePermissionSeeder` setiap kali ada update yang menambahkan fitur baru dengan permission baru.
-> Aman dijalankan berulang kali — tidak akan membuat duplikat data.
 
 ---
 
