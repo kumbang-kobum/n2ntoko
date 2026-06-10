@@ -212,6 +212,54 @@ Ganti baris pertama menjadi `cd /www/wwwroot/grosir.n2n.com` lalu jalankan perin
 
 ---
 
+## 🪟 Update Aplikasi via XAMPP (Windows)
+
+Buka **Command Prompt** atau **Git Bash** di folder `n2ntoko`:
+
+```bash
+cd C:\xampp\htdocs\n2ntoko
+
+# 1. Ambil update terbaru dari GitHub
+git fetch origin && git reset --hard origin/main
+
+# 2. Update dependensi & build ulang aset
+composer install
+npm install && npm run build
+
+# 3. Jalankan migrasi & seeder permission
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+
+# 4. Bersihkan cache
+php artisan optimize
+```
+
+---
+
+## 🐧 Update Aplikasi via Git + CLI (Linux/Mac)
+
+```bash
+cd /path/ke/n2ntoko
+
+# 1. Ambil update terbaru dari GitHub
+git fetch origin && git reset --hard origin/main
+
+# 2. Update dependensi & build ulang aset
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+
+# 3. Jalankan migrasi & seeder permission
+php artisan migrate --force
+php artisan db:seed --class=RolePermissionSeeder --force
+
+# 4. Bersihkan cache & fix permission
+php artisan optimize
+chmod -R 775 storage bootstrap/cache
+sudo chown -R www-data:www-data .   # sesuaikan user Nginx/Apache
+```
+
+---
+
 ## 🪟 Instalasi via XAMPP (Windows) — Lokal
 
 
