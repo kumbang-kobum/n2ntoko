@@ -216,6 +216,7 @@
                         <label class="block text-xs text-gray-400 mb-1">Barcode</label>
                         <input type="text" :name="`units[${index}][barcode]`" x-model="unit.barcode"
                                placeholder="Scan / ketik barcode"
+                               @keydown.enter.prevent
                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono
                                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                     </div>
