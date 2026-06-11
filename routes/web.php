@@ -111,8 +111,9 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan',       [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('laporan/shift', [LaporanController::class, 'shift'])->name('laporan.shift');
 
-    Route::get('stok-opname',  [StokOpnameController::class, 'index'])->name('stok-opname.index');
-    Route::post('stok-opname', [StokOpnameController::class, 'store'])->name('stok-opname.store');
+    Route::get('stok-opname',        [StokOpnameController::class, 'index'])->name('stok-opname.index');
+    Route::get('stok-opname/cetak',  [StokOpnameController::class, 'cetak'])->name('stok-opname.cetak');
+    Route::post('stok-opname',       [StokOpnameController::class, 'store'])->name('stok-opname.store');
 
     Route::get('activity-log',                        [ActivityLogController::class, 'index'])->name('activity-log.index');
     Route::delete('activity-log/clear',               [ActivityLogController::class, 'destroyAll'])->name('activity-log.destroyAll');

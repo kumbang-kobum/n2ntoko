@@ -28,6 +28,18 @@ class StokOpnameController extends Controller implements HasMiddleware
         return view('stok_opname.index', compact('products'));
     }
 
+    public function cetak()
+    {
+        $products = Product::with('baseUnit', 'category')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $settings = DB::table('settings')->pluck('value', 'key');
+
+        return view('stok_opname.cetak', compact('products', 'settings'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
