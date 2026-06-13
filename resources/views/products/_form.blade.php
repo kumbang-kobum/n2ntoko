@@ -196,11 +196,13 @@
                         <label class="block text-xs text-gray-400 mb-1">Konversi ke Dasar *</label>
                         <div class="relative">
                             <input type="number" :name="`units[${index}][conversion]`" x-model="unit.conversion"
+                                   :readonly="baseUnitIndex === index"
                                    step="0.0001" min="0.0001" placeholder="1"
                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-                                          focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                          focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                   :class="baseUnitIndex === index ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'">
                             <span x-show="baseUnitIndex === index"
-                                  class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-semibold">
+                                  class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-bold bg-blue-50 px-1 rounded">
                                 DASAR
                             </span>
                         </div>
@@ -341,7 +343,10 @@ function productForm(initialUnits, initialBaseIndex) {
             else if (this.baseUnitIndex > index) this.baseUnitIndex--;
         },
 
-        setBase(index) { this.baseUnitIndex = index; },
+        setBase(index) {
+            this.baseUnitIndex = index;
+            this.units[index].conversion = 1;
+        },
 
         onUnitSelect(index) {
             const unit = this.units[index];
