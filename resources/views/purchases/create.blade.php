@@ -185,8 +185,7 @@
                                             <input type="number" :name="'items['+idx+'][buy_price]'"
                                                    x-model="item.buy_price"
                                                    @input="calcSubtotal(idx)"
-                                                   min="0" step="100"
-                                                   class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm
+                                                   min="0" step="1"                                                   class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm
                                                           text-right focus:ring-2 focus:ring-blue-500">
                                         </td>
                                         {{-- Subtotal --}}

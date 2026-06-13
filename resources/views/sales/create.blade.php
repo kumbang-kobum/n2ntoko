@@ -139,10 +139,9 @@
                                                 <td class="px-2 py-2.5">
                                                     <input type="number" :name="'items['+idx+'][sell_price]'"
                                                            x-model="item.sell_price" @input="calcItem(idx)"
-                                                           min="0" step="500"
+                                                           min="0" step="1"
                                                            :class="item.auto_grosir ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white'"
-                                                           class="w-full border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-blue-500">
-                                                    <div x-show="item.auto_grosir" class="text-center mt-0.5">
+                                                           class="w-full border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-blue-500">                                                    <div x-show="item.auto_grosir" class="text-center mt-0.5">
                                                         <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-medium">★ Grosir</span>
                                                     </div>
                                                     <div x-show="!item.auto_grosir && item.min_qty_grosir > 0" class="text-center mt-0.5">
@@ -320,11 +319,10 @@
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">Rp</span>
                                     <input type="number" x-model.number="paidAmount" @input="calcChange"
-                                           min="0" step="500" placeholder="0"
+                                           min="0" step="1" placeholder="0"
                                            class="w-full border-2 border-gray-300 rounded-xl pl-10 pr-4 py-3.5
                                                   text-xl font-bold text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                {{-- Quick amounts --}}
+                                </div>                                {{-- Quick amounts --}}
                                 <div class="grid grid-cols-3 gap-2">
                                     <template x-for="n in quickAmounts" :key="n">
                                         <button type="button" @click="paidAmount = n; calcChange()"

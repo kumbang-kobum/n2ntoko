@@ -55,7 +55,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1">Jumlah (Rp) <span class="text-red-500">*</span></label>
-                            <input type="number" name="amount" value="{{ old('amount') }}" min="1" step="500"
+                            <input type="number" name="amount" value="{{ old('amount') }}" min="1" step="1"
                                    placeholder="0"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                             @error('amount')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
@@ -184,7 +184,7 @@
                                             </div>
                                             <div>
                                                 <label class="text-xs font-medium text-gray-600">Jumlah</label>
-                                                <input type="number" name="amount" value="{{ $e->amount }}" min="1" step="500"
+                                                <input type="number" name="amount" value="{{ $e->amount }}" min="1" step="1"
                                                        class="w-full mt-1 border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500">
                                             </div>
                                             <div>

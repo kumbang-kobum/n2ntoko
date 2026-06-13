@@ -195,9 +195,8 @@
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Rp</span>
                                 <input type="number" name="bayar" value="{{ old('bayar', $purchase->hutang) }}"
-                                       min="1" max="{{ $purchase->hutang }}" step="500"
-                                       class="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">
-                            </div>
+                                       min="1" max="{{ $purchase->hutang }}" step="1"
+                                       class="w-full border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">                            </div>
                             @error('bayar')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <button type="submit" onclick="return confirm('Konfirmasi pembayaran ini?')"

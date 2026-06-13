@@ -243,7 +243,7 @@
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Rp</span>
                                 <input type="number" :name="`units[${index}][price_eceran]`"
-                                       x-model="unit.price_eceran" min="0" step="100" placeholder="0"
+                                       x-model="unit.price_eceran" min="0" step="1" placeholder="0"
                                        class="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-sm
                                               focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             </div>
@@ -255,7 +255,7 @@
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Rp</span>
                                 <input type="number" :name="`units[${index}][price_grosir]`"
-                                       x-model="unit.price_grosir" min="0" step="100" placeholder="0"
+                                       x-model="unit.price_grosir" min="0" step="1" placeholder="0"
                                        class="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-sm
                                               focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                             </div>
