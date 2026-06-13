@@ -24,7 +24,7 @@
                     <x-dropdown align="left" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md
-                                {{ request()->routeIs('products.*', 'categories.*', 'purchases.*', 'suppliers.*', 'stok-opname.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
+                                {{ request()->routeIs('products.*', 'categories.*', 'purchases.*', 'suppliers.*', 'stok-opname.*', 'kartu-stok.*') ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900' }}
                                 transition">
                                 Inventaris
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,6 +36,7 @@
                             @can('produk.lihat')
                             <x-dropdown-link :href="route('products.index')">Produk & Stok</x-dropdown-link>
                             <x-dropdown-link :href="route('categories.index')">Kategori</x-dropdown-link>
+                            <x-dropdown-link :href="route('kartu-stok.index')">Kartu Stok</x-dropdown-link>
                             @endcan
                             @can('produk.edit')
                             <x-dropdown-link :href="route('stok-opname.index')">Stok Opname</x-dropdown-link>
@@ -215,6 +216,7 @@
             @can('produk.lihat')
             <x-responsive-nav-link :href="route('products.index')">Produk & Stok</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('categories.index')">Kategori</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('kartu-stok.index')">Kartu Stok</x-responsive-nav-link>
             @endcan
             @can('produk.edit')
             <x-responsive-nav-link :href="route('stok-opname.index')">Stok Opname</x-responsive-nav-link>

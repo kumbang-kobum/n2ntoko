@@ -13,6 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\KartuStokController;
 use App\Http\Controllers\StokOpnameController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -110,6 +111,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('laporan',       [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('laporan/shift', [LaporanController::class, 'shift'])->name('laporan.shift');
+
+    Route::get('kartu-stok',                     [KartuStokController::class, 'index'])->name('kartu-stok.index');
+    Route::get('kartu-stok/cetak-kosong',        [KartuStokController::class, 'cetakKosong'])->name('kartu-stok.cetak-kosong');
+    Route::get('kartu-stok/{product}/cetak',     [KartuStokController::class, 'cetak'])->name('kartu-stok.cetak');
+    Route::get('kartu-stok/{product}',           [KartuStokController::class, 'show'])->name('kartu-stok.show');
 
     Route::get('stok-opname',        [StokOpnameController::class, 'index'])->name('stok-opname.index');
     Route::get('stok-opname/cetak',  [StokOpnameController::class, 'cetak'])->name('stok-opname.cetak');
