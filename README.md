@@ -61,7 +61,13 @@ Agar sistem berjalan optimal, ikuti urutan setup berikut:
 ### 1. Setup Awal
 *   **Kategori & Supplier:** Daftarkan kategori produk dan supplier langganan Anda.
 *   **Master Produk:** Masukkan data produk. 
-    *   **PENTING (Konsep Satuan):** Tentukan satu **Satuan Dasar** (unit terkecil, misal: Pcs). Satuan lain (misal: Dus) diisi dengan nilai **Konversi** terhadap satuan dasar (misal: 1 Dus = 14 Pcs, maka konversi Dus = 14).
+    *   **PENTING (Konsep Satuan):** Tentukan satu **Satuan Dasar** (unit terkecil, misal: **Pcs** atau **Kotak**). Stok di gudang selalu dihitung dalam unit ini.
+    *   **Logika Konversi:** Nilai konversi satuan lain harus dihitung **langsung ke satuan dasar**, bukan berjenjang.
+        *   *Contoh Kasus:* 1 Dus berisi 12 Slop, dan 1 Slop berisi 10 Kotak.
+        *   *Cara Input yang Benar:*
+            1.  **Kotak** $\rightarrow$ Jadikan **Satuan Dasar** (Konversi = 1).
+            2.  **Slop** $\rightarrow$ Isi Konversi = **10** (karena 1 Slop = 10 Kotak).
+            3.  **Dus** $\rightarrow$ Isi Konversi = **120** (karena 1 Dus = 12 Slop $\times$ 10 Kotak).
     *   **Harga Grosir:** Atur "Min Qty Grosir" agar harga otomatis berubah di kasir saat mencapai jumlah tersebut.
 
 ### 2. Manajemen Stok (Pembelian)
