@@ -45,7 +45,7 @@ class StokOpnameController extends Controller implements HasMiddleware
         $request->validate([
             'adjustments'              => 'required|array',
             'adjustments.*.product_id' => 'required|exists:products,id',
-            'adjustments.*.qty_fisik'  => 'required|numeric|min:0',
+            'adjustments.*.qty_fisik'  => 'nullable|numeric|min:0',
             'adjustments.*.notes'      => 'nullable|string|max:255',
         ]);
 
@@ -53,7 +53,14 @@ class StokOpnameController extends Controller implements HasMiddleware
 
         DB::transaction(function () use ($request, &$changed) {
             foreach ($request->input('adjustments') as $adj) {
-                $product  = Product::find($adj['product_id']);
+                // Skip if qty_fisik is not provided
+                if ($adj['qty_fisik'] === null || $adj['qty_fisik'] === '') {
+                    continue;
+                }
+
+                $product  = Product::lockForUpdate()->find($adj['product_id']);
+                if (!$product) continue;
+
                 $qtyFisik = (float) $adj['qty_fisik'];
                 $selisih  = $qtyFisik - (float) $product->stock_qty;
 

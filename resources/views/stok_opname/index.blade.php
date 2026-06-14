@@ -26,6 +26,16 @@
             </div>
             @endif
 
+            @if($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
                 <strong>Petunjuk:</strong>
                 Isi kolom <em>Stok Fisik</em> dengan jumlah aktual hasil hitung di gudang (dalam satuan dasar).
@@ -85,8 +95,8 @@
                                                name="adjustments[{{ $i }}][qty_fisik]"
                                                x-model="rows[{{ $i }}].qty_fisik"
                                                @input="calcSelisih({{ $i }}, {{ $product->stock_qty }})"
-                                               min="0" step="1"
-                                               placeholder="{{ number_format($product->stock_qty, 0) }}"
+                                               min="0" step="any"
+                                               placeholder="{{ number_format($product->stock_qty, 2, ',', '.') }}"
                                                class="w-28 text-center border rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:outline-none transition"
                                                :class="rows[{{ $i }}].changed
                                                    ? (rows[{{ $i }}].selisih > 0 ? 'border-green-400 focus:ring-green-300 bg-green-50' : 'border-red-400 focus:ring-red-300 bg-red-50')
