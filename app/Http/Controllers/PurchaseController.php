@@ -148,26 +148,35 @@ class PurchaseController extends Controller implements HasMiddleware
 
         $this->validatePurchase($request, $purchase->id);
 
-        $purchase = DB::transaction(function () use ($request, $purchase) {
-            $purchase->items()->delete();
+        try {
+            $purchase = DB::transaction(function () use ($request, $purchase) {
+                $purchase->items()->delete();
 
-            $purchase->update([
-                'supplier_id'   => $request->supplier_id ?: null,
-                'invoice_number'=> $request->invoice_number,
-                'purchase_date' => $request->purchase_date,
-                'notes'         => $request->notes,
-                'buyer_name'    => $request->buyer_name ?: null,
+                $purchase->update([
+                    'supplier_id'   => $request->supplier_id ?: null,
+                    'invoice_number'=> $request->invoice_number,
+                    'purchase_date' => $request->purchase_date,
+                    'notes'         => $request->notes,
+                    'buyer_name'    => $request->buyer_name ?: null,
+                ]);
+
+                $total = $this->saveItems($purchase, $request->items);
+                $purchase->update(['total_amount' => $total]);
+
+                if ($request->action === 'confirm') {
+                    $this->confirmPurchase($purchase);
+                }
+
+                return $purchase;
+            });
+        } catch (\Exception $e) {
+            \Log::error('Purchase update failed', [
+                'purchase_id' => $purchase->id,
+                'user_id'     => auth()->id(),
+                'error'       => $e->getMessage()
             ]);
-
-            $total = $this->saveItems($purchase, $request->items);
-            $purchase->update(['total_amount' => $total]);
-
-            if ($request->action === 'confirm') {
-                $this->confirmPurchase($purchase);
-            }
-
-            return $purchase;
-        });
+            return back()->withInput()->with('error', 'Pembelian gagal diperbarui. ' . $e->getMessage());
+        }
 
         $msg = $request->action === 'confirm'
             ? "Pembelian {$purchase->invoice_number} dikonfirmasi. Stok telah diperbarui."
@@ -322,7 +331,11 @@ class PurchaseController extends Controller implements HasMiddleware
         $total = 0;
 
         foreach ($items as $item) {
-            $unit     = \App\Models\ProductUnit::find($item['unit_id']);
+            $unit = \App\Models\ProductUnit::find($item['unit_id']);
+            if (!$unit) {
+                throw new \Exception("Satuan dengan ID {$item['unit_id']} tidak ditemukan.");
+            }
+
             $qtyBase  = (float) $item['qty'] * (float) $unit->conversion;
             $priceBase = (float) $item['buy_price'] / (float) $unit->conversion;
             $subtotal  = (float) $item['qty'] * (float) $item['buy_price'];

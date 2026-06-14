@@ -13,20 +13,21 @@
 
     <div class="py-6">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm mb-5">
+                {{ session('success') }}
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm mb-5">
+                {{ session('error') }}
+            </div>
+            @endif
+
             <form method="POST" action="{{ route('purchases.update', $purchase) }}"
-                  x-data="purchaseForm({{ json_encode($purchase->items->map(fn($i) => [
-                      'product_id'   => $i->product_id,
-                      'product_name' => $i->product->name,
-                      'unit_id'      => $i->unit_id,
-                      'units'        => $i->product->units->map(fn($u) => [
-                          'id'        => $u->id,
-                          'unit_name' => $u->unit_name,
-                          'is_base'   => $u->is_base,
-                      ]),
-                      'qty'          => (float) $i->qty,
-                      'buy_price'    => (float) $i->buy_price,
-                      'subtotal'     => (float) $i->subtotal,
-                  ])) }})"
+                  x-data="purchaseForm()"
                 @csrf
                 @method('PUT')
 
@@ -250,8 +251,29 @@
     </div>
 
 @push('scripts')
+@php
+    $initialItems = $purchase->items->map(function($i) {
+        return [
+            'product_id'   => $i->product_id,
+            'product_name' => $i->product->name,
+            'unit_id'      => $i->unit_id,
+            'units'        => $i->product->units->map(function($u) {
+                return [
+                    'id'        => $u->id,
+                    'unit_name' => $u->unit_name,
+                    'is_base'   => $u->is_base,
+                ];
+            }),
+            'qty'          => (float) $i->qty,
+            'buy_price'    => (float) $i->buy_price,
+            'subtotal'     => (float) $i->subtotal,
+        ];
+    });
+@endphp
 <script>
-function purchaseForm(initialItems) {
+window._initialItems = @json($initialItems);
+
+function purchaseForm() {
     return {
         barcodeInput: '',
         items: [],
@@ -262,6 +284,7 @@ function purchaseForm(initialItems) {
         },
 
         init() {
+            const initialItems = window._initialItems;
             if (initialItems && initialItems.length > 0) {
                 initialItems.forEach(i => {
                     this.items.push({
