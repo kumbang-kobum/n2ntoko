@@ -8,10 +8,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
-            color: #111;
-            background: #f0f0f0;
+            color: #000;
+            background: #fff;
         }
 
         .page {
@@ -24,15 +24,15 @@
 
         /* ── Header ── */
         .header { text-align: center; margin-bottom: 8px; }
-        .header .toko-nama { font-size: 14px; font-weight: bold; }
-        .header .toko-sub  { font-size: 10px; color: #555; margin-top: 2px; }
+        .header .toko-nama { font-size: 16px; font-weight: bold; }
+        .header .toko-sub  { font-size: 11px; margin-top: 2px; }
 
-        .divider-thick { border: none; border-top: 2px solid #111; margin: 7px 0 4px; }
-        .divider-thin  { border: none; border-top: 1px solid #bbb; margin: 3px 0 8px; }
+        .divider-thick { border: none; border-top: 2px solid #000; margin: 7px 0 4px; }
+        .divider-thin  { border: none; border-top: 1px solid #000; margin: 3px 0 8px; }
 
         .doc-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -44,111 +44,92 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3px 20px;
-            font-size: 10.5px;
+            font-size: 11px;
             margin-bottom: 10px;
             padding: 7px 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            background: #fafafa;
+            border: 1px solid #000;
         }
         .info-row { display: flex; gap: 4px; }
-        .info-label { color: #666; width: 90px; flex-shrink: 0; }
-        .info-value { font-weight: 600; }
+        .info-label { width: 90px; flex-shrink: 0; }
+        .info-value { font-weight: bold; }
 
         /* ── Tabel ── */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 11px;
         }
         thead th {
-            background: #1e3a5f;
-            color: #fff;
+            background: #fff;
+            color: #000;
             padding: 5px 5px;
             text-align: center;
-            font-size: 9.5px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-            border: 1px solid #1a3050;
+            border: 1px solid #000;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
         }
         thead th.left { text-align: left; }
 
-        tbody tr { border-bottom: 1px solid #ddd; }
-        tbody tr:nth-child(even) { background: #f9f9fb; }
-        tbody tr.saldo-row { background: #f0f4f8; font-style: italic; }
-        tfoot tr { background: #e8eef5; border-top: 2px solid #1e3a5f; }
+        tbody tr { border-bottom: 1px solid #000; }
+        tbody tr.saldo-row { font-style: italic; }
+        tfoot tr { border-top: 2px solid #000; }
 
         td {
             padding: 4px 5px;
             vertical-align: middle;
-            border-left: 1px solid #e0e0e0;
-            border-right: 1px solid #e0e0e0;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
         }
-        td:first-child { border-left: 1px solid #ccc; }
-        td:last-child  { border-right: 1px solid #ccc; }
+        td:first-child { border-left: 1px solid #000; }
+        td:last-child  { border-right: 1px solid #000; }
 
-        .td-no     { text-align: center; width: 24px; color: #888; font-size: 9px; }
+        .td-no     { text-align: center; width: 24px; font-size: 10px; }
         .td-tgl    { width: 56px; white-space: nowrap; }
         .td-ket    { }
-        .td-ket-sub { font-size: 9px; color: #888; }
+        .td-ket-sub { font-size: 10px; }
         .td-tipe   { text-align: center; width: 52px; }
-        .td-angka  { text-align: right; width: 52px; font-family: monospace; font-size: 10.5px; }
-        .td-saldo  { text-align: right; width: 58px; font-family: monospace; font-weight: bold; font-size: 10.5px; }
+        .td-angka  { text-align: right; width: 52px; font-weight: bold; }
+        .td-saldo  { text-align: right; width: 58px; font-weight: bold; }
         .td-cek    { text-align: center; width: 30px; }
 
         .cek-box {
             width: 14px;
             height: 14px;
-            border: 1.5px solid #555;
+            border: 1px solid #000;
             display: inline-block;
-            border-radius: 2px;
         }
 
         .badge {
             display: inline-block;
-            font-size: 8.5px;
+            font-size: 10px;
             font-weight: bold;
-            padding: 1px 5px;
-            border-radius: 8px;
         }
-        .badge-in  { background: #dcfce7; color: #166534; }
-        .badge-out { background: #fee2e2; color: #991b1b; }
-        .badge-adj-pos { background: #dbeafe; color: #1e40af; }
-        .badge-adj-neg { background: #ffedd5; color: #9a3412; }
-
-        .text-green { color: #166534; }
-        .text-red   { color: #991b1b; }
-        .text-muted { color: #bbb; }
 
         tfoot td {
             padding: 5px 5px;
             font-weight: bold;
-            font-size: 10.5px;
         }
-        .tfoot-label { text-align: right; color: #444; }
-        .tfoot-val   { text-align: right; font-family: monospace; font-size: 11px; }
+        .tfoot-label { text-align: right; }
+        .tfoot-val   { text-align: right; }
 
         /* ── Ringkasan ── */
         .summary {
             display: flex;
             gap: 8px;
             margin-top: 10px;
-            font-size: 10px;
+            font-size: 11px;
         }
         .summary-box {
             flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+            border: 1px solid #000;
             padding: 6px 8px;
             text-align: center;
         }
-        .summary-box .s-label { color: #666; margin-bottom: 2px; }
+        .summary-box .s-label { margin-bottom: 2px; }
         .summary-box .s-val   { font-size: 13px; font-weight: bold; }
-        .summary-box .s-unit  { color: #999; font-size: 9px; }
-        .summary-box.green { border-color: #86efac; background: #f0fdf4; }
-        .summary-box.red   { border-color: #fca5a5; background: #fff5f5; }
-        .summary-box.blue  { border-color: #93c5fd; background: #eff6ff; }
+        .summary-box .s-unit  { font-size: 10px; }
 
         /* ── Footer TTD ── */
         .footer-ttd {
@@ -157,16 +138,14 @@
             gap: 30px;
             margin-top: 16px;
         }
-        .ttd-box { text-align: center; width: 110px; font-size: 10px; }
-        .ttd-line { border-bottom: 1px solid #555; height: 36px; margin: 16px 4px 4px; }
-        .ttd-label { color: #555; }
+        .ttd-box { text-align: center; width: 110px; font-size: 11px; }
+        .ttd-line { border-bottom: 1px solid #000; height: 36px; margin: 16px 4px 4px; }
 
         .footer-note {
             margin-top: 10px;
             padding-top: 6px;
-            border-top: 1px solid #ddd;
-            font-size: 9px;
-            color: #999;
+            border-top: 1px solid #000;
+            font-size: 10px;
             text-align: center;
         }
 
@@ -182,13 +161,13 @@
         .btn {
             padding: 8px 16px;
             border-radius: 8px;
-            border: none;
+            border: 1px solid #000;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
         }
-        .btn-print { background: #1e3a5f; color: #fff; }
-        .btn-back  { background: #e5e7eb; color: #374151; text-decoration: none;
+        .btn-print { background: #000; color: #fff; }
+        .btn-back  { background: #fff; color: #000; text-decoration: none;
                      display: inline-flex; align-items: center; }
 
         @media print {

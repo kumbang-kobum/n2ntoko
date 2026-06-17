@@ -228,269 +228,258 @@
         </div>
     </div>
 
-    {{-- ═══ DATA UNTUK CETAK (hidden, dibaca JS) ═══ --}}
+    {{-- ═══ STRUK 80mm ═══ --}}
     @php $cfg = \App\Models\Setting::all(); @endphp
+    <div id="print-struk" style="display:none">
+        <div style="font-family:'Courier New',monospace; font-size:11px; width:72mm; margin:0 auto; line-height:1.45; color:#000;">
 
-    <script id="data-struk80" type="application/json">
-    {
-        "namatoko":  {{ json_encode($cfg['toko_nama'] ?? config('app.name')) }},
-        "tagline":   {{ json_encode($cfg['toko_tagline'] ?? '') }},
-        "alamat":    {{ json_encode($cfg['toko_alamat'] ?? '') }},
-        "kota":      {{ json_encode($cfg['toko_kota'] ?? '') }},
-        "telepon":   {{ json_encode($cfg['toko_telepon'] ?? '') }},
-        "notaheader":{{ json_encode($cfg['nota_header'] ?? '') }},
-        "footer":    {{ json_encode($cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!') }},
-        "invoice":   {{ json_encode($purchase->invoice_number) }},
-        "tanggal":   {{ json_encode($purchase->purchase_date->format('d/m/Y')) }},
-        "supplier":  {{ json_encode($purchase->supplier?->name ?? '-') }},
-        "status":    {{ json_encode($bl) }},
-        "dibuat":    {{ json_encode($purchase->user?->name ?? '-') }},
-        "total":     {{ json_encode('Rp '.number_format($purchase->total_amount, 0, ',', '.')) }},
-        "dibayar":   {{ json_encode($purchase->paid_amount > 0 ? 'Rp '.number_format($purchase->paid_amount, 0, ',', '.') : '') }},
-        "hutang":    {{ json_encode($purchase->hutang > 0 ? 'Rp '.number_format($purchase->hutang, 0, ',', '.') : '') }},
-        "catatan":   {{ json_encode($purchase->notes ?? '') }},
-        "pembeli":   {{ json_encode($purchase->buyer_name ?? '') }},
-        "dicetakoleh": {{ json_encode(auth()->user()->name) }},
-        "dicetakpada": {{ json_encode(now()->format('d/m/Y H:i')) }},
-        "items": [
+            <div style="text-align:center; margin-bottom:5px;">
+                <div style="font-size:14px; font-weight:bold; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
+                @if(!empty($cfg['toko_tagline']))<div style="font-size:9px;">{{ $cfg['toko_tagline'] }}</div>@endif
+                @if(!empty($cfg['nota_header']))<div style="font-size:9px;">{{ $cfg['nota_header'] }}</div>@endif
+                @if(!empty($cfg['toko_alamat']))<div style="font-size:9px;">{{ $cfg['toko_alamat'] }}{{ !empty($cfg['toko_kota']) ? ', '.$cfg['toko_kota'] : '' }}</div>@endif
+                @if(!empty($cfg['toko_telepon']))<div style="font-size:9px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+                <div style="font-size:10px; font-weight:bold;">NOTA PEMBELIAN</div>
+                <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+            </div>
+
+            <table style="width:100%; font-size:10px; border-collapse:collapse; margin-bottom:4px;">
+                <tr><td style="width:38%">No. Faktur</td><td style="width:4%">:</td><td><b>{{ $purchase->invoice_number }}</b></td></tr>
+                <tr><td>Tanggal</td><td>:</td><td>{{ $purchase->purchase_date->format('d/m/Y') }}</td></tr>
+                <tr><td>Supplier</td><td>:</td><td>{{ $purchase->supplier?->name ?? '-' }}</td></tr>
+                @if($purchase->buyer_name)<tr><td>Pembeli</td><td>:</td><td><b>{{ $purchase->buyer_name }}</b></td></tr>@endif
+                <tr><td>Status</td><td>:</td><td>{{ $bl }}</td></tr>
+                <tr><td>Dibuat</td><td>:</td><td>{{ $purchase->user?->name }}</td></tr>
+            </table>
+            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
+
             @foreach($purchase->items as $item)
-            {
-                "nama":    {{ json_encode($item->product->name) }},
-                "sku":     {{ json_encode($item->product->sku) }},
-                "qty":     {{ json_encode(rtrim(rtrim(number_format($item->qty, 2, ',', '.'), '0'), ',')) }},
-                "satuan":  {{ json_encode($item->unit->unit_name) }},
-                "harga":   {{ json_encode('Rp '.number_format($item->buy_price, 0, ',', '.')) }},
-                "subtotal":{{ json_encode('Rp '.number_format($item->subtotal, 0, ',', '.')) }},
-                "no":      {{ $loop->iteration }}
-            }{{ !$loop->last ? ',' : '' }}
+            <div style="font-size:10px; margin-bottom:4px;">
+                <div style="font-weight:bold;">{{ $item->product->name }}</div>
+                <div style="display:flex; justify-content:space-between; padding-left:4px;">
+                    <span>{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->buy_price,0,',','.') }}</span>
+                    <span style="font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</span>
+                </div>
+            </div>
             @endforeach
-        ]
-    }
-    </script>
 
-    @push('scripts')
-    <script>
-    const D = JSON.parse(document.getElementById('data-struk80').textContent);
+            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
 
-    // ── STRUK 80mm ──────────────────────────────────────────────────────────
-    function cetakStruk() {
-        const w = window.open('', '_blank', 'width=320,height=600,scrollbars=yes');
-        let rows = D.items.map(i =>
-            `<div style="font-size:10px;margin-bottom:3px;">
-                <div style="font-weight:bold;">${i.nama}</div>
-                <div style="font-size:9px;color:#555;">${i.sku}</div>
-                <div style="display:flex;justify-content:space-between;">
-                    <span>${i.qty} ${i.satuan} &times; ${i.harga}</span>
-                    <span style="font-weight:bold;">${i.subtotal.replace('Rp ','')}</span>
-                </div>
-            </div>`
-        ).join('');
-
-        w.document.write(`<!DOCTYPE html><html><head>
-            <meta charset="utf-8">
-            <title>Struk ${D.invoice}</title>
-            <style>
-                @page { size: 80mm auto; margin: 3mm; }
-                body { font-family: 'Courier New', monospace; font-size: 11px; width: 72mm; margin: 0 auto; line-height: 1.5; }
-                @media print { .no-print { display: none !important; } }
-            </style>
-        </head><body>
-            <div style="text-align:center;margin-bottom:6px;">
-                <div style="font-size:13px;font-weight:bold;">${D.namatoko.toUpperCase()}</div>
-                ${D.tagline    ? `<div style="font-size:9px;">${D.tagline}</div>` : ''}
-                ${D.notaheader ? `<div style="font-size:9px;">${D.notaheader}</div>` : ''}
-                ${D.alamat     ? `<div style="font-size:9px;">${D.alamat}${D.kota ? ', '+D.kota : ''}</div>` : ''}
-                ${D.telepon    ? `<div style="font-size:9px;">Telp: ${D.telepon}</div>` : ''}
-                <div style="border-bottom:1px dashed #000;margin:4px 0;"></div>
-                <div style="font-size:10px;font-weight:bold;">NOTA PEMBELIAN</div>
-                <div style="border-bottom:1px dashed #000;margin:4px 0;"></div>
-            </div>
-
-            <table style="width:100%;font-size:10px;border-collapse:collapse;margin-bottom:4px;">
-                <tr><td style="width:38%">No. Faktur</td><td>:</td><td><b>${D.invoice}</b></td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>${D.tanggal}</td></tr>
-                <tr><td>Supplier</td><td>:</td><td>${D.supplier}</td></tr>
-                ${D.pembeli ? `<tr><td>Nama Pembeli</td><td>:</td><td><b>${D.pembeli}</b></td></tr>` : ''}
-                <tr><td>Status</td><td>:</td><td>${D.status}</td></tr>
-                <tr><td>Dibuat</td><td>:</td><td>${D.dibuat}</td></tr>
-            </table>
-            <div style="border-bottom:1px dashed #000;margin:4px 0;"></div>
-
-            ${rows}
-
-            <div style="border-bottom:1px dashed #000;margin:4px 0;"></div>
-            <table style="width:100%;font-size:10px;border-collapse:collapse;">
-                <tr style="font-weight:bold;font-size:12px;">
-                    <td>TOTAL</td><td style="text-align:right;">${D.total}</td>
+            <table style="width:100%; font-size:10px; border-collapse:collapse;">
+                <tr style="font-weight:bold; font-size:12px;">
+                    <td style="padding-top:2px;">TOTAL</td>
+                    <td style="text-align:right; padding-top:2px;">Rp {{ number_format($purchase->total_amount,0,',','.') }}</td>
                 </tr>
-                ${D.dibayar ? `<tr><td>Sudah Dibayar</td><td style="text-align:right;">${D.dibayar}</td></tr>` : ''}
-                ${D.hutang  ? `<tr style="font-weight:bold;"><td>Sisa Hutang</td><td style="text-align:right;">${D.hutang}</td></tr>` : ''}
+                @if($purchase->paid_amount > 0)
+                <tr><td>Dibayar</td><td style="text-align:right;">Rp {{ number_format($purchase->paid_amount,0,',','.') }}</td></tr>
+                @endif
+                @if($purchase->hutang > 0)
+                <tr style="font-weight:bold;"><td>Sisa Hutang</td><td style="text-align:right;">Rp {{ number_format($purchase->hutang,0,',','.') }}</td></tr>
+                @endif
             </table>
 
-            ${D.catatan ? `<div style="border-top:1px dashed #000;margin-top:4px;padding-top:4px;font-size:9px;color:#555;">Catatan: ${D.catatan}</div>` : ''}
+            @if($purchase->notes)
+            <div style="border-top:1px dashed #000; margin-top:5px; padding-top:4px; font-size:9px;">
+                <b>Catatan:</b> {{ $purchase->notes }}
+            </div>
+            @endif
 
-            <div style="border-top:1px dashed #000;margin-top:8px;padding-top:6px;font-size:9px;">
-                <div style="display:flex;justify-content:space-between;">
-                    <div style="text-align:center;width:45%;">
+            <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:9px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <div style="text-align:center; width:45%;">
                         <div>Penerima</div>
-                        <div style="margin-top:30px;border-top:1px solid #000;">............</div>
+                        <div style="height:35px; border-bottom:1px solid #000; margin-top:5px;"></div>
                     </div>
-                    <div style="text-align:center;width:45%;">
+                    <div style="text-align:center; width:45%;">
                         <div>Supplier</div>
-                        <div style="margin-top:30px;border-top:1px solid #000;">............</div>
+                        <div style="height:35px; border-bottom:1px solid #000; margin-top:5px;"></div>
                     </div>
                 </div>
             </div>
-            <div style="text-align:center;font-size:9px;margin-top:6px;color:#555;">
-                Dicetak: ${D.dicetakpada}
+            <div style="text-align:center; font-size:9px; margin-top:8px; color:#555;">
+                Dicetak: {{ now()->format('d/m/Y H:i') }}
             </div>
+        </div>
+    </div>
 
-            <div class="no-print" style="text-align:center;margin-top:12px;">
-                <button onclick="window.print()" style="padding:8px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">🖨️ Cetak</button>
-                <button onclick="window.close()" style="padding:8px 20px;background:#6b7280;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">✕ Tutup</button>
-            </div>
-        </body></html>`);
-        w.document.close();
-    }
+    {{-- ═══ CETAK A4 ═══ --}}
+    <div id="print-a4" style="display:none">
+        <div style="font-family:'Courier New', Courier, monospace; font-size:12px; color:#000; line-height: 1.2;">
 
-    // ── CETAK A4 ─────────────────────────────────────────────────────────────
-    function cetakA4() {
-        const w = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
-        const namaDoc = '${!! ($purchase->status === 'draft' ? 'PURCHASE ORDER' : ($purchase->status === 'ordered' ? 'SURAT PESANAN' : 'BUKTI PEMBELIAN')) !!}';
-        const statusColor = '{{ $purchase->status === 'confirmed' ? '#16a34a' : ($purchase->status === 'draft' ? '#d97706' : '#1d4ed8') }}';
-
-        let rows = D.items.map(i =>
-            `<tr style="background:${D.items.indexOf(i)%2===0?'#f8fafc':'#fff'};border-bottom:1px solid #e5e7eb;">
-                <td style="padding:6px 8px;text-align:center;color:#666;">${i.no}</td>
-                <td style="padding:6px 8px;">
-                    <div style="font-weight:600;">${i.nama}</div>
-                    <div style="font-size:9px;color:#888;">SKU: ${i.sku}</div>
-                </td>
-                <td style="padding:6px 8px;text-align:center;">${i.satuan}</td>
-                <td style="padding:6px 8px;text-align:right;">${i.qty}</td>
-                <td style="padding:6px 8px;text-align:right;">${i.harga}</td>
-                <td style="padding:6px 8px;text-align:right;font-weight:600;">${i.subtotal}</td>
-            </tr>`
-        ).join('');
-
-        w.document.write(`<!DOCTYPE html><html><head>
-            <meta charset="utf-8">
-            <title>${namaDoc} - ${D.invoice}</title>
-            <style>
-                @page { size: A4 portrait; margin: 12mm 15mm; }
-                body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
-                @media print { .no-print { display: none !important; } }
-            </style>
-        </head><body>
-
-            {{-- Kop --}}
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
                 <div>
-                    <div style="font-size:20px;font-weight:bold;color:#1e40af;">${D.namatoko}</div>
-                    ${D.tagline ? `<div style="font-size:10px;color:#555;margin-top:2px;">${D.tagline}</div>` : ''}
-                    ${D.notaheader ? `<div style="font-size:10px;margin-top:2px;">${D.notaheader}</div>` : ''}
-                    ${D.alamat ? `<div style="font-size:10px;margin-top:4px;">${D.alamat}${D.kota ? ', '+D.kota : ''}</div>` : ''}
-                    ${D.telepon ? `<div style="font-size:10px;">Telp: ${D.telepon}</div>` : ''}
+                    <div style="font-size:22px; font-weight:bold;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
+                    @if(!empty($cfg['toko_tagline']))<div style="font-size:11px; margin-top:2px;">{{ $cfg['toko_tagline'] }}</div>@endif
+                    @if(!empty($cfg['nota_header']))<div style="font-size:11px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
+                    @if(!empty($cfg['toko_alamat']))<div style="font-size:11px; margin-top:4px;">{{ $cfg['toko_alamat'] }}{{ !empty($cfg['toko_kota']) ? ', '.$cfg['toko_kota'] : '' }}</div>@endif
+                    @if(!empty($cfg['toko_telepon']))<div style="font-size:11px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:16px;font-weight:bold;text-transform:uppercase;border:2px solid #000;padding:6px 14px;display:inline-block;letter-spacing:1px;">
-                        ${namaDoc}
+                    <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px;">
+                        @if($purchase->status === 'draft') PURCHASE ORDER @elseif($purchase->status === 'ordered') SURAT PESANAN @else BUKTI PEMBELIAN @endif
                     </div>
-                    <div style="margin-top:8px;font-size:10px;line-height:1.8;">
-                        <div><b>No. Dokumen</b> : ${D.invoice}</div>
-                        <div><b>Tanggal</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${D.tanggal}</div>
-                        <div><b>Status</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span style="font-weight:bold;color:${statusColor};">${D.status.toUpperCase()}</span></div>
+                    <div style="margin-top:8px; font-size:11px; line-height:1.6;">
+                        <div><b>No. Dokumen</b> : {{ $purchase->invoice_number }}</div>
+                        <div><b>Tanggal</b>     : {{ $purchase->purchase_date->format('d/m/Y') }}</div>
+                        <div><b>Status</b>      : {{ strtoupper($bl) }}</div>
                     </div>
                 </div>
             </div>
 
-            {{-- Info Supplier & Penerima --}}
-            <div style="display:flex;gap:20px;margin-bottom:14px;">
-                <div style="flex:1;border:1px solid #ddd;padding:8px;border-radius:4px;">
-                    <div style="font-size:9px;font-weight:bold;text-transform:uppercase;color:#555;margin-bottom:4px;">Supplier / Dari</div>
-                    <div style="font-weight:bold;font-size:12px;">${D.supplier}</div>
+            <div style="display:flex; gap:20px; margin-bottom:14px;">
+                <div style="flex:1; border:1px solid #000; padding:8px;">
+                    <div style="font-size:10px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Supplier / Dari</div>
+                    <div style="font-weight:bold; font-size:12px;">{{ $purchase->supplier?->name ?? '-' }}</div>
                 </div>
-                <div style="flex:1;border:1px solid #ddd;padding:8px;border-radius:4px;">
-                    <div style="font-size:9px;font-weight:bold;text-transform:uppercase;color:#555;margin-bottom:4px;">Diterima Oleh</div>
-                    <div style="font-weight:bold;font-size:12px;">${D.namatoko}</div>
-                    ${D.alamat ? `<div style="font-size:10px;color:#555;">${D.alamat}</div>` : ''}
-                    <div style="font-size:10px;color:#555;margin-top:4px;">Dibuat oleh: ${D.dibuat}</div>
+                <div style="flex:1; border:1px solid #000; padding:8px;">
+                    <div style="font-size:10px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Diterima Oleh</div>
+                    <div style="font-weight:bold; font-size:12px;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
+                    <div style="font-size:11px; margin-top:4px;">Dibuat oleh: {{ $purchase->user?->name }}</div>
                 </div>
-                ${D.pembeli ? `
-                <div style="flex:1;border:2px solid #1e40af;padding:8px;border-radius:4px;background:#eff6ff;">
-                    <div style="font-size:9px;font-weight:bold;text-transform:uppercase;color:#1e40af;margin-bottom:4px;">Nama Pembeli</div>
-                    <div style="font-weight:bold;font-size:13px;color:#1e3a8a;">${D.pembeli}</div>
-                </div>` : ''}
+                @if($purchase->buyer_name)
+                <div style="flex:1; border:2px solid #000; padding:8px;">
+                    <div style="font-size:10px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Nama Pembeli</div>
+                    <div style="font-weight:bold; font-size:13px;">{{ $purchase->buyer_name }}</div>
+                </div>
+                @endif
             </div>
 
-            {{-- Tabel Item --}}
-            <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px;">
                 <thead>
-                    <tr style="background:#1e40af;color:#fff;">
-                        <th style="padding:7px 8px;text-align:center;width:4%;">No</th>
-                        <th style="padding:7px 8px;text-align:left;">Nama Produk / SKU</th>
-                        <th style="padding:7px 8px;text-align:center;width:10%;">Satuan</th>
-                        <th style="padding:7px 8px;text-align:right;width:10%;">Qty</th>
-                        <th style="padding:7px 8px;text-align:right;width:16%;">Harga Beli</th>
-                        <th style="padding:7px 8px;text-align:right;width:16%;">Subtotal</th>
+                    <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
+                        <th style="padding:7px 8px; text-align:center; width:4%;">No</th>
+                        <th style="padding:7px 8px; text-align:left;">Nama Produk / SKU</th>
+                        <th style="padding:7px 8px; text-align:center; width:10%;">Satuan</th>
+                        <th style="padding:7px 8px; text-align:right; width:10%;">Qty</th>
+                        <th style="padding:7px 8px; text-align:right; width:16%;">Harga Beli</th>
+                        <th style="padding:7px 8px; text-align:right; width:16%;">Subtotal</th>
                     </tr>
                 </thead>
-                <tbody>${rows}</tbody>
-                <tfoot>
-                    <tr style="background:#f1f5f9;border-top:2px solid #000;">
-                        <td colspan="5" style="padding:8px;text-align:right;font-weight:bold;font-size:12px;">TOTAL</td>
-                        <td style="padding:8px;text-align:right;font-weight:bold;font-size:13px;">${D.total}</td>
+                <tbody>
+                    @foreach($purchase->items as $i => $item)
+                    <tr style="border-bottom:1px solid #000;">
+                        <td style="padding:6px 8px; text-align:center;">{{ $i + 1 }}</td>
+                        <td style="padding:6px 8px;">
+                            <div style="font-weight:bold;">{{ $item->product->name }}</div>
+                            <div style="font-size:10px;">SKU: {{ $item->product->sku }}</div>
+                        </td>
+                        <td style="padding:6px 8px; text-align:center;">{{ $item->unit->unit_name }}</td>
+                        <td style="padding:6px 8px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
+                        <td style="padding:6px 8px; text-align:right;">{{ number_format($item->buy_price,0,',','.') }}</td>
+                        <td style="padding:6px 8px; text-align:right; font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</td>
                     </tr>
-                    ${D.dibayar ? `
-                    <tr style="background:#f1f5f9;">
-                        <td colspan="5" style="padding:6px 8px;text-align:right;font-size:10px;color:#555;">Sudah Dibayar</td>
-                        <td style="padding:6px 8px;text-align:right;font-size:10px;color:green;font-weight:bold;">${D.dibayar}</td>
-                    </tr>` : ''}
-                    ${D.hutang ? `
-                    <tr style="background:#fff3cd;">
-                        <td colspan="5" style="padding:6px 8px;text-align:right;font-size:10px;font-weight:bold;">Sisa Hutang</td>
-                        <td style="padding:6px 8px;text-align:right;font-size:11px;font-weight:bold;color:#d97706;">${D.hutang}</td>
-                    </tr>` : ''}
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
+                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:13px;">TOTAL</td>
+                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:14px;">Rp {{ number_format($purchase->total_amount,0,',','.') }}</td>
+                    </tr>
+                    @if($purchase->paid_amount > 0)
+                    <tr>
+                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:11px;">Sudah Dibayar</td>
+                        <td style="padding:6px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ number_format($purchase->paid_amount,0,',','.') }}</td>
+                    </tr>
+                    @endif
+                    @if($purchase->hutang > 0)
+                    <tr>
+                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:11px; font-weight:bold;">Sisa Hutang</td>
+                        <td style="padding:6px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ number_format($purchase->hutang,0,',','.') }}</td>
+                    </tr>
+                    @endif
                 </tfoot>
             </table>
 
-            ${D.catatan ? `<div style="border:1px solid #e5e7eb;padding:8px;border-radius:4px;margin-bottom:12px;font-size:10px;"><b>Catatan:</b> ${D.catatan}</div>` : ''}
+            @if($purchase->notes)
+            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:11px;">
+                <b>Catatan:</b> {{ $purchase->notes }}
+            </div>
+            @endif
 
-            {{-- Tanda Tangan --}}
-            <div style="display:flex;justify-content:space-between;margin-top:24px;gap:10px;">
-                <div style="flex:1;text-align:center;font-size:10px;">
+            <div style="display:flex; justify-content:space-between; margin-top:24px; gap:10px;">
+                <div style="flex:1; text-align:center; font-size:11px;">
                     <div style="font-weight:bold;">Dibuat Oleh</div>
-                    <div style="height:60px;border-bottom:1px solid #000;margin:8px 20px 4px;"></div>
-                    <div>${D.dibuat}</div>
-                    <div style="color:#555;">${D.dicetakpada.split(' ')[0]}</div>
+                    <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
+                    <div>{{ $purchase->user?->name }}</div>
+                    <div>{{ now()->format('d/m/Y') }}</div>
                 </div>
-                <div style="flex:1;text-align:center;font-size:10px;">
+                <div style="flex:1; text-align:center; font-size:11px;">
                     <div style="font-weight:bold;">Penerima Barang</div>
-                    <div style="height:60px;border-bottom:1px solid #000;margin:8px 20px 4px;"></div>
+                    <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
                     <div>.............................</div>
-                    <div style="color:#555;">( Tanggal: ............... )</div>
                 </div>
-                <div style="flex:1;text-align:center;font-size:10px;">
+                <div style="flex:1; text-align:center; font-size:11px;">
                     <div style="font-weight:bold;">Supplier / Pengirim</div>
-                    <div style="height:60px;border-bottom:1px solid #000;margin:8px 20px 4px;"></div>
-                    <div>${D.supplier !== '-' ? D.supplier : '.......................'}</div>
-                    <div style="color:#555;">( Stempel & Tanda Tangan )</div>
+                    <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
+                    <div>{{ $purchase->supplier?->name ?? '.......................' }}</div>
                 </div>
             </div>
 
-            {{-- Footer --}}
-            <div style="border-top:1px solid #ddd;margin-top:16px;padding-top:6px;display:flex;justify-content:space-between;font-size:9px;color:#888;">
-                <span>${D.namatoko} — Dokumen dicetak otomatis oleh sistem</span>
-                <span>Dicetak: ${D.dicetakpada} oleh ${D.dicetakoleh}</span>
+            <div style="border-top:1px solid #000; margin-top:16px; padding-top:6px; display:flex; justify-content:space-between; font-size:10px;">
+                <span>{{ $cfg['toko_nama'] ?? config('app.name') }} — Dokumen dicetak otomatis oleh sistem</span>
+                <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
             </div>
+        </div>
+    </div>
 
-            <div class="no-print" style="text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #eee;">
-                <button onclick="window.print()" style="padding:10px 28px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;">🖨️ Cetak</button>
-                <button onclick="window.close()" style="padding:10px 24px;background:#6b7280;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;margin-left:8px;">✕ Tutup</button>
-            </div>
-        </body></html>`);
-        w.document.close();
+    @push('styles')
+    <style>
+    /* Default layar: sembunyikan area cetak */
+    #print-struk, #print-a4 { display: none; }
+
+    @media print {
+        /* Sembunyikan semua elemen layar */
+        nav, header, .no-print, .py-6, .max-w-5xl { display: none !important; }
+
+        /* Struk 80mm */
+        body.mode-struk #print-struk {
+            display: block !important;
+        }
+
+        /* A4 */
+        body.mode-a4 #print-a4 {
+            display: block !important;
+        }
     }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script>
+    function cetakStruk() {
+        let ps = document.getElementById('ps-override');
+        if (ps) ps.remove();
+        ps = document.createElement('style');
+        ps.id = 'ps-override';
+        ps.textContent = '@media print { @page { size: 80mm auto; margin: 3mm; } }';
+        document.head.appendChild(ps);
+
+        document.body.classList.remove('mode-a4');
+        document.body.classList.add('mode-struk');
+        window.print();
+        setTimeout(() => document.body.classList.remove('mode-struk'), 1500);
+    }
+
+    function cetakA4() {
+        let ps = document.getElementById('ps-override');
+        if (ps) ps.remove();
+        ps = document.createElement('style');
+        ps.id = 'ps-override';
+        ps.textContent = '@media print { @page { size: A4 portrait; margin: 12mm 15mm; } }';
+        document.head.appendChild(ps);
+
+        document.body.classList.remove('mode-struk');
+        document.body.classList.add('mode-a4');
+        window.print();
+        setTimeout(() => document.body.classList.remove('mode-a4'), 1500);
+    }
+
+    @if(request('print') === 'a4')
+    window.addEventListener('load', () => setTimeout(cetakA4, 500));
+    @elseif(request('print'))
+    window.addEventListener('load', () => setTimeout(cetakStruk, 500));
+    @endif
     </script>
     @endpush
 
