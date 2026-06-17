@@ -9,9 +9,11 @@
 
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
-            color: #000;
+            font-size: 12px;
+            color: #000 !important;
             background: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .page {
@@ -23,34 +25,36 @@
         }
 
         /* ── Header ── */
-        .header { text-align: center; margin-bottom: 8px; }
-        .header .toko-nama { font-size: 16px; font-weight: bold; }
-        .header .toko-sub  { font-size: 11px; margin-top: 2px; }
+        .header { text-align: center; margin-bottom: 8px; color: #000 !important; }
+        .header .toko-nama { font-size: 18px; font-weight: bold; }
+        .header .toko-sub  { font-size: 12px; margin-top: 2px; font-weight: bold; }
 
         .divider-thick { border: none; border-top: 2px solid #000; margin: 7px 0 4px; }
         .divider-thin  { border: none; border-top: 1px solid #000; margin: 3px 0 8px; }
 
         .doc-title {
             text-align: center;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 2px;
+            color: #000 !important;
         }
 
         /* ── Info produk ── */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 3px 20px;
-            font-size: 11px;
+            gap: 5px 20px;
+            font-size: 12px;
             margin-bottom: 10px;
-            padding: 7px 10px;
-            border: 1px solid #000;
+            padding: 8px 10px;
+            border: 2px solid #000;
+            color: #000 !important;
         }
         .info-row { display: flex; gap: 4px; }
-        .info-label { width: 90px; flex-shrink: 0; }
+        .info-label { width: 100px; flex-shrink: 0; font-weight: bold; }
         .info-value { font-weight: bold; }
 
         /* ── Tabel ── */
@@ -58,58 +62,56 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 11px;
+            color: #000 !important;
         }
         thead th {
             background: #fff;
-            color: #000;
-            padding: 5px 5px;
+            color: #000 !important;
+            padding: 6px 5px;
             text-align: center;
             font-size: 11px;
             text-transform: uppercase;
             border: 1px solid #000;
             border-top: 2px solid #000;
             border-bottom: 2px solid #000;
+            font-weight: bold;
         }
         thead th.left { text-align: left; }
 
         tbody tr { border-bottom: 1px solid #000; }
-        tbody tr.saldo-row { font-style: italic; }
+        tbody tr.saldo-row { font-style: italic; font-weight: bold; }
         tfoot tr { border-top: 2px solid #000; }
 
         td {
-            padding: 4px 5px;
+            padding: 5px 5px;
             vertical-align: middle;
             border-left: 1px solid #000;
             border-right: 1px solid #000;
+            color: #000 !important;
         }
         td:first-child { border-left: 1px solid #000; }
         td:last-child  { border-right: 1px solid #000; }
 
-        .td-no     { text-align: center; width: 24px; font-size: 10px; }
-        .td-tgl    { width: 56px; white-space: nowrap; }
+        .td-no     { text-align: center; width: 24px; font-weight: bold; }
+        .td-tgl    { width: 70px; white-space: nowrap; font-weight: bold; }
         .td-ket    { }
-        .td-ket-sub { font-size: 10px; }
-        .td-tipe   { text-align: center; width: 52px; }
-        .td-angka  { text-align: right; width: 52px; font-weight: bold; }
-        .td-saldo  { text-align: right; width: 58px; font-weight: bold; }
+        .td-ket-sub { font-size: 10px; font-weight: bold; }
+        .td-tipe   { text-align: center; width: 65px; font-weight: bold; }
+        .td-angka  { text-align: right; width: 55px; font-weight: bold; }
+        .td-saldo  { text-align: right; width: 65px; font-weight: bold; font-size: 12px; }
         .td-cek    { text-align: center; width: 30px; }
 
         .cek-box {
-            width: 14px;
-            height: 14px;
-            border: 1px solid #000;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #000;
             display: inline-block;
-        }
-
-        .badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: bold;
         }
 
         tfoot td {
-            padding: 5px 5px;
+            padding: 6px 5px;
             font-weight: bold;
+            font-size: 12px;
         }
         .tfoot-label { text-align: right; }
         .tfoot-val   { text-align: right; }
@@ -117,36 +119,40 @@
         /* ── Ringkasan ── */
         .summary {
             display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            font-size: 11px;
+            gap: 10px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #000 !important;
         }
         .summary-box {
             flex: 1;
-            border: 1px solid #000;
-            padding: 6px 8px;
+            border: 2px solid #000;
+            padding: 8px;
             text-align: center;
         }
-        .summary-box .s-label { margin-bottom: 2px; }
-        .summary-box .s-val   { font-size: 13px; font-weight: bold; }
-        .summary-box .s-unit  { font-size: 10px; }
+        .summary-box .s-label { margin-bottom: 3px; font-weight: bold; }
+        .summary-box .s-val   { font-size: 15px; font-weight: bold; }
+        .summary-box .s-unit  { font-size: 11px; font-weight: bold; }
 
         /* ── Footer TTD ── */
         .footer-ttd {
             display: flex;
             justify-content: flex-end;
-            gap: 30px;
-            margin-top: 16px;
+            gap: 40px;
+            margin-top: 20px;
+            color: #000 !important;
         }
-        .ttd-box { text-align: center; width: 110px; font-size: 11px; }
-        .ttd-line { border-bottom: 1px solid #000; height: 36px; margin: 16px 4px 4px; }
+        .ttd-box { text-align: center; width: 130px; font-size: 12px; font-weight: bold; }
+        .ttd-line { border-bottom: 2px solid #000; height: 50px; margin: 10px 4px 5px; }
 
         .footer-note {
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 15px;
+            padding-top: 8px;
             border-top: 1px solid #000;
-            font-size: 10px;
+            font-size: 11px;
             text-align: center;
+            color: #000 !important;
+            font-weight: bold;
         }
 
         /* ── Print controls ── */
@@ -161,9 +167,9 @@
         .btn {
             padding: 8px 16px;
             border-radius: 8px;
-            border: 1px solid #000;
+            border: 2px solid #000;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
         }
         .btn-print { background: #000; color: #fff; }
@@ -173,7 +179,7 @@
         @media print {
             body { background: #fff; }
             .print-controls { display: none; }
-            .page { margin: 0; padding: 8mm 10mm 6mm; }
+            .page { margin: 0; padding: 8mm 10mm 6mm; width: 100%; }
         }
     </style>
 </head>
@@ -243,13 +249,13 @@
         <thead>
             <tr>
                 <th style="width:24px">No</th>
-                <th class="left" style="width:56px">Tanggal</th>
+                <th class="left" style="width:70px">Tanggal</th>
                 <th class="left">Keterangan</th>
-                <th style="width:52px">Tipe</th>
-                <th style="width:52px; color:#a7f3d0">Masuk</th>
-                <th style="width:52px; color:#fca5a5">Keluar</th>
-                <th style="width:58px">Saldo</th>
-                <th style="width:30px">Cek ✓</th>
+                <th style="width:65px">Tipe</th>
+                <th style="width:55px">Masuk</th>
+                <th style="width:55px">Keluar</th>
+                <th style="width:65px">Saldo</th>
+                <th style="width:30px">Cek</th>
             </tr>
         </thead>
         <tbody>
@@ -259,16 +265,16 @@
             @php $saldoAwal = $ledgers->first()->stock_before; @endphp
             <tr class="saldo-row">
                 <td class="td-no">—</td>
-                <td class="td-tgl" style="font-size:9px; color:#666">
+                <td class="td-tgl">
                     {{ $dari
                         ? \Carbon\Carbon::parse($dari)->format('d/m/Y')
                         : \Carbon\Carbon::parse($ledgers->first()->created_at)->format('d/m/Y') }}
                 </td>
-                <td class="td-ket" style="color:#777">Saldo awal periode</td>
+                <td class="td-ket">Saldo awal periode</td>
                 <td class="td-tipe"></td>
                 <td class="td-angka"></td>
                 <td class="td-angka"></td>
-                <td class="td-saldo" style="color:#555">{{ number_format($saldoAwal, 0, ',', '.') }}</td>
+                <td class="td-saldo">{{ number_format($saldoAwal, 0, ',', '.') }}</td>
                 <td class="td-cek"></td>
             </tr>
             @endif
@@ -297,12 +303,6 @@
                     default       => ucfirst($row->reference_type),
                 };
 
-                $badgeClass = match(true) {
-                    $row->movement_type === 'in'                         => 'badge-in',
-                    $row->movement_type === 'out'                        => 'badge-out',
-                    $row->movement_type === 'adjustment' && $qty >= 0    => 'badge-adj-pos',
-                    default                                              => 'badge-adj-neg',
-                };
                 $badgeLabel = match(true) {
                     $row->movement_type === 'in'                         => 'Masuk',
                     $row->movement_type === 'out'                        => 'Keluar',
@@ -314,10 +314,10 @@
                 <td class="td-no">{{ $i + 1 }}</td>
                 <td class="td-tgl">
                     {{ \Carbon\Carbon::parse($row->created_at)->format('d/m/Y') }}<br>
-                    <span style="font-size:8.5px; color:#999">{{ \Carbon\Carbon::parse($row->created_at)->format('H:i') }}</span>
+                    <span>{{ \Carbon\Carbon::parse($row->created_at)->format('H:i') }}</span>
                 </td>
                 <td class="td-ket">
-                    <span style="font-weight:600">{{ $refLabel }}</span>
+                    <span style="font-weight:bold">{{ $refLabel }}</span>
                     @if($row->reference_id)
                     <span class="td-ket-sub">&nbsp;#{{ $row->reference_id }}</span>
                     @endif
@@ -325,22 +325,12 @@
                     <br><span class="td-ket-sub">{{ $row->notes }}</span>
                     @endif
                 </td>
-                <td class="td-tipe">
-                    <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                <td class="td-tipe">{{ $badgeLabel }}</td>
+                <td class="td-angka">
+                    @if($masuk !== null) +{{ number_format($masuk, 0, ',', '.') }} @else — @endif
                 </td>
                 <td class="td-angka">
-                    @if($masuk !== null)
-                    <span class="text-green">+{{ number_format($masuk, 0, ',', '.') }}</span>
-                    @else
-                    <span class="text-muted">—</span>
-                    @endif
-                </td>
-                <td class="td-angka">
-                    @if($keluar !== null)
-                    <span class="text-red">{{ number_format($keluar, 0, ',', '.') }}</span>
-                    @else
-                    <span class="text-muted">—</span>
-                    @endif
+                    @if($keluar !== null) {{ number_format($keluar, 0, ',', '.') }} @else — @endif
                 </td>
                 <td class="td-saldo">{{ number_format($row->stock_after, 0, ',', '.') }}</td>
                 <td class="td-cek"><span class="cek-box"></span></td>
@@ -352,8 +342,8 @@
         <tfoot>
             <tr>
                 <td colspan="4" class="tfoot-label">Total Periode</td>
-                <td class="tfoot-val text-green">+{{ number_format($totalMasuk, 0, ',', '.') }}</td>
-                <td class="tfoot-val text-red">{{ number_format($totalKeluar, 0, ',', '.') }}</td>
+                <td class="tfoot-val">+{{ number_format($totalMasuk, 0, ',', '.') }}</td>
+                <td class="tfoot-val">{{ number_format($totalKeluar, 0, ',', '.') }}</td>
                 <td class="tfoot-val">{{ number_format($ledgers->last()->stock_after, 0, ',', '.') }}</td>
                 <td></td>
             </tr>
@@ -364,25 +354,25 @@
     {{-- Ringkasan --}}
     @if($ledgers->isNotEmpty())
     <div class="summary">
-        <div class="summary-box green">
+        <div class="summary-box">
             <div class="s-label">Total Masuk</div>
-            <div class="s-val text-green">{{ number_format($totalMasuk, 0, ',', '.') }}</div>
+            <div class="s-val">{{ number_format($totalMasuk, 0, ',', '.') }}</div>
             <div class="s-unit">{{ $product->baseUnit?->unit_name }}</div>
         </div>
-        <div class="summary-box red">
+        <div class="summary-box">
             <div class="s-label">Total Keluar</div>
-            <div class="s-val text-red">{{ number_format($totalKeluar, 0, ',', '.') }}</div>
+            <div class="s-val">{{ number_format($totalKeluar, 0, ',', '.') }}</div>
             <div class="s-unit">{{ $product->baseUnit?->unit_name }}</div>
         </div>
-        <div class="summary-box blue">
+        <div class="summary-box">
             <div class="s-label">Saldo Akhir</div>
-            <div class="s-val" style="color:#1e40af">{{ number_format($ledgers->last()->stock_after, 0, ',', '.') }}</div>
+            <div class="s-val">{{ number_format($ledgers->last()->stock_after, 0, ',', '.') }}</div>
             <div class="s-unit">{{ $product->baseUnit?->unit_name }}</div>
         </div>
         <div class="summary-box" style="flex:2; text-align:left">
             <div class="s-label" style="margin-bottom:4px">Catatan Pemeriksaan</div>
-            <div style="border-bottom: 1px solid #ccc; height: 14px; margin-bottom:5px;"></div>
-            <div style="border-bottom: 1px solid #ccc; height: 14px;"></div>
+            <div style="border-bottom: 2px solid #000; height: 16px; margin-bottom:6px;"></div>
+            <div style="border-bottom: 2px solid #000; height: 16px;"></div>
         </div>
     </div>
     @endif

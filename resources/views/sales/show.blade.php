@@ -229,15 +229,15 @@
             </table>
 
             <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
-            <div style="text-align:center; font-size:9px;">
-                <div>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</div>
+            <div style="text-align:center; font-size:10px; color:#000 !important;">
+                <div style="font-weight:bold;">{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</div>
                 @if($sale->notes)
-                <div style="margin-top:3px; font-style:italic;">{{ $sale->notes }}</div>
+                <div style="margin-top:3px;">{{ $sale->notes }}</div>
                 @endif
-                <div style="margin-top:4px; color:#777;">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
-            </div>
-        </div>
-    </div>
+                <div style="margin-top:4px; color:#000 !important; font-weight:bold;">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
+                </div>
+                </div>
+                </div>
 
     {{-- ═══ CETAK A4 ═══ --}}
     <div id="print-a4" style="display:none">
@@ -246,16 +246,16 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
                 <div>
                     <div style="font-size:24px; font-weight:bold; color:#000 !important;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
-                    @if(!empty($cfg['toko_tagline']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['toko_tagline'] }}</div>@endif
-                    @if(!empty($cfg['nota_header']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
-                    @if(!empty($cfg['toko_alamat']))<div style="font-size:12px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
-                    @if(!empty($cfg['toko_telepon']))<div style="font-size:12px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                    @if(!empty($cfg['toko_tagline']))<div style="font-size:13px; margin-top:2px; font-weight:bold;">{{ $cfg['toko_tagline'] }}</div>@endif
+                    @if(!empty($cfg['nota_header']))<div style="font-size:13px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
+                    @if(!empty($cfg['toko_alamat']))<div style="font-size:13px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
+                    @if(!empty($cfg['toko_telepon']))<div style="font-size:13px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px; color:#000 !important;">
                         NOTA PENJUALAN
                     </div>
-                    <div style="margin-top:8px; font-size:12px; line-height:1.6;">
+                    <div style="margin-top:8px; font-size:13px; line-height:1.6; color:#000 !important;">
                         <div><b>No. Faktur</b> : {{ $sale->invoice_number }}</div>
                         <div><b>Tanggal</b>    : {{ $sale->sale_date->translatedFormat('d F Y') }} {{ $sale->created_at->format('H:i') }}</div>
                         <div><b>Kasir</b>      : {{ $sale->user?->name ?? '-' }}</div>
@@ -267,82 +267,82 @@
             <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:12px; color:#000 !important;">
                 <thead>
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <th style="padding:7px 8px; text-align:center; width:4%;">No</th>
-                        <th style="padding:7px 8px; text-align:left;">Produk</th>
-                        <th style="padding:7px 8px; text-align:center; width:10%;">Satuan</th>
-                        <th style="padding:7px 8px; text-align:right; width:10%;">Qty</th>
-                        <th style="padding:7px 8px; text-align:right; width:18%;">Harga</th>
-                        <th style="padding:7px 8px; text-align:right; width:18%;">Subtotal</th>
+                        <th style="padding:7px 8px; text-align:center; width:4%; color:#000 !important;">No</th>
+                        <th style="padding:7px 8px; text-align:left; color:#000 !important;">Produk</th>
+                        <th style="padding:7px 8px; text-align:center; width:10%; color:#000 !important;">Satuan</th>
+                        <th style="padding:7px 8px; text-align:right; width:10%; color:#000 !important;">Qty</th>
+                        <th style="padding:7px 8px; text-align:right; width:18%; color:#000 !important;">Harga</th>
+                        <th style="padding:7px 8px; text-align:right; width:18%; color:#000 !important;">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($sale->items as $i => $item)
                     <tr style="border-bottom:1px solid #000;">
-                        <td style="padding:6px 8px; text-align:center;">{{ $i + 1 }}</td>
-                        <td style="padding:6px 8px;">
+                        <td style="padding:6px 8px; text-align:center; color:#000 !important; font-weight:bold;">{{ $i + 1 }}</td>
+                        <td style="padding:6px 8px; color:#000 !important;">
                             <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                            <div style="font-size:11px;">SKU: {{ $item->product->sku }}</div>
+                            <div style="font-size:12px; font-weight:bold;">SKU: {{ $item->product->sku }}</div>
                         </td>
-                        <td style="padding:6px 8px; text-align:center;">{{ $item->unit->unit_name }}</td>
-                        <td style="padding:6px 8px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
-                        <td style="padding:6px 8px; text-align:right;">{{ number_format($item->sell_price,0,',','.') }}</td>
-                        <td style="padding:6px 8px; text-align:right; font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                        <td style="padding:6px 8px; text-align:center; color:#000 !important;">{{ $item->unit->unit_name }}</td>
+                        <td style="padding:6px 8px; text-align:right; color:#000 !important; font-weight:bold;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
+                        <td style="padding:6px 8px; text-align:right; color:#000 !important;">{{ number_format($item->sell_price,0,',','.') }}</td>
+                        <td style="padding:6px 8px; text-align:right; font-weight:bold; color:#000 !important;">{{ number_format($item->subtotal,0,',','.') }}</td>
                     </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     @if($sale->tax_amount > 0)
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Subtotal</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:12px;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Subtotal</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">PPN {{ number_format($sale->tax_rate,0) }}%</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->tax_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">PPN {{ number_format($sale->tax_rate,0) }}%</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->tax_amount,0,',','.') }}</td>
                     </tr>
                     @endif
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">TOTAL</td>
-                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">TOTAL</td>
+                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
                     </tr>
                     @if($sale->payment_method === 'cash')
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Dibayar (Tunai)</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->paid_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Dibayar (Tunai)</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->paid_amount,0,',','.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Kembalian</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->change_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Kembalian</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->change_amount,0,',','.') }}</td>
                     </tr>
                     @else
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Lunas via</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ $sale->payment_method_label }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Lunas via</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ $sale->payment_method_label }}</td>
                     </tr>
                     @endif
                 </tfoot>
             </table>
 
             @if($sale->notes)
-            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:12px;">
+            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:13px; color:#000 !important;">
                 <b>Catatan:</b> {{ $sale->notes }}
             </div>
             @endif
 
             <div style="display:flex; justify-content:flex-end; margin-top:24px; gap:40px;">
-                <div style="text-align:center; font-size:12px; width:160px;">
+                <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
                     <div style="font-weight:bold;">Kasir</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
                     <div>{{ $sale->user?->name ?? '...........' }}</div>
                 </div>
-                <div style="text-align:center; font-size:12px; width:160px;">
+                <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
                     <div style="font-weight:bold;">Pelanggan</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
                     <div>{{ $sale->buyer_name ? '( '.$sale->buyer_name.' )' : '( ........................ )' }}</div>
                 </div>
             </div>
 
-            <div style="border-top:1px solid #000; margin-top:20px; padding-top:6px; display:flex; justify-content:space-between; font-size:11px;">
+            <div style="border-top:1px solid #000; margin-top:20px; padding-top:6px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important;">
                 <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
                 <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
             </div>

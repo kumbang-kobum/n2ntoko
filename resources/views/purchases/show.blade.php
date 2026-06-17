@@ -231,31 +231,31 @@
 
     {{-- ═══ STRUK 80mm ═══ --}}
     <div id="print-struk" style="display:none">
-        <div style="font-family:'Courier New',monospace; font-size:11px; width:72mm; margin:0 auto; line-height:1.45; color:#000;">
+        <div style="font-family:'Courier New',monospace; font-size:12px; width:72mm; margin:0 auto; line-height:1.45; color:#000 !important; -webkit-print-color-adjust: exact;">
 
             <div style="text-align:center; margin-bottom:5px;">
-                <div style="font-size:14px; font-weight:bold; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
-                @if(!empty($cfg['toko_tagline']))<div style="font-size:9px;">{{ $cfg['toko_tagline'] }}</div>@endif
-                @if(!empty($cfg['nota_header']))<div style="font-size:9px;">{{ $cfg['nota_header'] }}</div>@endif
-                @if(!empty($cfg['toko_alamat']))<div style="font-size:9px;">{{ $cfg['toko_alamat'] }}{{ !empty($cfg['toko_kota']) ? ', '.$cfg['toko_kota'] : '' }}</div>@endif
-                @if(!empty($cfg['toko_telepon']))<div style="font-size:9px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                <div style="font-size:16px; font-weight:bold; letter-spacing:1px; color:#000 !important;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
+                @if(!empty($cfg['toko_tagline']))<div style="font-size:11px; font-weight:bold;">{{ $cfg['toko_tagline'] }}</div>@endif
+                @if(!empty($cfg['nota_header']))<div style="font-size:11px;">{{ $cfg['nota_header'] }}</div>@endif
+                @if(!empty($cfg['toko_alamat']))<div style="font-size:11px;">{{ $cfg['toko_alamat'] }}{{ !empty($cfg['toko_kota']) ? ', '.$cfg['toko_kota'] : '' }}</div>@endif
+                @if(!empty($cfg['toko_telepon']))<div style="font-size:11px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
                 <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
-                <div style="font-size:10px; font-weight:bold;">NOTA PEMBELIAN</div>
+                <div style="font-size:11px; font-weight:bold;">NOTA PEMBELIAN</div>
                 <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
             </div>
 
-            <table style="width:100%; font-size:10px; border-collapse:collapse; margin-bottom:4px;">
+            <table style="width:100%; font-size:11px; border-collapse:collapse; margin-bottom:4px; color:#000 !important;">
                 <tr><td style="width:38%">No. Faktur</td><td style="width:4%">:</td><td><b>{{ $purchase->invoice_number }}</b></td></tr>
                 <tr><td>Tanggal</td><td>:</td><td>{{ $purchase->purchase_date->format('d/m/Y') }}</td></tr>
                 <tr><td>Supplier</td><td>:</td><td>{{ $purchase->supplier?->name ?? '-' }}</td></tr>
                 @if($purchase->buyer_name)<tr><td>Pembeli</td><td>:</td><td><b>{{ $purchase->buyer_name }}</b></td></tr>@endif
-                <tr><td>Status</td><td>:</td><td>{{ $bl }}</td></tr>
+                <tr><td>Status</td><td>:</td><td>{{ strtoupper($bl) }}</td></tr>
                 <tr><td>Dibuat</td><td>:</td><td>{{ $purchase->user?->name }}</td></tr>
             </table>
             <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
 
             @foreach($purchase->items as $item)
-            <div style="font-size:10px; margin-bottom:4px;">
+            <div style="font-size:11px; margin-bottom:4px; color:#000 !important;">
                 <div style="font-weight:bold;">{{ $item->product->name }}</div>
                 <div style="display:flex; justify-content:space-between; padding-left:4px;">
                     <span>{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->buy_price,0,',','.') }}</span>
@@ -266,8 +266,8 @@
 
             <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
 
-            <table style="width:100%; font-size:10px; border-collapse:collapse;">
-                <tr style="font-weight:bold; font-size:12px;">
+            <table style="width:100%; font-size:11px; border-collapse:collapse; color:#000 !important;">
+                <tr style="font-weight:bold; font-size:13px;">
                     <td style="padding-top:2px;">TOTAL</td>
                     <td style="text-align:right; padding-top:2px;">Rp {{ number_format($purchase->total_amount,0,',','.') }}</td>
                 </tr>
@@ -280,12 +280,12 @@
             </table>
 
             @if($purchase->notes)
-            <div style="border-top:1px dashed #000; margin-top:5px; padding-top:4px; font-size:9px;">
-                <b>Catatan:</b> {{ $purchase->notes }}
+            <div style="border-top:1px dashed #000; margin-top:5px; padding-top:4px; font-size:11px; color:#000 !important; font-weight:bold;">
+                Catatan: {{ $purchase->notes }}
             </div>
             @endif
 
-            <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:9px;">
+            <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:11px; color:#000 !important;">
                 <div style="display:flex; justify-content:space-between;">
                     <div style="text-align:center; width:45%;">
                         <div>Penerima</div>
@@ -297,7 +297,7 @@
                     </div>
                 </div>
             </div>
-            <div style="text-align:center; font-size:9px; margin-top:8px; color:#555;">
+            <div style="text-align:center; font-size:11px; margin-top:8px; color:#000 !important; font-weight:bold;">
                 Dicetak: {{ now()->format('d/m/Y H:i') }}
             </div>
         </div>
@@ -310,16 +310,16 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
                 <div>
                     <div style="font-size:24px; font-weight:bold; color:#000 !important;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
-                    @if(!empty($cfg['toko_tagline']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['toko_tagline'] }}</div>@endif
-                    @if(!empty($cfg['nota_header']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
-                    @if(!empty($cfg['toko_alamat']))<div style="font-size:12px; margin-top:4px;">{{ $cfg['toko_alamat'] }}{{ !empty($cfg['toko_kota']) ? ', '.$cfg['toko_kota'] : '' }}</div>@endif
-                    @if(!empty($cfg['toko_telepon']))<div style="font-size:12px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                    @if(!empty($cfg['toko_tagline']))<div style="font-size:13px; margin-top:2px; font-weight:bold;">{{ $cfg['toko_tagline'] }}</div>@endif
+                    @if(!empty($cfg['nota_header']))<div style="font-size:13px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
+                    @if(!empty($cfg['toko_alamat']))<div style="font-size:13px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
+                    @if(!empty($cfg['toko_telepon']))<div style="font-size:13px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px; color:#000 !important;">
                         @if($purchase->status === 'draft') PURCHASE ORDER @elseif($purchase->status === 'ordered') SURAT PESANAN @else BUKTI PEMBELIAN @endif
                     </div>
-                    <div style="margin-top:8px; font-size:12px; line-height:1.6;">
+                    <div style="margin-top:8px; font-size:13px; line-height:1.6; color:#000 !important;">
                         <div><b>No. Dokumen</b> : {{ $purchase->invoice_number }}</div>
                         <div><b>Tanggal</b>     : {{ $purchase->purchase_date->format('d/m/Y') }}</div>
                         <div><b>Status</b>      : {{ strtoupper($bl) }}</div>
@@ -328,19 +328,19 @@
             </div>
 
             <div style="display:flex; gap:20px; margin-bottom:14px;">
-                <div style="flex:1; border:1px solid #000; padding:8px;">
-                    <div style="font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Supplier / Dari</div>
-                    <div style="font-weight:bold; font-size:13px;">{{ $purchase->supplier?->name ?? '-' }}</div>
+                <div style="flex:1; border:1px solid #000; padding:8px; color:#000 !important;">
+                    <div style="font-size:13px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Supplier / Dari</div>
+                    <div style="font-weight:bold; font-size:14px;">{{ $purchase->supplier?->name ?? '-' }}</div>
                 </div>
-                <div style="flex:1; border:1px solid #000; padding:8px;">
-                    <div style="font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Diterima Oleh</div>
-                    <div style="font-weight:bold; font-size:13px;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
-                    <div style="font-size:12px; margin-top:4px;">Dibuat oleh: {{ $purchase->user?->name }}</div>
+                <div style="flex:1; border:1px solid #000; padding:8px; color:#000 !important;">
+                    <div style="font-size:13px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Diterima Oleh</div>
+                    <div style="font-weight:bold; font-size:14px;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
+                    <div style="font-size:13px; margin-top:4px;">Dibuat oleh: {{ $purchase->user?->name }}</div>
                 </div>
                 @if($purchase->buyer_name)
-                <div style="flex:1; border:2px solid #000; padding:8px;">
-                    <div style="font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Nama Pembeli</div>
-                    <div style="font-weight:bold; font-size:14px;">{{ $purchase->buyer_name }}</div>
+                <div style="flex:1; border:2px solid #000; padding:8px; color:#000 !important;">
+                    <div style="font-size:13px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">Nama Pembeli</div>
+                    <div style="font-weight:bold; font-size:15px;">{{ $purchase->buyer_name }}</div>
                 </div>
                 @endif
             </div>
@@ -348,75 +348,75 @@
             <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:12px; color:#000 !important;">
                 <thead>
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <th style="padding:7px 8px; text-align:center; width:4%;">No</th>
-                        <th style="padding:7px 8px; text-align:left;">Nama Produk / SKU</th>
-                        <th style="padding:7px 8px; text-align:center; width:10%;">Satuan</th>
-                        <th style="padding:7px 8px; text-align:right; width:10%;">Qty</th>
-                        <th style="padding:7px 8px; text-align:right; width:16%;">Harga Beli</th>
-                        <th style="padding:7px 8px; text-align:right; width:16%;">Subtotal</th>
+                        <th style="padding:7px 8px; text-align:center; width:4%; color:#000 !important;">No</th>
+                        <th style="padding:7px 8px; text-align:left; color:#000 !important;">Nama Produk / SKU</th>
+                        <th style="padding:7px 8px; text-align:center; width:10%; color:#000 !important;">Satuan</th>
+                        <th style="padding:7px 8px; text-align:right; width:10%; color:#000 !important;">Qty</th>
+                        <th style="padding:7px 8px; text-align:right; width:16%; color:#000 !important;">Harga Beli</th>
+                        <th style="padding:7px 8px; text-align:right; width:16%; color:#000 !important;">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($purchase->items as $i => $item)
                     <tr style="border-bottom:1px solid #000;">
-                        <td style="padding:6px 8px; text-align:center;">{{ $i + 1 }}</td>
-                        <td style="padding:6px 8px;">
+                        <td style="padding:6px 8px; text-align:center; color:#000 !important;">{{ $i + 1 }}</td>
+                        <td style="padding:6px 8px; color:#000 !important;">
                             <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                            <div style="font-size:11px;">SKU: {{ $item->product->sku }}</div>
+                            <div style="font-size:12px; font-weight:bold;">SKU: {{ $item->product->sku }}</div>
                         </td>
-                        <td style="padding:6px 8px; text-align:center;">{{ $item->unit->unit_name }}</td>
-                        <td style="padding:6px 8px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
-                        <td style="padding:6px 8px; text-align:right;">{{ number_format($item->buy_price,0,',','.') }}</td>
-                        <td style="padding:6px 8px; text-align:right; font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                        <td style="padding:6px 8px; text-align:center; color:#000 !important;">{{ $item->unit->unit_name }}</td>
+                        <td style="padding:6px 8px; text-align:right; color:#000 !important; font-weight:bold;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
+                        <td style="padding:6px 8px; text-align:right; color:#000 !important;">{{ number_format($item->buy_price,0,',','.') }}</td>
+                        <td style="padding:6px 8px; text-align:right; font-weight:bold; color:#000 !important;">{{ number_format($item->subtotal,0,',','.') }}</td>
                     </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">TOTAL</td>
-                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">Rp {{ number_format($purchase->total_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">TOTAL</td>
+                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">Rp {{ number_format($purchase->total_amount,0,',','.') }}</td>
                     </tr>
                     @if($purchase->paid_amount > 0)
                     <tr>
-                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:12px;">Sudah Dibayar</td>
-                        <td style="padding:6px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($purchase->paid_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:13px; color:#000 !important;">Sudah Dibayar</td>
+                        <td style="padding:6px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($purchase->paid_amount,0,',','.') }}</td>
                     </tr>
                     @endif
                     @if($purchase->hutang > 0)
                     <tr>
-                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:12px; font-weight:bold;">Sisa Hutang</td>
-                        <td style="padding:6px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($purchase->hutang,0,',','.') }}</td>
+                        <td colspan="5" style="padding:6px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">Sisa Hutang</td>
+                        <td style="padding:6px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($purchase->hutang,0,',','.') }}</td>
                     </tr>
                     @endif
                 </tfoot>
             </table>
 
             @if($purchase->notes)
-            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:12px;">
+            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:13px; color:#000 !important;">
                 <b>Catatan:</b> {{ $purchase->notes }}
             </div>
             @endif
 
             <div style="display:flex; justify-content:space-between; margin-top:24px; gap:10px;">
-                <div style="flex:1; text-align:center; font-size:12px;">
+                <div style="flex:1; text-align:center; font-size:13px; color:#000 !important;">
                     <div style="font-weight:bold;">Dibuat Oleh</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
                     <div>{{ $purchase->user?->name }}</div>
                     <div>{{ now()->format('d/m/Y') }}</div>
                 </div>
-                <div style="flex:1; text-align:center; font-size:12px;">
+                <div style="flex:1; text-align:center; font-size:13px; color:#000 !important;">
                     <div style="font-weight:bold;">Penerima Barang</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
                     <div>.............................</div>
                 </div>
-                <div style="flex:1; text-align:center; font-size:12px;">
+                <div style="flex:1; text-align:center; font-size:13px; color:#000 !important;">
                     <div style="font-weight:bold;">Supplier / Pengirim</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 20px 4px;"></div>
                     <div>{{ $purchase->supplier?->name ?? '.......................' }}</div>
                 </div>
             </div>
 
-            <div style="border-top:1px solid #000; margin-top:16px; padding-top:6px; display:flex; justify-content:space-between; font-size:11px;">
+            <div style="border-top:1px solid #000; margin-top:16px; padding-top:6px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important;">
                 <span>{{ $cfg['toko_nama'] ?? config('app.name') }} — Dokumen dicetak otomatis oleh sistem</span>
                 <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
             </div>

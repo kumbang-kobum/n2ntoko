@@ -247,7 +247,7 @@
                 Tanggal: {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y') }}
                 @if($filterKasir) &nbsp;|&nbsp; Kasir: {{ $filterKasir->name }} @endif
             </div>
-            <div style="border-top: 2px solid #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-size:11px;">
+            <div style="border-top: 2px solid #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important; font-weight:bold;">
                 <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
                 <span>Total Transaksi: {{ $jumlahTransaksi }}</span>
             </div>
@@ -255,15 +255,15 @@
 
         {{-- Rekap per kasir --}}
         @foreach($byKasir as $kData)
-        <div style="margin-bottom:16px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace;">
-            <div style="padding:6px 0; font-weight:bold; font-size:12px; border-top:1px solid #000; border-bottom:1px solid #000;">
+        <div style="margin-bottom:16px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace; color:#000 !important;">
+            <div style="padding:6px 0; font-weight:bold; font-size:13px; border-top:1px solid #000; border-bottom:1px solid #000;">
                 KASIR: {{ strtoupper($kData['user']->name) }}
                 &nbsp;·&nbsp; {{ $kData['trx'] }} Transaksi
                 &nbsp;·&nbsp; Total: Rp {{ number_format($kData['total'], 0, ',', '.') }}
             </div>
 
             {{-- Breakdown metode bayar --}}
-            <div style="display:flex; gap:16px; padding:4px 0; font-size:10px; border-bottom:1px dashed #000;">
+            <div style="display:flex; gap:16px; padding:4px 0; font-size:11px; border-bottom:1px dashed #000; font-weight:bold;">
                 @foreach(['cash'=>'Tunai','debit'=>'Debit','qris'=>'QRIS'] as $pm => $lbl)
                 @if(isset($kData['by_payment'][$pm]) && $kData['by_payment'][$pm]['trx'] > 0)
                 <span>{{ $lbl }}: Rp {{ number_format($kData['by_payment'][$pm]['total'], 0, ',', '.') }} ({{ $kData['by_payment'][$pm]['trx'] }} trx)</span>
@@ -274,7 +274,7 @@
                 @endif
             </div>
 
-            <table style="width:100%; border-collapse:collapse; font-size:10px; margin-top:2px;">
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:2px; color:#000 !important;">
                 <thead>
                     <tr style="border-bottom:1px solid #000;">
                         <th style="text-align:left; padding:3px 4px;">Waktu</th>
@@ -288,7 +288,7 @@
                 </thead>
                 <tbody>
                     @foreach($kData['sales'] as $s)
-                    <tr style="border-bottom:1px solid #ccc;">
+                    <tr style="border-bottom:1px solid #000;">
                         <td style="padding:2px 4px;">{{ $s->created_at->format('H:i') }}</td>
                         <td style="padding:2px 4px;">{{ $s->invoice_number }}</td>
                         <td style="padding:2px 4px; text-align:center;">{{ ucfirst($s->price_type) }}</td>
@@ -310,9 +310,9 @@
         @endforeach
 
         {{-- Rekapitulasi Metode Bayar --}}
-        <div style="margin-top:12px; border-top:2px solid #000; padding-top:8px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace;">
-            <div style="font-weight:bold; font-size:11px; margin-bottom:6px;">REKAPITULASI METODE PEMBAYARAN</div>
-            <table style="width:100%; border-collapse:collapse; font-size:10px;">
+        <div style="margin-top:12px; border-top:2px solid #000; padding-top:8px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace; color:#000 !important;">
+            <div style="font-weight:bold; font-size:12px; margin-bottom:6px;">REKAPITULASI METODE PEMBAYARAN</div>
+            <table style="width:100%; border-collapse:collapse; font-size:11px; color:#000 !important;">
                 <thead>
                     <tr style="border-bottom:1px solid #000;">
                         <th style="text-align:left; padding:2px 4px;">Metode</th>
@@ -345,36 +345,36 @@
         </div>
 
         {{-- Laporan L/R --}}
-        <div style="margin-top:12px; border-top:2px solid #000; padding-top:8px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace;">
-            <div style="font-weight:bold; font-size:11px; margin-bottom:6px;">LAPORAN LABA RUGI HARIAN</div>
-            <table style="width:100%; border-collapse:collapse; font-size:10px;">
+        <div style="margin-top:12px; border-top:2px solid #000; padding-top:8px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace; color:#000 !important;">
+            <div style="font-weight:bold; font-size:12px; margin-bottom:6px;">LAPORAN LABA RUGI HARIAN</div>
+            <table style="width:100%; border-collapse:collapse; font-size:11px; color:#000 !important;">
                 <tr><td style="padding:2px 4px;">Pendapatan Kotor</td><td style="text-align:right; padding:2px 4px;">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</td></tr>
                 <tr><td style="padding:2px 4px;">(-) PPN Terpungut</td><td style="text-align:right; padding:2px 4px;">Rp {{ number_format($totalPPN, 0, ',', '.') }}</td></tr>
                 <tr style="border-top:1px dashed #000;"><td style="padding:2px 4px; font-weight:bold;">= Pendapatan Bersih</td><td style="text-align:right; padding:2px 4px; font-weight:bold;">Rp {{ number_format($totalSubtotal, 0, ',', '.') }}</td></tr>
                 <tr><td style="padding:2px 4px;">(-) HPP</td><td style="text-align:right; padding:2px 4px;">Rp {{ number_format($totalHpp, 0, ',', '.') }}</td></tr>
                 <tr style="border-top:1px dashed #000;"><td style="padding:2px 4px; font-weight:bold;">= Laba Kotor</td><td style="text-align:right; padding:2px 4px; font-weight:bold;">Rp {{ number_format($labaKotor, 0, ',', '.') }}</td></tr>
                 <tr><td style="padding:2px 4px;">(-) Pengeluaran</td><td style="text-align:right; padding:2px 4px;">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td></tr>
-                <tr style="border-top:2px solid #000;"><td style="padding:3px 4px; font-weight:bold; font-size:11px;">= LABA BERSIH</td><td style="text-align:right; padding:3px 4px; font-weight:bold; font-size:11px;">Rp {{ number_format($labaBersih, 0, ',', '.') }}</td></tr>
+                <tr style="border-top:2px solid #000;"><td style="padding:3px 4px; font-weight:bold; font-size:12px;">= LABA BERSIH</td><td style="text-align:right; padding:3px 4px; font-weight:bold; font-size:12px;">Rp {{ number_format($labaBersih, 0, ',', '.') }}</td></tr>
             </table>
         </div>
 
         @if($expenses->isNotEmpty())
-        <div style="margin-top:12px; border-top:1px solid #000; padding-top:6px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace;">
-            <div style="font-weight:bold; font-size:11px; margin-bottom:4px;">PENGELUARAN</div>
+        <div style="margin-top:12px; border-top:1px solid #000; padding-top:6px; page-break-inside:avoid; font-family:'Courier New', Courier, monospace; color:#000 !important;">
+            <div style="font-weight:bold; font-size:12px; margin-bottom:4px;">PENGELUARAN</div>
             @php $catLabels = \App\Models\Expense::categoryLabels(); @endphp
             @foreach($expenses as $e)
-            <div style="display:flex; justify-content:space-between; font-size:10px; padding:1px 0;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; padding:1px 0;">
                 <span>{{ $catLabels[$e->category] ?? $e->category }} — {{ $e->description }}</span>
                 <span>Rp {{ number_format($e->amount, 0, ',', '.') }}</span>
             </div>
             @endforeach
-            <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:bold; border-top:1px solid #000; padding-top:3px; margin-top:3px;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; border-top:1px solid #000; padding-top:3px; margin-top:3px;">
                 <span>TOTAL</span><span>Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</span>
             </div>
         </div>
         @endif
 
-        <div style="text-align:center; font-size:10px; margin-top:20px; border-top:1px solid #000; padding-top:6px; font-family:'Courier New', Courier, monospace;">
+        <div style="text-align:center; font-size:11px; margin-top:20px; border-top:1px solid #000; padding-top:6px; font-family:'Courier New', Courier, monospace; color:#000 !important; font-weight:bold;">
             Dicetak oleh: {{ auth()->user()->name }} &nbsp;|&nbsp; {{ now()->format('d/m/Y H:i:s') }}
         </div>
     </div>
