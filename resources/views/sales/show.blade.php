@@ -1,4 +1,5 @@
 <x-app-layout>
+    @php $cfg = \App\Models\Setting::all(); @endphp
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -165,7 +166,6 @@
     </div>
 
     {{-- ═══ STRUK 80mm ═══ --}}
-    @php $cfg = \App\Models\Setting::all(); @endphp
     <div id="print-struk" style="display:none">
         <div style="font-family:'Courier New',monospace; font-size:11px; width:72mm; margin:0 auto; line-height:1.45; color:#000;">
 
@@ -241,21 +241,21 @@
 
     {{-- ═══ CETAK A4 ═══ --}}
     <div id="print-a4" style="display:none">
-        <div style="font-family:'Courier New', Courier, monospace; font-size:12px; color:#000; line-height: 1.2;">
+        <div style="font-family:'Courier New', Courier, monospace; font-size:14px; color:#000 !important; line-height: 1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
 
             <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
                 <div>
-                    <div style="font-size:22px; font-weight:bold;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
-                    @if(!empty($cfg['toko_tagline']))<div style="font-size:11px; margin-top:2px;">{{ $cfg['toko_tagline'] }}</div>@endif
-                    @if(!empty($cfg['nota_header']))<div style="font-size:11px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
-                    @if(!empty($cfg['toko_alamat']))<div style="font-size:11px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
-                    @if(!empty($cfg['toko_telepon']))<div style="font-size:11px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                    <div style="font-size:24px; font-weight:bold; color:#000 !important;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
+                    @if(!empty($cfg['toko_tagline']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['toko_tagline'] }}</div>@endif
+                    @if(!empty($cfg['nota_header']))<div style="font-size:12px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
+                    @if(!empty($cfg['toko_alamat']))<div style="font-size:12px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
+                    @if(!empty($cfg['toko_telepon']))<div style="font-size:12px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px;">
+                    <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px; color:#000 !important;">
                         NOTA PENJUALAN
                     </div>
-                    <div style="margin-top:8px; font-size:11px; line-height:1.6;">
+                    <div style="margin-top:8px; font-size:12px; line-height:1.6;">
                         <div><b>No. Faktur</b> : {{ $sale->invoice_number }}</div>
                         <div><b>Tanggal</b>    : {{ $sale->sale_date->translatedFormat('d F Y') }} {{ $sale->created_at->format('H:i') }}</div>
                         <div><b>Kasir</b>      : {{ $sale->user?->name ?? '-' }}</div>
@@ -264,7 +264,7 @@
                 </div>
             </div>
 
-            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px;">
+            <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:12px; color:#000 !important;">
                 <thead>
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
                         <th style="padding:7px 8px; text-align:center; width:4%;">No</th>
@@ -281,7 +281,7 @@
                         <td style="padding:6px 8px; text-align:center;">{{ $i + 1 }}</td>
                         <td style="padding:6px 8px;">
                             <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                            <div style="font-size:10px;">SKU: {{ $item->product->sku }}</div>
+                            <div style="font-size:11px;">SKU: {{ $item->product->sku }}</div>
                         </td>
                         <td style="padding:6px 8px; text-align:center;">{{ $item->unit->unit_name }}</td>
                         <td style="padding:6px 8px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
@@ -293,56 +293,56 @@
                 <tfoot>
                     @if($sale->tax_amount > 0)
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:11px;">Subtotal</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:11px;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Subtotal</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:12px;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:11px;">PPN {{ number_format($sale->tax_rate,0) }}%</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ number_format($sale->tax_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">PPN {{ number_format($sale->tax_rate,0) }}%</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->tax_amount,0,',','.') }}</td>
                     </tr>
                     @endif
                     <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:14px;">TOTAL</td>
-                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:14px;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">TOTAL</td>
+                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
                     </tr>
                     @if($sale->payment_method === 'cash')
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:11px;">Dibayar (Tunai)</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ number_format($sale->paid_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Dibayar (Tunai)</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->paid_amount,0,',','.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:11px;">Kembalian</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ number_format($sale->change_amount,0,',','.') }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Kembalian</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ number_format($sale->change_amount,0,',','.') }}</td>
                     </tr>
                     @else
                     <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:11px;">Lunas via</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:11px; font-weight:bold;">{{ $sale->payment_method_label }}</td>
+                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:12px;">Lunas via</td>
+                        <td style="padding:5px 8px; text-align:right; font-size:12px; font-weight:bold;">{{ $sale->payment_method_label }}</td>
                     </tr>
                     @endif
                 </tfoot>
             </table>
 
             @if($sale->notes)
-            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:11px;">
+            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:12px;">
                 <b>Catatan:</b> {{ $sale->notes }}
             </div>
             @endif
 
             <div style="display:flex; justify-content:flex-end; margin-top:24px; gap:40px;">
-                <div style="text-align:center; font-size:11px; width:160px;">
+                <div style="text-align:center; font-size:12px; width:160px;">
                     <div style="font-weight:bold;">Kasir</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
                     <div>{{ $sale->user?->name ?? '...........' }}</div>
                 </div>
-                <div style="text-align:center; font-size:11px; width:160px;">
+                <div style="text-align:center; font-size:12px; width:160px;">
                     <div style="font-weight:bold;">Pelanggan</div>
                     <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
                     <div>{{ $sale->buyer_name ? '( '.$sale->buyer_name.' )' : '( ........................ )' }}</div>
                 </div>
             </div>
 
-            <div style="border-top:1px solid #000; margin-top:20px; padding-top:6px; display:flex; justify-content:space-between; font-size:10px;">
+            <div style="border-top:1px solid #000; margin-top:20px; padding-top:6px; display:flex; justify-content:space-between; font-size:11px;">
                 <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
                 <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
             </div>
