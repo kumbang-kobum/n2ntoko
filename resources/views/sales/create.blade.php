@@ -125,7 +125,7 @@
                                                             class="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs
                                                                    focus:ring-2 focus:ring-blue-500 bg-white">
                                                         <template x-for="u in item.units" :key="u.id">
-                                                            <option :value="u.id" x-text="u.unit_name"></option>
+                                                            <option :value="String(u.id)" x-text="u.unit_name"></option>
                                                         </template>
                                                     </select>
                                                 </td>
@@ -140,9 +140,14 @@
                                                     <input type="number" :name="'items['+idx+'][sell_price]'"
                                                            x-model="item.sell_price" @input="calcItem(idx)"
                                                            min="0" step="1"
-                                                           :class="item.auto_grosir ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white'"
-                                                           class="w-full border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-blue-500">                                                    <div x-show="item.auto_grosir" class="text-center mt-0.5">
-                                                        <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-medium">★ Grosir</span>
+                                                           :class="item.grosir_same_price_warning ? 'border-red-300 bg-red-50 text-red-700 font-semibold' : (item.auto_grosir ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white')"
+                                                           class="w-full border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-blue-500">
+                                                    <div x-show="item.auto_grosir" class="text-center mt-0.5">
+                                                        <span x-show="!item.grosir_same_price_warning"
+                                                              class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-medium">★ Grosir</span>
+                                                        <span x-show="item.grosir_same_price_warning"
+                                                              class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold"
+                                                              x-text="'Eceran = grosir ≥'+item.min_qty_grosir"></span>
                                                     </div>
                                                     <div x-show="!item.auto_grosir && item.min_qty_grosir > 0" class="text-center mt-0.5">
                                                         <span class="text-xs text-gray-400"
@@ -437,23 +442,24 @@ function kasirForm(defaultTaxRate = 0) {
         },
 
         addProductWithUnit(product, unitId) {
-            const existing = this.items.find(i => i.product_id === product.id && i.unit_id == unitId);
+            const selectedUnitId = unitId !== undefined && unitId !== null ? String(unitId) : null;
+            const existing = this.items.find(i => i.product_id === product.id && String(i.unit_id) === selectedUnitId);
             if (existing) {
                 existing.qty++;
-                this.calcItemObj(existing);
                 this.autoPrice(existing);
+                this.calcItemObj(existing);
                 this.calcTax();
                 return;
             }
 
-            const unit  = product.units.find(u => u.id == unitId) ?? product.units[0];
+            const unit  = product.units.find(u => String(u.id) === selectedUnitId) ?? product.units[0];
             const price = this.resolvePrice(unit, 1);
 
             this.items.push({
                 _key:          ++this._key,
                 product_id:    product.id,
                 product_name:  product.name,
-                unit_id:       unit.id,
+                unit_id:       String(unit.id),
                 unit_name:     unit.unit_name,
                 units:         product.units,
                 stock_qty:     product.stock_qty,
@@ -462,8 +468,12 @@ function kasirForm(defaultTaxRate = 0) {
                 sell_price:    price,
                 subtotal:      price,
                 auto_grosir:   false,
+                grosir_same_price_warning: false,
                 min_qty_grosir:unit.min_qty_grosir ?? 0,
             });
+            this.autoPrice(this.items[this.items.length - 1]);
+            this.calcItemObj(this.items[this.items.length - 1]);
+            this.calcTax();
         },
 
         resolvePrice(unit, qty) {
@@ -474,15 +484,24 @@ function kasirForm(defaultTaxRate = 0) {
         },
 
         autoPrice(item) {
-            const unit = item.units.find(u => u.id == item.unit_id);
+            const unit = item.units.find(u => String(u.id) === String(item.unit_id));
             if (!unit) return;
-            const minQty = unit.min_qty_grosir ?? 0;
-            if (minQty > 0 && parseFloat(item.qty) >= minQty && unit.price_grosir > 0) {
-                item.sell_price  = unit.price_grosir;
+            const minQty = parseFloat(unit.min_qty_grosir) || 0;
+            const qty = parseFloat(item.qty) || 0;
+            const retailPrice = parseFloat(unit.price_eceran) || 0;
+            const grosirPrice = parseFloat(unit.price_grosir) || 0;
+            const useGrosir = minQty > 0 && qty >= minQty && grosirPrice > 0;
+
+            if (useGrosir) {
+                item.sell_price = grosirPrice;
                 item.auto_grosir = true;
+                item.grosir_same_price_warning = retailPrice > 0 && grosirPrice === retailPrice;
             } else if (item.auto_grosir) {
-                item.sell_price  = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;
+                item.sell_price  = this.priceType === 'grosir' ? grosirPrice : retailPrice;
                 item.auto_grosir = false;
+                item.grosir_same_price_warning = false;
+            } else {
+                item.grosir_same_price_warning = false;
             }
             item.min_qty_grosir = minQty;
         },
@@ -491,12 +510,14 @@ function kasirForm(defaultTaxRate = 0) {
 
         onUnitChange(idx) {
             const item = this.items[idx];
-            const unit = item.units.find(u => u.id == item.unit_id);
+            item.unit_id = String(item.unit_id);
+            const unit = item.units.find(u => String(u.id) === item.unit_id);
             if (!unit) return;
             item.unit_name      = unit.unit_name;
             item.stock_display  = unit.stock_display ?? item.stock_qty;
             item.min_qty_grosir = unit.min_qty_grosir ?? 0;
             item.auto_grosir    = false;
+            item.grosir_same_price_warning = false;
             item.sell_price     = this.resolvePrice(unit, parseFloat(item.qty) || 1);
             this.autoPrice(item);
             this.calcItemObj(item);
@@ -514,7 +535,7 @@ function kasirForm(defaultTaxRate = 0) {
 
         updateAllPrices() {
             this.items.forEach(item => {
-                const unit = item.units.find(u => u.id == item.unit_id);
+                const unit = item.units.find(u => String(u.id) === String(item.unit_id));
                 if (!unit) return;
                 if (!item.auto_grosir) {
                     item.sell_price = this.priceType === 'grosir' ? unit.price_grosir : unit.price_eceran;

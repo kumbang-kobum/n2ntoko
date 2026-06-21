@@ -241,7 +241,7 @@
 
     {{-- ═══ CETAK A4 ═══ --}}
     <div id="print-a4" style="display:none">
-        <div style="font-family:'Courier New', Courier, monospace; font-size:14px; color:#000 !important; line-height: 1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+        <div class="nota-a4-print" style="font-family:'Courier New', Courier, monospace; font-size:14px; font-weight:700; color:#000 !important; background:#fff !important; line-height:1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
 
             <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
                 <div>
@@ -281,7 +281,6 @@
                         <td style="padding:6px 8px; text-align:center; color:#000 !important; font-weight:bold;">{{ $i + 1 }}</td>
                         <td style="padding:6px 8px; color:#000 !important;">
                             <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                            <div style="font-size:12px; font-weight:bold;">SKU: {{ $item->product->sku }}</div>
                         </td>
                         <td style="padding:6px 8px; text-align:center; color:#000 !important;">{{ $item->unit->unit_name }}</td>
                         <td style="padding:6px 8px; text-align:right; color:#000 !important; font-weight:bold;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
@@ -329,20 +328,20 @@
             </div>
             @endif
 
-            <div style="display:flex; justify-content:flex-end; margin-top:24px; gap:40px;">
+            <div style="display:flex; justify-content:flex-end; margin-top:10px; gap:32px;">
                 <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
                     <div style="font-weight:bold;">Kasir</div>
-                    <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
+                    <div style="height:32px; border-bottom:1px solid #000; margin:5px 16px 3px;"></div>
                     <div>{{ $sale->user?->name ?? '...........' }}</div>
                 </div>
                 <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
                     <div style="font-weight:bold;">Pelanggan</div>
-                    <div style="height:60px; border-bottom:1px solid #000; margin:8px 16px 4px;"></div>
+                    <div style="height:32px; border-bottom:1px solid #000; margin:5px 16px 3px;"></div>
                     <div>{{ $sale->buyer_name ? '( '.$sale->buyer_name.' )' : '( ........................ )' }}</div>
                 </div>
             </div>
 
-            <div style="border-top:1px solid #000; margin-top:20px; padding-top:6px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important;">
+            <div style="border-top:1px solid #000; margin-top:10px; padding-top:4px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important;">
                 <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
                 <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
             </div>
@@ -357,6 +356,20 @@
     @media print {
         /* Sembunyikan semua elemen layar */
         #screen-content, nav, header, .no-print { display: none !important; }
+        html,
+        body,
+        body.mode-a4,
+        body.mode-a4 > div,
+        body.mode-a4 main {
+            background: #fff !important;
+        }
+        body.mode-a4 > div {
+            min-height: 0 !important;
+        }
+        * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
 
         /* Struk 80mm */
         body.mode-struk #print-struk {
@@ -366,6 +379,45 @@
         /* A4 */
         body.mode-a4 #print-a4 {
             display: block !important;
+        }
+        body.mode-a4 #print-a4,
+        body.mode-a4 #print-a4 * {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            color: #000 !important;
+            text-shadow: none !important;
+        }
+        body.mode-a4 #print-a4 .nota-a4-print {
+            background: #fff !important;
+            color: #000 !important;
+            font-size: 12pt !important;
+            font-weight: 700 !important;
+            line-height: 1.08 !important;
+        }
+        body.mode-a4 #print-a4 .nota-a4-print table {
+            margin-bottom: 6px !important;
+        }
+        body.mode-a4 #print-a4 th,
+        body.mode-a4 #print-a4 td {
+            color: #000 !important;
+            font-weight: 700;
+            line-height: 1.05 !important;
+            padding: 2px 5px !important;
+        }
+        body.mode-a4 #print-a4 thead th {
+            padding-top: 3px !important;
+            padding-bottom: 3px !important;
+        }
+        body.mode-a4 #print-a4 tfoot td {
+            padding-top: 3px !important;
+            padding-bottom: 3px !important;
+        }
+        body.mode-a4 #print-a4 table,
+        body.mode-a4 #print-a4 tr,
+        body.mode-a4 #print-a4 th,
+        body.mode-a4 #print-a4 td {
+            border-color: #000 !important;
         }
     }
     </style>
