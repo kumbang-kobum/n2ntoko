@@ -100,6 +100,21 @@
                         </div>
                         <p class="text-xs text-gray-400 mt-1">PPN yang terpilih secara otomatis saat membuka form kasir</p>
                     </div>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <input type="hidden" name="grosir_same_price_warning" value="0">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" name="grosir_same_price_warning" value="1"
+                                   {{ old('grosir_same_price_warning', $settings['grosir_same_price_warning'] ?? '1') == '1' ? 'checked' : '' }}
+                                   class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                            <span>
+                                <span class="block text-sm font-medium text-gray-700">Peringatan harga eceran = grosir</span>
+                                <span class="block text-xs text-gray-400 mt-1">
+                                    Tampilkan warna merah di kasir saat qty sudah masuk grosir, tetapi harga eceran dan grosir sama.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 {{-- Preview Struk --}}

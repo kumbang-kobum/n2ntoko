@@ -19,7 +19,7 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('sales.store') }}" x-data="kasirForm({{ $ppnDefault }})">
+            <form method="POST" action="{{ route('sales.store') }}" x-data="kasirForm({{ $ppnDefault }}, @json($grosirSamePriceWarning))">
                 @csrf
 
                 {{-- Layout: mobile=stack, tablet portrait=stack, tablet landscape/desktop=2col --}}
@@ -378,7 +378,7 @@
 
 @push('scripts')
 <script>
-function kasirForm(defaultTaxRate = 0) {
+function kasirForm(defaultTaxRate = 0, grosirSamePriceWarningEnabled = true) {
     return {
         items:       [],
         searchQuery: '',
@@ -392,6 +392,7 @@ function kasirForm(defaultTaxRate = 0) {
         taxOptions:  [0, 11, 12],
         paidAmount:  0,
         _key:        0,
+        grosirSamePriceWarningEnabled,
 
         get grandTotal() { return this.items.reduce((s, i) => s + (parseFloat(i.subtotal)||0), 0); },
         get change()     { return this.paidAmount - (this.grandTotal + this.taxAmount); },
@@ -495,7 +496,7 @@ function kasirForm(defaultTaxRate = 0) {
             if (useGrosir) {
                 item.sell_price = grosirPrice;
                 item.auto_grosir = true;
-                item.grosir_same_price_warning = retailPrice > 0 && grosirPrice === retailPrice;
+                item.grosir_same_price_warning = this.grosirSamePriceWarningEnabled && retailPrice > 0 && grosirPrice === retailPrice;
             } else if (item.auto_grosir) {
                 item.sell_price  = this.priceType === 'grosir' ? grosirPrice : retailPrice;
                 item.auto_grosir = false;

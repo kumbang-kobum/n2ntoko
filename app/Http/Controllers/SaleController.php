@@ -59,7 +59,8 @@ class SaleController extends Controller implements HasMiddleware
     {
         $invoice    = Sale::generateInvoiceNumber();
         $ppnDefault = (int) \App\Models\Setting::get('ppn_default', 0);
-        return view('sales.create', compact('invoice', 'ppnDefault'));
+        $grosirSamePriceWarning = (bool) \App\Models\Setting::get('grosir_same_price_warning', true);
+        return view('sales.create', compact('invoice', 'ppnDefault', 'grosirSamePriceWarning'));
     }
 
     public function store(Request $request)
