@@ -561,8 +561,8 @@
         if (ps) ps.remove();
         ps = document.createElement('style');
         ps.id = 'ps-override';
-        // 9.5in x 11in continuous paper; kiri-kanan 20mm untuk lubang traktor
-        ps.textContent = '@media print { @page { size: 9.5in 11in; margin: 10mm 20mm; } }';
+        // Driver LX-310 di-set A4, gunakan A4 agar tidak ada scaling paksa dari browser
+        ps.textContent = '@media print { @page { size: A4 portrait; margin: 10mm 15mm; } }';
         document.head.appendChild(ps);
 
         document.body.classList.remove('mode-struk', 'mode-a4');
