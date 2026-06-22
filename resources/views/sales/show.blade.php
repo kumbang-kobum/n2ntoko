@@ -16,13 +16,20 @@
                 @endif
             </div>
             @if($sale->status === 'paid')
-            <div class="flex gap-2 no-print">
+            <div class="flex flex-wrap gap-2 no-print">
                 <button onclick="cetakStruk()"
                         class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                     </svg>
                     Struk 80mm
+                </button>
+                <button onclick="cetakLX310()"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-800 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m0 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8m6 0v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4"/>
+                    </svg>
+                    LX-310 (2-ply)
                 </button>
                 <button onclick="cetakA4()"
                         class="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 transition">
@@ -165,9 +172,57 @@
         </div>
     </div>
 
+    {{-- ═══ MODAL CETAK ═══ --}}
+    @if(request('cetak'))
+    <div x-data="{ open: true }" x-show="open"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 no-print"
+         style="background:rgba(0,0,0,0.55)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs text-center overflow-hidden">
+            {{-- Header hijau --}}
+            <div class="bg-green-500 px-6 pt-7 pb-5">
+                <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <p class="text-white font-bold text-lg leading-tight">Transaksi Berhasil!</p>
+                <p class="text-green-100 text-sm mt-1 font-mono">{{ $sale->invoice_number }}</p>
+            </div>
+
+            {{-- Tombol cetak --}}
+            <div class="p-5 space-y-3">
+                <p class="text-xs text-gray-500 mb-4">Pilih format nota yang ingin dicetak:</p>
+
+                <button @click="open=false; $nextTick(()=>cetakStruk())"
+                        class="w-full py-3.5 bg-gray-800 text-white font-semibold rounded-xl
+                               hover:bg-gray-900 active:bg-black transition flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Nota Kecil (Thermal 80mm)
+                </button>
+
+                <button @click="open=false; $nextTick(()=>cetakLX310())"
+                        class="w-full py-3.5 border-2 border-gray-700 text-gray-700 font-semibold rounded-xl
+                               hover:bg-gray-50 active:bg-gray-100 transition flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m0 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8m6 0v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4"/>
+                    </svg>
+                    Nota Besar (2-ply LX-310)
+                </button>
+
+                <button @click="open=false"
+                        class="w-full py-2.5 text-sm text-gray-400 hover:text-gray-600 transition">
+                    Lewati, tidak cetak
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- ═══ STRUK 80mm ═══ --}}
     <div id="print-struk" style="display:none">
-        <div style="font-family:'Courier New',monospace; font-size:11px; width:72mm; margin:0 auto; line-height:1.45; color:#000;">
+        <div style="font-family:'Courier New',monospace; font-size:11px; width:100%; line-height:1.45; color:#000; background:#fff;">
 
             <div style="text-align:center; margin-bottom:5px;">
                 <div style="font-size:14px; font-weight:bold; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
@@ -202,10 +257,12 @@
             @foreach($sale->items as $item)
             <div style="font-size:10px; margin-bottom:4px;">
                 <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                <div style="display:flex; justify-content:space-between; padding-left:4px;">
-                    <span>{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->sell_price,0,',','.') }}</span>
-                    <span style="font-weight:bold;">{{ number_format($item->subtotal,0,',','.') }}</span>
-                </div>
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td style="padding-left:4px; font-size:10px;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->sell_price,0,',','.') }}</td>
+                        <td style="text-align:right; font-weight:bold; white-space:nowrap; font-size:10px;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                    </tr>
+                </table>
             </div>
             @endforeach
 
@@ -372,8 +429,27 @@
         }
 
         /* Struk 80mm */
+        body.mode-struk {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        body.mode-struk * {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
         body.mode-struk #print-struk {
             display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        body.mode-struk #print-struk > div {
+            background: #fff !important;
+            background-color: #fff !important;
+        }
+        body.mode-struk #print-struk * {
+            color: #000 !important;
         }
 
         /* A4 */
@@ -387,6 +463,32 @@
             box-shadow: none !important;
             color: #000 !important;
             text-shadow: none !important;
+        }
+
+        /* LX-310 (reuse layout A4) */
+        body.mode-lx310 #print-a4 {
+            display: block !important;
+        }
+        body.mode-lx310 #print-a4,
+        body.mode-lx310 #print-a4 * {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            color: #000 !important;
+            text-shadow: none !important;
+        }
+        body.mode-lx310 #print-a4 .nota-a4-print {
+            background: #fff !important;
+            color: #000 !important;
+            font-size: 11pt !important;
+            font-weight: 900 !important;
+            line-height: 1.15 !important;
+        }
+        body.mode-lx310 #print-a4 th,
+        body.mode-lx310 #print-a4 td {
+            color: #000 !important;
+            font-weight: 900 !important;
+            padding: 3px 5px !important;
         }
         body.mode-a4 #print-a4 .nota-a4-print {
             background: #fff !important;
@@ -434,7 +536,7 @@
         ps.textContent = '@media print { @page { size: 80mm auto; margin: 3mm; } }';
         document.head.appendChild(ps);
 
-        document.body.classList.remove('mode-a4');
+        document.body.classList.remove('mode-a4', 'mode-lx310');
         document.body.classList.add('mode-struk');
         window.print();
         setTimeout(() => document.body.classList.remove('mode-struk'), 1500);
@@ -448,15 +550,27 @@
         ps.textContent = '@media print { @page { size: A4 portrait; margin: 12mm 15mm; } }';
         document.head.appendChild(ps);
 
-        document.body.classList.remove('mode-struk');
+        document.body.classList.remove('mode-struk', 'mode-lx310');
         document.body.classList.add('mode-a4');
         window.print();
         setTimeout(() => document.body.classList.remove('mode-a4'), 1500);
     }
 
-    @if(request('print'))
-    window.addEventListener('load', () => setTimeout(cetakStruk, 400));
-    @endif
+    function cetakLX310() {
+        let ps = document.getElementById('ps-override');
+        if (ps) ps.remove();
+        ps = document.createElement('style');
+        ps.id = 'ps-override';
+        // 9.5in x 11in continuous paper; kiri-kanan 20mm untuk lubang traktor
+        ps.textContent = '@media print { @page { size: 9.5in 11in; margin: 10mm 20mm; } }';
+        document.head.appendChild(ps);
+
+        document.body.classList.remove('mode-struk', 'mode-a4');
+        document.body.classList.add('mode-lx310');
+        window.print();
+        setTimeout(() => document.body.classList.remove('mode-lx310'), 1500);
+    }
+
     </script>
     @endpush
 

@@ -175,7 +175,7 @@ class SaleController extends Controller implements HasMiddleware
             return back()->withInput()->with('error', 'Transaksi gagal diproses. Silakan coba lagi.');
         }
 
-        return redirect()->route('sales.show', [$sale, 'print' => 1])
+        return redirect()->route('sales.show', [$sale, 'cetak' => 1])
             ->with('success', "Penjualan {$sale->invoice_number} berhasil disimpan.");
     }
 
