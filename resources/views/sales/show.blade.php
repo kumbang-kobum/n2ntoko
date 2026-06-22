@@ -296,6 +296,100 @@
                 </div>
                 </div>
 
+    {{-- ═══ CETAK LX-310 (dot matrix 2-ply) ═══ --}}
+    <div id="print-lx310" style="display:none">
+        <div style="font-family:'Courier New',Courier,monospace; font-size:16px; font-weight:bold; color:#000; background:#fff; line-height:1.4;">
+
+            {{-- Header toko: satu kolom, rata tengah --}}
+            <div style="text-align:center; border-bottom:3px solid #000; padding-bottom:8px; margin-bottom:10px;">
+                <div style="font-size:26px; font-weight:900; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
+                @if(!empty($cfg['toko_tagline']))<div style="font-size:15px;">{{ $cfg['toko_tagline'] }}</div>@endif
+                @if(!empty($cfg['nota_header']))<div style="font-size:15px;">{{ $cfg['nota_header'] }}</div>@endif
+                @if(!empty($cfg['toko_alamat']))<div style="font-size:15px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
+                @if(!empty($cfg['toko_telepon']))<div style="font-size:15px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
+                <div style="font-size:18px; font-weight:900; margin-top:6px; letter-spacing:2px;">====  NOTA PENJUALAN  ====</div>
+            </div>
+
+            {{-- Info transaksi --}}
+            <table style="width:100%; border-collapse:collapse; font-size:16px; margin-bottom:8px;">
+                <tr><td style="width:130px; padding:2px 0; font-weight:bold;">No. Faktur</td><td style="width:16px;">:</td><td style="font-weight:900;">{{ $sale->invoice_number }}</td></tr>
+                <tr><td style="padding:2px 0; font-weight:bold;">Tanggal</td><td>:</td><td>{{ $sale->sale_date->translatedFormat('d F Y') }} {{ $sale->created_at->format('H:i') }}</td></tr>
+                <tr><td style="padding:2px 0; font-weight:bold;">Kasir</td><td>:</td><td>{{ $sale->user?->name ?? '-' }}</td></tr>
+                @if($sale->buyer_name)<tr><td style="padding:2px 0; font-weight:bold;">Pembeli</td><td>:</td><td style="font-weight:900;">{{ $sale->buyer_name }}</td></tr>@endif
+                <tr><td style="padding:2px 0; font-weight:bold;">Bayar</td><td>:</td><td>{{ $sale->payment_method_label }}</td></tr>
+            </table>
+            <div style="border-bottom:2px solid #000; margin:6px 0;"></div>
+
+            {{-- Tabel item --}}
+            <table style="width:100%; border-collapse:collapse; font-size:15px; margin-bottom:6px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #000;">
+                        <th style="text-align:left; padding:4px 4px 4px 0; width:4%;">No</th>
+                        <th style="text-align:left; padding:4px;">Produk</th>
+                        <th style="text-align:center; padding:4px; width:9%;">Sat</th>
+                        <th style="text-align:right; padding:4px; width:8%;">Qty</th>
+                        <th style="text-align:right; padding:4px; width:20%;">Harga</th>
+                        <th style="text-align:right; padding:4px 0 4px 4px; width:20%;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($sale->items as $i => $item)
+                    <tr style="border-bottom:1px solid #000;">
+                        <td style="padding:4px 4px 4px 0; text-align:center;">{{ $i+1 }}</td>
+                        <td style="padding:4px; font-weight:900;">{{ $item->product->name }}</td>
+                        <td style="padding:4px; text-align:center;">{{ $item->unit->unit_name }}</td>
+                        <td style="padding:4px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
+                        <td style="padding:4px; text-align:right;">{{ number_format($item->sell_price,0,',','.') }}</td>
+                        <td style="padding:4px 0 4px 4px; text-align:right; font-weight:900;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div style="border-bottom:2px solid #000; margin:6px 0;"></div>
+
+            {{-- Totals --}}
+            <table style="width:55%; margin-left:auto; border-collapse:collapse; font-size:16px;">
+                @if($sale->tax_amount > 0)
+                <tr><td style="padding:3px 8px 3px 0;">Subtotal</td><td style="text-align:right; padding:3px 0;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
+                <tr><td style="padding:3px 8px 3px 0;">PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="text-align:right; padding:3px 0;">{{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
+                @endif
+                <tr style="border-top:2px solid #000; font-size:18px; font-weight:900;">
+                    <td style="padding:4px 8px 4px 0;">TOTAL</td>
+                    <td style="text-align:right; padding:4px 0;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                </tr>
+                @if($sale->payment_method === 'cash')
+                <tr><td style="padding:3px 8px 3px 0;">Tunai</td><td style="text-align:right; padding:3px 0;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
+                <tr style="font-weight:900;"><td style="padding:3px 8px 3px 0;">Kembali</td><td style="text-align:right; padding:3px 0;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
+                @else
+                <tr><td colspan="2" style="text-align:center; padding:3px 0;">Lunas via {{ $sale->payment_method_label }}</td></tr>
+                @endif
+            </table>
+
+            @if($sale->notes)
+            <div style="border:2px solid #000; padding:6px 8px; margin-top:10px; font-size:15px;"><b>Catatan:</b> {{ $sale->notes }}</div>
+            @endif
+
+            {{-- TTD --}}
+            <div style="display:flex; justify-content:flex-end; gap:40px; margin-top:16px;">
+                <div style="text-align:center; width:150px; font-size:15px;">
+                    <div style="font-weight:900;">Kasir</div>
+                    <div style="height:40px; border-bottom:1px solid #000; margin:6px 12px 4px;"></div>
+                    <div>{{ $sale->user?->name ?? '...........' }}</div>
+                </div>
+                <div style="text-align:center; width:150px; font-size:15px;">
+                    <div style="font-weight:900;">Pelanggan</div>
+                    <div style="height:40px; border-bottom:1px solid #000; margin:6px 12px 4px;"></div>
+                    <div>{{ $sale->buyer_name ? '('.$sale->buyer_name.')' : '( .................. )' }}</div>
+                </div>
+            </div>
+
+            <div style="border-top:2px solid #000; margin-top:10px; padding-top:5px; display:flex; justify-content:space-between; font-size:14px;">
+                <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
+                <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
+            </div>
+        </div>
+    </div>
+
     {{-- ═══ CETAK A4 ═══ --}}
     <div id="print-a4" style="display:none">
         <div class="nota-a4-print" style="font-family:'Courier New', Courier, monospace; font-size:14px; font-weight:700; color:#000 !important; background:#fff !important; line-height:1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
@@ -408,7 +502,7 @@
     @push('styles')
     <style>
     /* Default layar: sembunyikan area cetak */
-    #print-struk, #print-a4 { display: none; }
+    #print-struk, #print-a4, #print-lx310 { display: none; }
 
     @media print {
         /* Sembunyikan semua elemen layar */
@@ -465,30 +559,26 @@
             text-shadow: none !important;
         }
 
-        /* LX-310 (reuse layout A4) */
-        body.mode-lx310 #print-a4 {
-            display: block !important;
+        /* LX-310 — layout khusus dot matrix */
+        body.mode-lx310 {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
-        body.mode-lx310 #print-a4,
-        body.mode-lx310 #print-a4 * {
+        body.mode-lx310 * {
             background: transparent !important;
             background-color: transparent !important;
             box-shadow: none !important;
+        }
+        body.mode-lx310 #print-lx310 {
+            display: block !important;
+        }
+        body.mode-lx310 #print-lx310 > div {
+            background: #fff !important;
+        }
+        body.mode-lx310 #print-lx310 * {
             color: #000 !important;
             text-shadow: none !important;
-        }
-        body.mode-lx310 #print-a4 .nota-a4-print {
-            background: #fff !important;
-            color: #000 !important;
-            font-size: 11pt !important;
-            font-weight: 900 !important;
-            line-height: 1.15 !important;
-        }
-        body.mode-lx310 #print-a4 th,
-        body.mode-lx310 #print-a4 td {
-            color: #000 !important;
-            font-weight: 900 !important;
-            padding: 3px 5px !important;
         }
         body.mode-a4 #print-a4 .nota-a4-print {
             background: #fff !important;
