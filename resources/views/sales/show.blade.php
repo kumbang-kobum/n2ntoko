@@ -222,195 +222,193 @@
 
     {{-- ═══ STRUK 80mm ═══ --}}
     <div id="print-struk" style="display:none">
-        <div style="font-family:'Courier New',monospace; font-size:11px; width:100%; line-height:1.45; color:#000; background:#fff;">
+        <div style="font-family:Tahoma,Arial,sans-serif; font-size:11px; color:#000; background:#fff; width:100%; line-height:1.4;">
 
-            <div style="text-align:center; margin-bottom:5px;">
-                <div style="font-size:14px; font-weight:bold; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
-                @if(!empty($cfg['toko_tagline']))
-                <div style="font-size:9px;">{{ $cfg['toko_tagline'] }}</div>
-                @endif
-                @if(!empty($cfg['nota_header']))
-                <div style="font-size:9px;">{{ $cfg['nota_header'] }}</div>
-                @endif
-                @if(!empty($cfg['toko_alamat']))
-                <div style="font-size:9px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>
-                @endif
-                @if(!empty($cfg['toko_telepon']))
-                <div style="font-size:9px;">Telp: {{ $cfg['toko_telepon'] }}</div>
-                @endif
-                <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
-                <div style="font-size:10px; font-weight:bold;">NOTA PENJUALAN</div>
-                <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
-            </div>
-
-            <table style="width:100%; font-size:10px; border-collapse:collapse; margin-bottom:4px;">
-                <tr><td style="width:36%">No</td><td style="width:4%">:</td><td><b>{{ $sale->invoice_number }}</b></td></tr>
-                <tr><td>Tanggal</td><td>:</td><td>{{ $sale->sale_date->format('d/m/Y') }} {{ $sale->created_at->format('H:i') }}</td></tr>
-                <tr><td>Kasir</td><td>:</td><td>{{ $sale->user?->name }}</td></tr>
-                @if($sale->buyer_name)
-                <tr><td>Pembeli</td><td>:</td><td><b>{{ $sale->buyer_name }}</b></td></tr>
-                @endif
-                <tr><td>Bayar</td><td>:</td><td>{{ $sale->payment_method_label }}</td></tr>
-            </table>
-            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
-
-            @foreach($sale->items as $item)
-            <div style="font-size:10px; margin-bottom:4px;">
-                <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="padding-left:4px; font-size:10px;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} &times; {{ number_format($item->sell_price,0,',','.') }}</td>
-                        <td style="text-align:right; font-weight:bold; white-space:nowrap; font-size:10px;">{{ number_format($item->subtotal,0,',','.') }}</td>
-                    </tr>
-                </table>
-            </div>
-            @endforeach
-
-            <div style="border-bottom:1px dashed #000; margin:4px 0;"></div>
-
-            <table style="width:100%; font-size:10px; border-collapse:collapse;">
-                @if($sale->tax_amount > 0)
-                <tr><td>Subtotal</td><td style="text-align:right;">Rp {{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
-                <tr><td>PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="text-align:right;">Rp {{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
-                @endif
-                <tr style="font-weight:bold; font-size:12px; border-top:1px solid #000;">
-                    <td style="padding-top:2px;">TOTAL</td>
-                    <td style="text-align:right; padding-top:2px;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
-                </tr>
-                @if($sale->payment_method === 'cash')
-                <tr><td>Tunai</td><td style="text-align:right;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
-                <tr><td style="font-weight:bold;">Kembali</td><td style="text-align:right; font-weight:bold;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
-                @else
-                <tr><td colspan="2" style="text-align:center; font-size:9px; padding-top:3px;">Lunas via {{ $sale->payment_method_label }}</td></tr>
-                @endif
-            </table>
-
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
-            <div style="text-align:center; font-size:10px; color:#000 !important;">
-                <div style="font-weight:bold;">{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</div>
-                @if($sale->notes)
-                <div style="margin-top:3px;">{{ $sale->notes }}</div>
-                @endif
-                <div style="margin-top:4px; color:#000 !important; font-weight:bold;">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
-                </div>
-                </div>
-                </div>
-
-    {{-- ═══ CETAK LX-310 (dot matrix 2-ply) ═══ --}}
-    <div id="print-lx310" style="display:none">
-        {{--
-            Font 13px / line-height 1.25 → tiap baris ~7.2mm
-            Cell padding 2px → tiap item ~9mm
-            Fixed sections (header+info+total+ttd) ~135mm
-            Sisa untuk item: 277-135 = ~142mm → muat ±15 item/halaman
-        --}}
-        <div style="font-family:'Courier New',Courier,monospace; font-size:13px; font-weight:bold; color:#000; background:#fff; line-height:1.25;">
-
-            {{-- Header toko --}}
-            <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:4px; margin-bottom:6px;">
-                <div style="font-size:20px; font-weight:900; letter-spacing:1px;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
+            {{-- Header --}}
+            <div style="text-align:center; margin-bottom:3px;">
+                <div style="font-size:14px; font-weight:bold;">{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</div>
                 @if(!empty($cfg['toko_tagline']))<div>{{ $cfg['toko_tagline'] }}</div>@endif
                 @if(!empty($cfg['nota_header']))<div>{{ $cfg['nota_header'] }}</div>@endif
                 @if(!empty($cfg['toko_alamat']))<div>{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
                 @if(!empty($cfg['toko_telepon']))<div>Telp: {{ $cfg['toko_telepon'] }}</div>@endif
-                <div style="font-size:15px; font-weight:900; margin-top:3px; letter-spacing:1px;">====  NOTA PENJUALAN  ====</div>
+            </div>
+            <div style="border-bottom:1px dashed #000; margin:3px 0;"></div>
+            <div style="text-align:center; font-weight:bold; margin-bottom:2px;">NOTA PENJUALAN</div>
+            <div style="border-bottom:1px dashed #000; margin:3px 0;"></div>
+
+            {{-- Info --}}
+            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                <tr><td style="width:36%; padding:0;">No</td><td style="width:4%; padding:0;">:</td><td style="padding:0;">{{ $sale->invoice_number }}</td></tr>
+                <tr><td style="padding:0;">Tanggal</td><td style="padding:0;">:</td><td style="padding:0;">{{ $sale->sale_date->format('d/m/Y') }} {{ $sale->created_at->format('H:i') }}</td></tr>
+                <tr><td style="padding:0;">Kasir</td><td style="padding:0;">:</td><td style="padding:0;">{{ $sale->user?->name }}</td></tr>
+                @if($sale->buyer_name)
+                <tr><td style="padding:0;">Pembeli</td><td style="padding:0;">:</td><td style="padding:0;">{{ $sale->buyer_name }}</td></tr>
+                @endif
+                <tr><td style="padding:0;">Bayar</td><td style="padding:0;">:</td><td style="padding:0;">{{ $sale->payment_method_label }}</td></tr>
+            </table>
+            <div style="border-bottom:1px dashed #000; margin:3px 0;"></div>
+
+            {{-- Item produk --}}
+            @foreach($sale->items as $item)
+            <div style="margin-bottom:2px;">
+                <div>{{ $item->product->name }}</div>
+                <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                    <tr>
+                        <td style="padding:0 0 0 6px;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} x {{ number_format($item->sell_price,0,',','.') }}</td>
+                        <td style="padding:0; text-align:right; white-space:nowrap;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                    </tr>
+                </table>
+            </div>
+            @endforeach
+            <div style="border-bottom:1px dashed #000; margin:3px 0;"></div>
+
+            {{-- Totals --}}
+            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                @if($sale->tax_amount > 0)
+                <tr><td style="padding:0;">Subtotal</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
+                @endif
+                <tr>
+                    <td style="padding:2px 0; font-size:13px; font-weight:bold;">TOTAL</td>
+                    <td style="padding:2px 0; font-size:13px; font-weight:bold; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                </tr>
+                @if($sale->payment_method === 'cash')
+                <tr><td style="padding:0;">Tunai</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">Kembali</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
+                @else
+                <tr><td colspan="2" style="padding:0; text-align:center; font-size:10px;">Lunas via {{ $sale->payment_method_label }}</td></tr>
+                @endif
+            </table>
+            <div style="border-bottom:1px dashed #000; margin:3px 0;"></div>
+
+            {{-- Footer --}}
+            <div style="text-align:center; font-size:10px;">
+                <div>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</div>
+                @if($sale->notes)<div>{{ $sale->notes }}</div>@endif
+                <div>Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
             </div>
 
-            {{-- Info transaksi: 2 kolom agar hemat baris --}}
-            <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:4px;">
-                <tr>
-                    <td style="width:48%; vertical-align:top; padding:1px 6px 1px 0;">
-                        <table style="border-collapse:collapse; width:100%;">
-                            <tr><td style="width:85px; padding:1px 0; white-space:nowrap;">No. Faktur</td><td style="width:10px;">:</td><td style="font-weight:900;">{{ $sale->invoice_number }}</td></tr>
-                            <tr><td style="padding:1px 0;">Tanggal</td><td>:</td><td>{{ $sale->sale_date->format('d/m/Y') }} {{ $sale->created_at->format('H:i') }}</td></tr>
-                        </table>
-                    </td>
-                    <td style="width:52%; vertical-align:top; padding:1px 0 1px 6px; border-left:1px solid #000;">
-                        <table style="border-collapse:collapse; width:100%; padding-left:4px;">
-                            <tr><td style="width:70px; padding:1px 0 1px 6px; white-space:nowrap;">Kasir</td><td style="width:10px;">:</td><td>{{ $sale->user?->name ?? '-' }}</td></tr>
-                            @if($sale->buyer_name)<tr><td style="padding:1px 0 1px 6px;">Pembeli</td><td>:</td><td style="font-weight:900;">{{ $sale->buyer_name }}</td></tr>@endif
-                            <tr><td style="padding:1px 0 1px 6px;">Bayar</td><td>:</td><td>{{ $sale->payment_method_label }}</td></tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-            <div style="border-bottom:2px solid #000; margin:3px 0;"></div>
+        </div>
+    </div>
+
+    {{-- ═══ CETAK LX-310 (dot matrix 2-ply) ═══ --}}
+    <div id="print-lx310" style="display:none">
+        {{-- Font Tahoma seperti referensi LaporanBilling.php — bukan Courier, bukan bold --}}
+        <table width="100%" bgcolor="#ffffff" border="0" cellspacing="0" cellpadding="0" style="font-family:Tahoma,Arial,sans-serif; font-size:12px; color:#000000;">
+
+            {{-- Header toko --}}
+            <tr><td colspan="2" align="center" style="padding-bottom:2px; border-bottom:1px solid #000;">
+                <font face="Tahoma" size="3" color="000000"><b>{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</b></font><br>
+                @if(!empty($cfg['toko_tagline']))<font face="Tahoma" size="1" color="000000">{{ $cfg['toko_tagline'] }}</font><br>@endif
+                @if(!empty($cfg['nota_header']))<font face="Tahoma" size="1" color="000000">{{ $cfg['nota_header'] }}</font><br>@endif
+                @if(!empty($cfg['toko_alamat']))<font face="Tahoma" size="1" color="000000">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</font><br>@endif
+                @if(!empty($cfg['toko_telepon']))<font face="Tahoma" size="1" color="000000">Telp: {{ $cfg['toko_telepon'] }}</font><br>@endif
+                <font face="Tahoma" size="1" color="000000">====  NOTA PENJUALAN  ====</font>
+            </td></tr>
+
+            {{-- Info transaksi 2 kolom --}}
+            <tr>
+                <td width="50%" valign="top" style="padding:1px 4px 0 0; border-right:1px solid #000;">
+                    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                        <tr><td width="80"><font face="Tahoma" size="1" color="000000">No. Faktur</font></td><td width="8"><font face="Tahoma" size="1" color="000000">:</font></td><td><font face="Tahoma" size="1" color="000000">{{ $sale->invoice_number }}</font></td></tr>
+                        <tr><td><font face="Tahoma" size="1" color="000000">Tanggal</font></td><td><font face="Tahoma" size="1" color="000000">:</font></td><td><font face="Tahoma" size="1" color="000000">{{ $sale->sale_date->format('d/m/Y') }} {{ $sale->created_at->format('H:i') }}</font></td></tr>
+                    </table>
+                </td>
+                <td width="50%" valign="top" style="padding:1px 0 0 4px;">
+                    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                        <tr><td width="60"><font face="Tahoma" size="1" color="000000">Kasir</font></td><td width="8"><font face="Tahoma" size="1" color="000000">:</font></td><td><font face="Tahoma" size="1" color="000000">{{ $sale->user?->name ?? '-' }}</font></td></tr>
+                        @if($sale->buyer_name)<tr><td><font face="Tahoma" size="1" color="000000">Pembeli</font></td><td><font face="Tahoma" size="1" color="000000">:</font></td><td><font face="Tahoma" size="1" color="000000">{{ $sale->buyer_name }}</font></td></tr>@endif
+                        <tr><td><font face="Tahoma" size="1" color="000000">Bayar</font></td><td><font face="Tahoma" size="1" color="000000">:</font></td><td><font face="Tahoma" size="1" color="000000">{{ $sale->payment_method_label }}</font></td></tr>
+                    </table>
+                </td>
+            </tr>
+
+            {{-- Garis pemisah --}}
+            <tr><td colspan="2" style="border-bottom:1px solid #000; padding:1px 0;"></td></tr>
 
             {{-- Tabel item --}}
-            <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                <thead>
-                    <tr style="border-bottom:2px solid #000;">
-                        <th style="text-align:center; padding:2px 3px 2px 0; width:4%;">No</th>
-                        <th style="text-align:left; padding:2px 3px;">Produk</th>
-                        <th style="text-align:center; padding:2px 3px; width:8%;">Sat</th>
-                        <th style="text-align:right; padding:2px 3px; width:7%;">Qty</th>
-                        <th style="text-align:right; padding:2px 3px; width:20%;">Harga</th>
-                        <th style="text-align:right; padding:2px 0 2px 3px; width:20%;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($sale->items as $i => $item)
+            <tr><td colspan="2" style="padding:0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr style="border-bottom:1px solid #000;">
-                        <td style="padding:2px 3px 2px 0; text-align:center;">{{ $i+1 }}</td>
-                        <td style="padding:2px 3px; font-weight:900;">{{ $item->product->name }}</td>
-                        <td style="padding:2px 3px; text-align:center;">{{ $item->unit->unit_name }}</td>
-                        <td style="padding:2px 3px; text-align:right;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
-                        <td style="padding:2px 3px; text-align:right;">{{ number_format($item->sell_price,0,',','.') }}</td>
-                        <td style="padding:2px 0 2px 3px; text-align:right; font-weight:900;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                        <td width="4%" align="center" style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">No</font></td>
+                        <td style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">Nama Produk</font></td>
+                        <td width="8%" align="center" style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">Sat</font></td>
+                        <td width="7%" align="right" style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">Qty</font></td>
+                        <td width="19%" align="right" style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">Harga</font></td>
+                        <td width="19%" align="right" style="border-bottom:1px solid #000;"><font face="Tahoma" size="1" color="000000">Subtotal</font></td>
+                    </tr>
+                    @foreach($sale->items as $i => $item)
+                    <tr>
+                        <td align="center" style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ $i+1 }}</font></td>
+                        <td style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ $item->product->name }}</font></td>
+                        <td align="center" style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ $item->unit->unit_name }}</font></td>
+                        <td align="right" style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</font></td>
+                        <td align="right" style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ number_format($item->sell_price,0,',','.') }}</font></td>
+                        <td align="right" style="border-bottom:1px dashed #ccc;"><font face="Tahoma" size="1" color="000000">{{ number_format($item->subtotal,0,',','.') }}</font></td>
                     </tr>
                     @endforeach
-                </tbody>
-            </table>
-            <div style="border-bottom:2px solid #000; margin:3px 0;"></div>
+                </table>
+            </td></tr>
 
-            {{-- Totals (kanan) + Catatan (kiri) sejajar --}}
-            <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:2px;">
-                <tr style="vertical-align:top;">
-                    <td style="width:48%; padding-right:8px;">
-                        @if($sale->notes)
-                        <div style="border:1px solid #000; padding:3px 5px; font-size:12px;"><b>Catatan:</b> {{ $sale->notes }}</div>
+            <tr><td colspan="2" style="border-bottom:1px solid #000; padding:1px 0;"></td></tr>
+
+            {{-- Totals kanan + Catatan kiri --}}
+            <tr>
+                <td width="50%" valign="top" style="padding:1px 4px 0 0; font-size:11px;">
+                    @if($sale->notes)<font face="Tahoma" size="1" color="000000">Catatan: {{ $sale->notes }}</font>@endif
+                </td>
+                <td width="50%" valign="top" style="padding:1px 0 0 0;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        @if($sale->tax_amount > 0)
+                        <tr><td><font face="Tahoma" size="1" color="000000">Subtotal</font></td><td align="right"><font face="Tahoma" size="1" color="000000">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</font></td></tr>
+                        <tr><td><font face="Tahoma" size="1" color="000000">PPN {{ number_format($sale->tax_rate,0) }}%</font></td><td align="right"><font face="Tahoma" size="1" color="000000">{{ number_format($sale->tax_amount,0,',','.') }}</font></td></tr>
                         @endif
-                    </td>
-                    <td style="width:52%;">
-                        <table style="width:100%; border-collapse:collapse;">
-                            @if($sale->tax_amount > 0)
-                            <tr><td style="padding:1px 6px 1px 0;">Subtotal</td><td style="text-align:right; padding:1px 0; white-space:nowrap;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
-                            <tr><td style="padding:1px 6px 1px 0;">PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="text-align:right; padding:1px 0; white-space:nowrap;">{{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
-                            @endif
-                            <tr style="border-top:2px solid #000; font-size:15px; font-weight:900;">
-                                <td style="padding:2px 6px 2px 0;">TOTAL</td>
-                                <td style="text-align:right; padding:2px 0; white-space:nowrap;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
-                            </tr>
-                            @if($sale->payment_method === 'cash')
-                            <tr><td style="padding:1px 6px 1px 0;">Tunai</td><td style="text-align:right; padding:1px 0; white-space:nowrap;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
-                            <tr style="font-weight:900;"><td style="padding:1px 6px 1px 0;">Kembali</td><td style="text-align:right; padding:1px 0; white-space:nowrap;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
-                            @else
-                            <tr><td colspan="2" style="text-align:center; padding:1px 0; font-size:12px;">Lunas via {{ $sale->payment_method_label }}</td></tr>
-                            @endif
-                        </table>
-                    </td>
-                </tr>
-            </table>
+                        <tr style="border-top:1px solid #000;">
+                            <td><font face="Tahoma" size="2" color="000000"><b>TOTAL</b></font></td>
+                            <td align="right"><font face="Tahoma" size="2" color="000000"><b>Rp {{ number_format($sale->total_amount,0,',','.') }}</b></font></td>
+                        </tr>
+                        @if($sale->payment_method === 'cash')
+                        <tr><td><font face="Tahoma" size="1" color="000000">Tunai</font></td><td align="right"><font face="Tahoma" size="1" color="000000">Rp {{ number_format($sale->paid_amount,0,',','.') }}</font></td></tr>
+                        <tr><td><font face="Tahoma" size="1" color="000000">Kembali</font></td><td align="right"><font face="Tahoma" size="1" color="000000">Rp {{ number_format($sale->change_amount,0,',','.') }}</font></td></tr>
+                        @else
+                        <tr><td colspan="2" align="center"><font face="Tahoma" size="1" color="000000">Lunas via {{ $sale->payment_method_label }}</font></td></tr>
+                        @endif
+                    </table>
+                </td>
+            </tr>
 
-            {{-- TTD: compact --}}
-            <div style="display:flex; justify-content:flex-end; gap:30px; margin-top:8px; border-top:1px solid #000; padding-top:4px;">
-                <div style="text-align:center; width:130px; font-size:12px;">
-                    <div style="font-weight:900;">Kasir</div>
-                    <div style="height:28px; border-bottom:1px solid #000; margin:3px 10px 3px;"></div>
-                    <div>{{ $sale->user?->name ?? '...........' }}</div>
-                </div>
-                <div style="text-align:center; width:130px; font-size:12px;">
-                    <div style="font-weight:900;">Pelanggan</div>
-                    <div style="height:28px; border-bottom:1px solid #000; margin:3px 10px 3px;"></div>
-                    <div>{{ $sale->buyer_name ? '('.$sale->buyer_name.')' : '( .............. )' }}</div>
-                </div>
-            </div>
+            {{-- TTD --}}
+            <tr><td colspan="2" style="border-top:1px solid #000; padding-top:2px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="50%">&nbsp;</td>
+                        <td width="25%" align="center"><font face="Tahoma" size="1" color="000000">Kasir</font></td>
+                        <td width="25%" align="center"><font face="Tahoma" size="1" color="000000">Pelanggan</font></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td height="24" style="border-bottom:1px solid #000; margin:0 8px;">&nbsp;</td>
+                        <td height="24" style="border-bottom:1px solid #000; margin:0 8px;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td align="center"><font face="Tahoma" size="1" color="000000">{{ $sale->user?->name ?? '...........' }}</font></td>
+                        <td align="center"><font face="Tahoma" size="1" color="000000">{{ $sale->buyer_name ? '('.$sale->buyer_name.')' : '(..............)' }}</font></td>
+                    </tr>
+                </table>
+            </td></tr>
 
-            <div style="border-top:1px solid #000; margin-top:6px; padding-top:3px; font-size:12px; display:flex; justify-content:space-between;">
-                <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
-                <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
-            </div>
-        </div>
+            {{-- Footer --}}
+            <tr><td colspan="2" style="border-top:1px solid #000; padding-top:2px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td><font face="Tahoma" size="1" color="000000">{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</font></td>
+                        <td align="right"><font face="Tahoma" size="1" color="000000">Dicetak: {{ now()->format('d/m/Y H:i') }}</font></td>
+                    </tr>
+                </table>
+            </td></tr>
+
+        </table>
     </div>
 
     {{-- ═══ CETAK A4 ═══ --}}
