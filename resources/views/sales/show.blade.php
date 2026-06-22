@@ -253,9 +253,10 @@
             <div style="margin-bottom:2px;">
                 <div>{{ $item->product->name }}</div>
                 <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                    <colgroup><col style="width:58%"><col style="width:42%"></colgroup>
                     <tr>
                         <td style="padding:0 0 0 6px;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }} {{ $item->unit->unit_name }} x {{ number_format($item->sell_price,0,',','.') }}</td>
-                        <td style="padding:0; text-align:right; white-space:nowrap;">{{ number_format($item->subtotal,0,',','.') }}</td>
+                        <td style="padding:0; text-align:right;">{{ number_format($item->subtotal,0,',','.') }}</td>
                     </tr>
                 </table>
             </div>
@@ -264,17 +265,18 @@
 
             {{-- Totals --}}
             <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                <colgroup><col style="width:55%"><col style="width:45%"></colgroup>
                 @if($sale->tax_amount > 0)
-                <tr><td style="padding:0;">Subtotal</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
-                <tr><td style="padding:0;">PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">Subtotal</td><td style="padding:0; text-align:right;">Rp {{ number_format($sale->subtotal_before_tax,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">PPN {{ number_format($sale->tax_rate,0) }}%</td><td style="padding:0; text-align:right;">Rp {{ number_format($sale->tax_amount,0,',','.') }}</td></tr>
                 @endif
                 <tr>
                     <td style="padding:2px 0; font-size:13px; font-weight:bold;">TOTAL</td>
-                    <td style="padding:2px 0; font-size:13px; font-weight:bold; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
+                    <td style="padding:2px 0; font-size:13px; font-weight:bold; text-align:right;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
                 </tr>
                 @if($sale->payment_method === 'cash')
-                <tr><td style="padding:0;">Tunai</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
-                <tr><td style="padding:0;">Kembali</td><td style="padding:0; text-align:right; white-space:nowrap;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">Tunai</td><td style="padding:0; text-align:right;">Rp {{ number_format($sale->paid_amount,0,',','.') }}</td></tr>
+                <tr><td style="padding:0;">Kembali</td><td style="padding:0; text-align:right;">Rp {{ number_format($sale->change_amount,0,',','.') }}</td></tr>
                 @else
                 <tr><td colspan="2" style="padding:0; text-align:center; font-size:10px;">Lunas via {{ $sale->payment_method_label }}</td></tr>
                 @endif
@@ -562,9 +564,21 @@
         body.mode-struk #print-struk > div {
             background: #fff !important;
             background-color: #fff !important;
+            max-width: 72mm !important;
+            overflow: hidden !important;
         }
         body.mode-struk #print-struk * {
             color: #000 !important;
+        }
+        body.mode-struk #print-struk table {
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
+        body.mode-struk #print-struk td,
+        body.mode-struk #print-struk th {
+            overflow: hidden !important;
+            word-break: break-word !important;
+            white-space: normal !important;
         }
 
         /* A4 */
