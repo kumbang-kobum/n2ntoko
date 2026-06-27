@@ -54,14 +54,15 @@ class StokOpnameController extends Controller implements HasMiddleware
 
         DB::transaction(function () use ($request, $user, &$changed) {
             foreach ($request->input('adjustments') as $adj) {
-                if ($adj['qty_fisik'] === null || $adj['qty_fisik'] === '') {
+                $qtyFisikRaw = $adj['qty_fisik'] ?? null;
+                if ($qtyFisikRaw === null || $qtyFisikRaw === '') {
                     continue;
                 }
 
                 $product  = Product::lockForUpdate()->find($adj['product_id']);
                 if (!$product) continue;
 
-                $qtyFisik   = (float) $adj['qty_fisik'];
+                $qtyFisik   = (float) $qtyFisikRaw;
                 $qtySebelum = (float) $product->stock_qty;
                 $selisih    = $qtyFisik - $qtySebelum;
 
