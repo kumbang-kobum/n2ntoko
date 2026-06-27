@@ -64,7 +64,7 @@ class StokOpnameController extends Controller implements HasMiddleware
 
                 $qtyFisik   = (float) $qtyFisikRaw;
                 $qtySebelum = (float) $product->stock_qty;
-                $selisih    = $qtyFisik - $qtySebelum;
+                $selisih    = round($qtyFisik - $qtySebelum, 4);
 
                 if (abs($selisih) < 0.0001) {
                     continue;

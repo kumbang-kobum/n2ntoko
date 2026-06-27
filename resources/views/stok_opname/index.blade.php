@@ -94,7 +94,7 @@
                                         <input type="number"
                                                name="adjustments[{{ $i }}][qty_fisik]"
                                                x-model="rows[{{ $i }}].qty_fisik"
-                                               @input="calcSelisih({{ $i }}, {{ $product->stock_qty }})"
+                                               @input="calcSelisih({{ $i }}, {{ round($product->stock_qty, 4) }})"
                                                min="0" step="any"
                                                placeholder="{{ number_format($product->stock_qty, 2, ',', '.') }}"
                                                class="w-28 text-center border rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:outline-none transition"
@@ -178,6 +178,14 @@
             },
 
             submitForm() {
+                // Nonaktifkan input baris yang tidak berubah agar tidak
+                // melampaui batas max_input_vars PHP (default 1000)
+                this.rows.forEach((row, i) => {
+                    if (!row.changed) {
+                        this.$el.querySelectorAll(`[name^="adjustments[${i}]"]`)
+                            .forEach(el => el.disabled = true);
+                    }
+                });
                 this.$el.submit();
             },
         };
