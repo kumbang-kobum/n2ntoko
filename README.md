@@ -89,6 +89,8 @@ Akses di `http://localhost:8000`. Login default: lihat `ADMIN_EMAIL` dan `ADMIN_
 
 Gunakan prosedur ini setiap kali ada pembaruan kode. Data di database dan file upload **tidak akan terhapus** selama mengikuti langkah ini.
 
+> **Menjalankan lebih dari satu instance?** (misal: server Grosir dan server Retail terpisah) — **Semua langkah di bawah harus dijalankan di setiap server secara terpisah.** Database masing-masing server berbeda; migrasi, seeder permission, dan cache harus dijalankan di tiap server sendiri.
+
 ### File yang AMAN (tidak disentuh `git pull`)
 | File / Direktori | Isi | Status saat update |
 |---|---|---|
@@ -142,6 +144,8 @@ php artisan up
 ```
 
 > **Catatan migrasi:** Perintah `migrate --force` hanya menjalankan file migrasi yang **belum pernah dijalankan**. Data yang sudah ada di tabel lain tidak tersentuh.
+
+> **Mengapa seeder permission wajib dijalankan?** Setiap kali ada penambahan permission atau role baru di kode (misal: `stok.opname`), permission tersebut hanya ada di database setelah seeder dijalankan. Tanpa langkah ini, user yang harusnya punya akses akan terus ditolak meski kodenya sudah benar.
 
 ---
 
@@ -230,9 +234,11 @@ php artisan optimize
 |---|---|---|
 | `tempnam(): file created in the system's temporary directory` | `storage/framework/views/` tidak writable | Jalankan `chown` + `chmod` di atas, lalu `php artisan view:cache` |
 | Halaman blank / 500 setelah update | File cache lama tidak cocok dengan kode baru | `php artisan optimize:clear && php artisan optimize` |
-| Permission baru tidak berlaku | Cache Spatie belum direset | `php artisan permission:cache-reset` |
+| Fitur tertentu muncul error 403 / "This action is unauthorized" setelah update | Permission baru belum ada di database — seeder belum dijalankan | `php artisan db:seed --class=RolePermissionSeeder --force && php artisan permission:cache-reset` |
+| Permission baru sudah di-seed tapi masih ditolak | Cache Spatie belum direset | `php artisan permission:cache-reset` |
 | User tidak bisa login setelah update | Session cache lama | Hapus isi `storage/framework/sessions/` |
 | Migrasi gagal di production | Tabel sudah ada / konflik | Cek `php artisan migrate:status`, selesaikan manual jika perlu |
+| Error muncul di satu server tapi tidak di server lain | Seeder/migrasi hanya dijalankan di satu instance | Jalankan ulang semua langkah update di server yang bermasalah |
 
 ---
 
