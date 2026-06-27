@@ -24,20 +24,19 @@
                     </svg>
                     Struk 80mm
                 </button>
-                <button onclick="cetakLX310()"
+                <button onclick="openLX310Popup()"
                         class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-800 text-gray-800 text-sm rounded-lg hover:bg-gray-50 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m0 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8m6 0v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4"/>
                     </svg>
                     LX-310 (2-ply)
                 </button>
-                <button onclick="cetakA4()"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Cetak A4
-                </button>
+                @can('penjualan.edit')
+                <a href="{{ route('sales.edit', $sale) }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-2 border border-indigo-300 text-indigo-700 text-sm rounded-lg hover:bg-indigo-50 transition">
+                    Edit
+                </a>
+                @endcan
                 @can('penjualan.batal')
                 <form method="POST" action="{{ route('sales.destroy', $sale) }}"
                       onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
@@ -59,6 +58,11 @@
             @if(session('success'))
             <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm no-print">
                 {{ session('success') }}
+            </div>
+            @endif
+            @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm no-print">
+                {{ session('error') }}
             </div>
             @endif
 
@@ -169,6 +173,38 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    {{-- ═══ POPUP PILIH FORMAT LX-310 ═══ --}}
+    <div id="lx310-popup"
+         onclick="if(event.target===this)closeLX310Popup()"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; align-items:center; justify-content:center; padding:1rem;"
+         class="no-print">
+        <div style="background:#fff; border-radius:1rem; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:320px; overflow:hidden;">
+            <div style="background:#1f2937; padding:1.25rem 1.5rem;">
+                <p style="color:#fff; font-weight:700; font-size:1rem; margin:0;">Cetak LX-310 (2-ply)</p>
+                <p style="color:#9ca3af; font-size:0.75rem; margin:4px 0 0;">Pilih jenis nota yang akan dicetak</p>
+            </div>
+            <div style="padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem;">
+                <button onclick="closeLX310Popup(); setTimeout(cetakLX310, 120)"
+                        style="width:100%; padding:0.875rem 1rem; background:#1f2937; color:#fff; border:none; border-radius:0.625rem; font-size:0.875rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.625rem; text-align:left;"
+                        onmouseover="this.style.background='#111827'" onmouseout="this.style.background='#1f2937'">
+                    <svg style="width:1.1rem;height:1.1rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m0 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8m6 0v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4"/></svg>
+                    <span>Nota Lengkap (2-ply)<br><small style="font-weight:400;color:#9ca3af;">Harga, total, TTD kasir &amp; pembeli</small></span>
+                </button>
+                <button onclick="closeLX310Popup(); setTimeout(cetakLX310Gudang, 120)"
+                        style="width:100%; padding:0.875rem 1rem; background:#fff; color:#1f2937; border:2px solid #d1d5db; border-radius:0.625rem; font-size:0.875rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.625rem; text-align:left;"
+                        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                    <svg style="width:1.1rem;height:1.1rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    <span>Nota Gudang<br><small style="font-weight:400;color:#6b7280;">Nama barang &amp; qty saja — untuk persiapan gudang</small></span>
+                </button>
+                <button onclick="closeLX310Popup()"
+                        style="width:100%; padding:0.625rem; background:transparent; color:#6b7280; border:none; font-size:0.8125rem; cursor:pointer; border-radius:0.5rem;"
+                        onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#6b7280'">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 
@@ -413,289 +449,137 @@
         </table>
     </div>
 
-    {{-- ═══ CETAK A4 ═══ --}}
-    <div id="print-a4" style="display:none">
-        <div class="nota-a4-print" style="font-family:'Courier New', Courier, monospace; font-size:14px; font-weight:700; color:#000 !important; background:#fff !important; line-height:1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+    {{-- ═══ NOTA GUDANG LX-310 (nama barang + qty saja) ═══ --}}
+    <div id="print-lx310-gudang" style="display:none">
+        <table width="100%" bgcolor="#ffffff" border="0" cellspacing="0" cellpadding="0" style="font-family:Tahoma,Arial,sans-serif; font-size:12px; color:#000000;">
 
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:12px;">
-                <div>
-                    <div style="font-size:24px; font-weight:bold; color:#000 !important;">{{ $cfg['toko_nama'] ?? config('app.name') }}</div>
-                    @if(!empty($cfg['toko_tagline']))<div style="font-size:13px; margin-top:2px; font-weight:bold;">{{ $cfg['toko_tagline'] }}</div>@endif
-                    @if(!empty($cfg['nota_header']))<div style="font-size:13px; margin-top:2px;">{{ $cfg['nota_header'] }}</div>@endif
-                    @if(!empty($cfg['toko_alamat']))<div style="font-size:13px; margin-top:4px;">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</div>@endif
-                    @if(!empty($cfg['toko_telepon']))<div style="font-size:13px;">Telp: {{ $cfg['toko_telepon'] }}</div>@endif
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:18px; font-weight:bold; text-transform:uppercase; border:2px solid #000; padding:6px 14px; display:inline-block; letter-spacing:1px; color:#000 !important;">
-                        NOTA PENJUALAN
-                    </div>
-                    <div style="margin-top:8px; font-size:13px; line-height:1.6; color:#000 !important;">
-                        <div><b>No. Faktur</b> : {{ $sale->invoice_number }}</div>
-                        <div><b>Tanggal</b>    : {{ $sale->sale_date->translatedFormat('d F Y') }} {{ $sale->created_at->format('H:i') }}</div>
-                        <div><b>Kasir</b>      : {{ $sale->user?->name ?? '-' }}</div>
-                        <div><b>Bayar</b>      : {{ $sale->payment_method_label }}</div>
-                    </div>
-                </div>
-            </div>
+            {{-- Header --}}
+            <tr><td colspan="5" align="center" style="border-bottom:2px solid #000; padding-bottom:3px;">
+                <font face="Tahoma" size="3" color="000000"><b>{{ strtoupper($cfg['toko_nama'] ?? config('app.name')) }}</b></font><br>
+                @if(!empty($cfg['toko_alamat']))<font face="Tahoma" size="1" color="000000">{{ $cfg['toko_alamat'] }}@if(!empty($cfg['toko_kota'])), {{ $cfg['toko_kota'] }}@endif</font><br>@endif
+                <font face="Tahoma" size="2" color="000000"><b>==  NOTA GUDANG — PENJUALAN  ==</b></font>
+            </td></tr>
 
-            <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:12px; color:#000 !important;">
-                <thead>
-                    <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <th style="padding:7px 8px; text-align:center; width:4%; color:#000 !important;">No</th>
-                        <th style="padding:7px 8px; text-align:left; color:#000 !important;">Produk</th>
-                        <th style="padding:7px 8px; text-align:center; width:10%; color:#000 !important;">Satuan</th>
-                        <th style="padding:7px 8px; text-align:right; width:10%; color:#000 !important;">Qty</th>
-                        <th style="padding:7px 8px; text-align:right; width:18%; color:#000 !important;">Harga</th>
-                        <th style="padding:7px 8px; text-align:right; width:18%; color:#000 !important;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($sale->items as $i => $item)
-                    <tr style="border-bottom:1px solid #000;">
-                        <td style="padding:6px 8px; text-align:center; color:#000 !important; font-weight:bold;">{{ $i + 1 }}</td>
-                        <td style="padding:6px 8px; color:#000 !important;">
-                            <div style="font-weight:bold;">{{ $item->product->name }}</div>
-                        </td>
-                        <td style="padding:6px 8px; text-align:center; color:#000 !important;">{{ $item->unit->unit_name }}</td>
-                        <td style="padding:6px 8px; text-align:right; color:#000 !important; font-weight:bold;">{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</td>
-                        <td style="padding:6px 8px; text-align:right; color:#000 !important;">{{ number_format($item->sell_price,0,',','.') }}</td>
-                        <td style="padding:6px 8px; text-align:right; font-weight:bold; color:#000 !important;">{{ number_format($item->subtotal,0,',','.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    @if($sale->tax_amount > 0)
-                    <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Subtotal</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">{{ number_format($sale->subtotal_before_tax,0,',','.') }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">PPN {{ number_format($sale->tax_rate,0) }}%</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->tax_amount,0,',','.') }}</td>
-                    </tr>
-                    @endif
-                    <tr style="border-top:2px solid #000; border-bottom:2px solid #000;">
-                        <td colspan="5" style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">TOTAL</td>
-                        <td style="padding:8px; text-align:right; font-weight:bold; font-size:16px; color:#000 !important;">Rp {{ number_format($sale->total_amount,0,',','.') }}</td>
-                    </tr>
-                    @if($sale->payment_method === 'cash')
-                    <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Dibayar (Tunai)</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->paid_amount,0,',','.') }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Kembalian</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ number_format($sale->change_amount,0,',','.') }}</td>
-                    </tr>
-                    @else
-                    <tr>
-                        <td colspan="5" style="padding:5px 8px; text-align:right; font-size:13px; color:#000 !important;">Lunas via</td>
-                        <td style="padding:5px 8px; text-align:right; font-size:13px; font-weight:bold; color:#000 !important;">{{ $sale->payment_method_label }}</td>
-                    </tr>
-                    @endif
-                </tfoot>
-            </table>
-
-            @if($sale->notes)
-            <div style="border:1px solid #000; padding:8px; margin-bottom:12px; font-size:13px; color:#000 !important;">
-                <b>Catatan:</b> {{ $sale->notes }}
-            </div>
+            {{-- Info singkat --}}
+            <tr>
+                <td colspan="3" style="padding:2px 0;"><font face="Tahoma" size="1" color="000000">No: <b>{{ $sale->invoice_number }}</b></font></td>
+                <td colspan="2" align="right" style="padding:2px 0;"><font face="Tahoma" size="1" color="000000">{{ $sale->sale_date->format('d/m/Y') }}</font></td>
+            </tr>
+            @if($sale->buyer_name)
+            <tr>
+                <td colspan="5" style="padding:1px 0;"><font face="Tahoma" size="1" color="000000">Pembeli: <b>{{ $sale->buyer_name }}</b></font></td>
+            </tr>
             @endif
+            <tr>
+                <td colspan="5" style="border-bottom:1px solid #000; padding-bottom:2px;">
+                    <font face="Tahoma" size="1" color="000000">Kasir: {{ $sale->user?->name ?? '-' }}</font>
+                </td>
+            </tr>
 
-            <div style="display:flex; justify-content:flex-end; margin-top:10px; gap:32px;">
-                <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
-                    <div style="font-weight:bold;">Kasir</div>
-                    <div style="height:32px; border-bottom:1px solid #000; margin:5px 16px 3px;"></div>
-                    <div>{{ $sale->user?->name ?? '...........' }}</div>
-                </div>
-                <div style="text-align:center; font-size:13px; width:160px; color:#000 !important;">
-                    <div style="font-weight:bold;">Pelanggan</div>
-                    <div style="height:32px; border-bottom:1px solid #000; margin:5px 16px 3px;"></div>
-                    <div>{{ $sale->buyer_name ? '( '.$sale->buyer_name.' )' : '( ........................ )' }}</div>
-                </div>
-            </div>
+            {{-- Tabel barang --}}
+            <tr>
+                <td width="5%" align="center" style="border-bottom:2px solid #000; padding:2px 0;"><font face="Tahoma" size="1" color="000000"><b>No</b></font></td>
+                <td style="border-bottom:2px solid #000; padding:2px 4px;"><font face="Tahoma" size="2" color="000000"><b>Nama Barang</b></font></td>
+                <td width="12%" align="right" style="border-bottom:2px solid #000; padding:2px 0;"><font face="Tahoma" size="2" color="000000"><b>Qty</b></font></td>
+                <td width="12%" align="center" style="border-bottom:2px solid #000; padding:2px 4px;"><font face="Tahoma" size="2" color="000000"><b>Sat</b></font></td>
+                <td width="8%" align="center" style="border-bottom:2px solid #000; padding:2px 0;"><font face="Tahoma" size="1" color="000000"><b>[ ]</b></font></td>
+            </tr>
+            @foreach($sale->items as $i => $item)
+            <tr>
+                <td align="center" style="border-bottom:1px dashed #aaa; padding:3px 0;"><font face="Tahoma" size="1" color="000000">{{ $i+1 }}</font></td>
+                <td style="border-bottom:1px dashed #aaa; padding:3px 4px;"><font face="Tahoma" size="2" color="000000"><b>{{ $item->product->name }}</b></font></td>
+                <td align="right" style="border-bottom:1px dashed #aaa; padding:3px 0;"><font face="Tahoma" size="2" color="000000"><b>{{ rtrim(rtrim(number_format($item->qty,2,',','.'), '0'), ',') }}</b></font></td>
+                <td align="center" style="border-bottom:1px dashed #aaa; padding:3px 4px;"><font face="Tahoma" size="1" color="000000">{{ $item->unit->unit_name }}</font></td>
+                <td align="center" style="border-bottom:1px dashed #aaa; padding:3px 0;"><font face="Tahoma" size="1" color="000000">[ ]</font></td>
+            </tr>
+            @endforeach
 
-            <div style="border-top:1px solid #000; margin-top:10px; padding-top:4px; display:flex; justify-content:space-between; font-size:12px; color:#000 !important;">
-                <span>{{ $cfg['struk_footer'] ?? 'Terima kasih atas kunjungan Anda!' }}</span>
-                <span>Dicetak: {{ now()->format('d/m/Y H:i') }}</span>
-            </div>
-        </div>
+            {{-- Footer --}}
+            <tr><td colspan="5" style="border-top:2px solid #000; padding-top:3px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td><font face="Tahoma" size="1" color="000000">Total: <b>{{ $sale->items->count() }} item</b></font></td>
+                        <td align="right"><font face="Tahoma" size="1" color="000000">Dicetak: {{ now()->format('d/m/Y H:i') }}</font></td>
+                    </tr>
+                </table>
+            </td></tr>
+
+            {{-- TTD gudang --}}
+            <tr><td colspan="5" style="padding-top:6px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="50%" align="center"><font face="Tahoma" size="1" color="000000">Disiapkan Oleh</font></td>
+                        <td width="50%" align="center"><font face="Tahoma" size="1" color="000000">Diserahkan Kepada</font></td>
+                    </tr>
+                    <tr>
+                        <td height="28" style="border-bottom:1px solid #000;">&nbsp;</td>
+                        <td height="28" style="border-bottom:1px solid #000;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="center"><font face="Tahoma" size="1" color="000000">( ................... )</font></td>
+                        <td align="center"><font face="Tahoma" size="1" color="000000">( ................... )</font></td>
+                    </tr>
+                </table>
+            </td></tr>
+
+        </table>
     </div>
 
     @push('styles')
     <style>
-    /* Default layar: sembunyikan area cetak */
-    #print-struk, #print-a4, #print-lx310 { display: none; }
+    #print-struk, #print-lx310, #print-lx310-gudang { display: none; }
 
     @media print {
-        /* Sembunyikan semua elemen layar */
-        #screen-content, nav, header, .no-print { display: none !important; }
-        html,
-        body,
-        body.mode-a4,
-        body.mode-a4 > div,
-        body.mode-a4 main {
-            background: #fff !important;
-        }
-        body.mode-a4 > div {
-            min-height: 0 !important;
-        }
-        * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+        #screen-content, #lx310-popup, nav, header, .no-print { display: none !important; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         /* Struk 80mm */
-        body.mode-struk {
-            background: #fff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        body.mode-struk * {
-            background: transparent !important;
-            background-color: transparent !important;
-            box-shadow: none !important;
-        }
-        body.mode-struk #print-struk {
-            display: block !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        body.mode-struk #print-struk > div {
-            background: #fff !important;
-            background-color: #fff !important;
-            max-width: 72mm !important;
-            overflow: hidden !important;
-        }
-        body.mode-struk #print-struk * {
-            color: #000 !important;
-        }
-        body.mode-struk #print-struk table {
-            table-layout: fixed !important;
-            width: 100% !important;
-        }
-        body.mode-struk #print-struk td,
-        body.mode-struk #print-struk th {
-            overflow: hidden !important;
-            word-break: break-word !important;
-            white-space: normal !important;
-        }
+        body.mode-struk { background:#fff !important; margin:0 !important; padding:0 !important; }
+        body.mode-struk * { background:transparent !important; background-color:transparent !important; box-shadow:none !important; }
+        body.mode-struk #print-struk { display:block !important; margin:0 !important; padding:0 !important; }
+        body.mode-struk #print-struk > div { background:#fff !important; max-width:72mm !important; overflow:hidden !important; }
+        body.mode-struk #print-struk * { color:#000 !important; }
+        body.mode-struk #print-struk table { table-layout:fixed !important; width:100% !important; }
+        body.mode-struk #print-struk td, body.mode-struk #print-struk th { overflow:hidden !important; word-break:break-word !important; white-space:normal !important; }
 
-        /* A4 */
-        body.mode-a4 #print-a4 {
-            display: block !important;
-        }
-        body.mode-a4 #print-a4,
-        body.mode-a4 #print-a4 * {
-            background: transparent !important;
-            background-color: transparent !important;
-            box-shadow: none !important;
-            color: #000 !important;
-            text-shadow: none !important;
-        }
+        /* LX-310 nota lengkap */
+        body.mode-lx310 { background:#fff !important; margin:0 !important; padding:0 !important; }
+        body.mode-lx310 * { background:transparent !important; background-color:transparent !important; box-shadow:none !important; }
+        body.mode-lx310 #print-lx310 { display:block !important; background:#fff !important; }
+        body.mode-lx310 #print-lx310 * { color:#000 !important; text-shadow:none !important; }
 
-        /* LX-310 — layout khusus dot matrix */
-        body.mode-lx310 {
-            background: #fff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        body.mode-lx310 * {
-            background: transparent !important;
-            background-color: transparent !important;
-            box-shadow: none !important;
-        }
-        body.mode-lx310 #print-lx310 {
-            display: block !important;
-        }
-        body.mode-lx310 #print-lx310 > div {
-            background: #fff !important;
-        }
-        body.mode-lx310 #print-lx310 * {
-            color: #000 !important;
-            text-shadow: none !important;
-        }
-        body.mode-a4 #print-a4 .nota-a4-print {
-            background: #fff !important;
-            color: #000 !important;
-            font-size: 12pt !important;
-            font-weight: 700 !important;
-            line-height: 1.08 !important;
-        }
-        body.mode-a4 #print-a4 .nota-a4-print table {
-            margin-bottom: 6px !important;
-        }
-        body.mode-a4 #print-a4 th,
-        body.mode-a4 #print-a4 td {
-            color: #000 !important;
-            font-weight: 700;
-            line-height: 1.05 !important;
-            padding: 2px 5px !important;
-        }
-        body.mode-a4 #print-a4 thead th {
-            padding-top: 3px !important;
-            padding-bottom: 3px !important;
-        }
-        body.mode-a4 #print-a4 tfoot td {
-            padding-top: 3px !important;
-            padding-bottom: 3px !important;
-        }
-        body.mode-a4 #print-a4 table,
-        body.mode-a4 #print-a4 tr,
-        body.mode-a4 #print-a4 th,
-        body.mode-a4 #print-a4 td {
-            border-color: #000 !important;
-        }
+        /* LX-310 nota gudang */
+        body.mode-lx310-gudang { background:#fff !important; margin:0 !important; padding:0 !important; }
+        body.mode-lx310-gudang * { background:transparent !important; background-color:transparent !important; box-shadow:none !important; }
+        body.mode-lx310-gudang #print-lx310-gudang { display:block !important; background:#fff !important; }
+        body.mode-lx310-gudang #print-lx310-gudang * { color:#000 !important; text-shadow:none !important; }
     }
     </style>
     @endpush
 
     @push('scripts')
     <script>
-    function cetakStruk() {
-        // Inject ukuran halaman 80mm
+    function _setPrintMode(mode, pageSize) {
         let ps = document.getElementById('ps-override');
         if (ps) ps.remove();
         ps = document.createElement('style');
         ps.id = 'ps-override';
-        ps.textContent = '@media print { @page { size: 80mm auto; margin: 3mm; } }';
+        ps.textContent = '@media print { @page { ' + pageSize + ' } }';
         document.head.appendChild(ps);
-
-        document.body.classList.remove('mode-a4', 'mode-lx310');
-        document.body.classList.add('mode-struk');
+        document.body.className = document.body.className
+            .replace(/\bmode-\S+/g, '').trim();
+        document.body.classList.add(mode);
         window.print();
-        setTimeout(() => document.body.classList.remove('mode-struk'), 1500);
+        setTimeout(() => document.body.classList.remove(mode), 1500);
     }
 
-    function cetakA4() {
-        let ps = document.getElementById('ps-override');
-        if (ps) ps.remove();
-        ps = document.createElement('style');
-        ps.id = 'ps-override';
-        ps.textContent = '@media print { @page { size: A4 portrait; margin: 12mm 15mm; } }';
-        document.head.appendChild(ps);
+    function cetakStruk()         { _setPrintMode('mode-struk',        'size:80mm auto; margin:3mm;'); }
+    function cetakLX310()         { _setPrintMode('mode-lx310',        'size:A4 portrait; margin:10mm 15mm;'); }
+    function cetakLX310Gudang()   { _setPrintMode('mode-lx310-gudang', 'size:A4 portrait; margin:10mm 15mm;'); }
 
-        document.body.classList.remove('mode-struk', 'mode-lx310');
-        document.body.classList.add('mode-a4');
-        window.print();
-        setTimeout(() => document.body.classList.remove('mode-a4'), 1500);
-    }
-
-    function cetakLX310() {
-        let ps = document.getElementById('ps-override');
-        if (ps) ps.remove();
-        ps = document.createElement('style');
-        ps.id = 'ps-override';
-        // Driver LX-310 di-set A4, gunakan A4 agar tidak ada scaling paksa dari browser
-        ps.textContent = '@media print { @page { size: A4 portrait; margin: 10mm 15mm; } }';
-        document.head.appendChild(ps);
-
-        document.body.classList.remove('mode-struk', 'mode-a4');
-        document.body.classList.add('mode-lx310');
-        window.print();
-        setTimeout(() => document.body.classList.remove('mode-lx310'), 1500);
-    }
-
+    function openLX310Popup()  { document.getElementById('lx310-popup').style.display = 'flex'; }
+    function closeLX310Popup() { document.getElementById('lx310-popup').style.display = 'none'; }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLX310Popup(); });
     </script>
     @endpush
 

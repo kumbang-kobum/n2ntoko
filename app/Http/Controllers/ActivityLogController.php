@@ -43,13 +43,26 @@ class ActivityLogController extends Controller implements HasMiddleware
         }
 
         if ($request->filled('event')) {
-            $query->where('event', $request->event);
+            if ($request->event === 'stok_opname') {
+                $query->where('log_name', 'stok_opname');
+            } else {
+                $query->where('event', $request->event)
+                      ->where('log_name', '!=', 'stok_opname');
+            }
         }
 
         if ($request->filled('user')) {
-            $query->whereHasMorph('causer', '*', fn($q) =>
-                $q->where('name', 'like', '%' . $request->user . '%')
-            );
+            $query->where(function ($q) use ($request) {
+                $q->whereHasMorph('causer', '*', fn($q2) =>
+                    $q2->where('name', 'like', '%' . $request->user . '%')
+                )->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(properties, '$.causer_name')) LIKE ?",
+                    ['%' . $request->user . '%']);
+            });
+        }
+
+        if ($request->filled('nama')) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(properties, '$.subject_name')) LIKE ?",
+                ['%' . $request->nama . '%']);
         }
 
         if ($request->filled('dari')) {

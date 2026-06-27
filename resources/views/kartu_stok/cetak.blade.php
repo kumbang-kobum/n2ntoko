@@ -299,6 +299,8 @@
                 $refLabel = match($row->reference_type) {
                     'purchase'    => 'Pembelian',
                     'sale'        => 'Penjualan',
+                    'sale_cancel' => 'Batal Penjualan',
+                    'sale_edit'   => 'Edit Penjualan',
                     'stok_opname' => 'Stok Opname',
                     default       => ucfirst($row->reference_type),
                 };

@@ -38,7 +38,7 @@
                             <x-dropdown-link :href="route('categories.index')">Kategori</x-dropdown-link>
                             <x-dropdown-link :href="route('kartu-stok.index')">Kartu Stok</x-dropdown-link>
                             @endcan
-                            @can('produk.edit')
+                            @can('stok.opname')
                             <x-dropdown-link :href="route('stok-opname.index')">Stok Opname</x-dropdown-link>
                             @endcan
                             @can('pembelian.lihat')
@@ -218,7 +218,7 @@
             <x-responsive-nav-link :href="route('categories.index')">Kategori</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('kartu-stok.index')">Kartu Stok</x-responsive-nav-link>
             @endcan
-            @can('produk.edit')
+            @can('stok.opname')
             <x-responsive-nav-link :href="route('stok-opname.index')">Stok Opname</x-responsive-nav-link>
             @endcan
             @can('pembelian.lihat')

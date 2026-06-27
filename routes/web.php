@@ -103,7 +103,7 @@ Route::middleware('auth')->group(function () {
         Route::get('api/customers',              [CustomerController::class, 'apiList'])->name('api.customers');
     });
 
-    Route::resource('sales', SaleController::class)->only(['index','create','store','show','destroy']);
+    Route::resource('sales', SaleController::class)->only(['index','create','store','show','edit','update','destroy']);
 
     Route::resource('customers', CustomerController::class)->except(['create','edit','show']);
 

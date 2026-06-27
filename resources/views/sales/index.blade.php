@@ -124,13 +124,17 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('sales.show', $s) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Lihat</a>
                                         @if($s->status === 'paid')
-                                        @can('penjualan.batal')
-                                        <form method="POST" action="{{ route('sales.destroy', $s) }}"
-                                              onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium">Batal</button>
-                                        </form>
-                                        @endcan
+                                            @can('penjualan.edit')
+                                                <a href="{{ route('sales.edit', $s) }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Edit</a>
+                                            @endcan
+
+                                            @can('penjualan.batal')
+                                                <form method="POST" action="{{ route('sales.destroy', $s) }}"
+                                                      onsubmit="return confirm('Batalkan penjualan ini? Stok akan dikembalikan.')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium">Batal</button>
+                                                </form>
+                                            @endcan
                                         @endif
                                     </div>
                                 </td>

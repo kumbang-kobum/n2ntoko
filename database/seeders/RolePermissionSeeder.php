@@ -19,6 +19,7 @@ class RolePermissionSeeder extends Seeder
             'produk.tambah',
             'produk.edit',
             'produk.hapus',
+            'stok.opname',
             // Pembelian
             'pembelian.lihat',
             'pembelian.tambah',
@@ -28,6 +29,7 @@ class RolePermissionSeeder extends Seeder
             // Penjualan
             'penjualan.lihat',
             'penjualan.tambah',
+            'penjualan.edit',
             'penjualan.batal',
             // Pelanggan
             'pelanggan.lihat',
@@ -98,6 +100,7 @@ class RolePermissionSeeder extends Seeder
             'produk.lihat',
             'penjualan.lihat',
             'penjualan.tambah',
+            'penjualan.edit',
             'penjualan.batal',
             'pelanggan.lihat',
             'pelanggan.tambah',
@@ -110,6 +113,7 @@ class RolePermissionSeeder extends Seeder
             'produk.lihat',
             'produk.tambah',
             'produk.edit',
+            'stok.opname',
             'pembelian.lihat',
             'pembelian.tambah',
             'pembelian.edit',

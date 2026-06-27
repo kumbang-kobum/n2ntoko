@@ -1,4 +1,10 @@
 <x-app-layout>
+    @php
+        $isEdit = isset($sale);
+        $formAction = $isEdit ? route('sales.update', $sale) : route('sales.store');
+        $headerTitle = $isEdit ? 'Kasir - Edit Transaksi' : 'Kasir - Transaksi Baru';
+    @endphp
+
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <a href="{{ route('sales.index') }}" class="text-gray-400 hover:text-gray-600 transition p-1">
@@ -6,7 +12,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <h2 class="text-lg md:text-xl font-semibold text-gray-800">Kasir — Transaksi Baru</h2>
+            <h2 class="text-lg md:text-xl font-semibold text-gray-800">{{ $headerTitle }}</h2>
         </div>
     </x-slot>
 
@@ -19,8 +25,11 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('sales.store') }}" x-data="kasirForm({{ $ppnDefault }}, @json($grosirSamePriceWarning))">
+            <form method="POST" action="{{ $formAction }}" x-data="kasirForm({{ $ppnDefault }}, {{ Js::from($grosirSamePriceWarning) }}, {{ Js::from($initialData ?? null) }})">
                 @csrf
+                @if($isEdit)
+                    @method('PUT')
+                @endif
 
                 {{-- Layout: mobile=stack, tablet portrait=stack, tablet landscape/desktop=2col --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -183,7 +192,7 @@
                                     </tbody>
                                     <tfoot x-show="items.length > 0" class="bg-gray-50 border-t-2 border-gray-200">
                                         <tr>
-                                            <td colspan="4" class="px-4 py-3 text-right font-bold text-gray-700">TOTAL</td>
+                                            <td colspan="4" class="px-4 py-3 text-right font-bold text-gray-700">Subtotal</td>
                                             <td class="px-3 py-3 text-right font-bold text-blue-600 text-base"
                                                 x-text="'Rp '+formatNum(grandTotal)"></td>
                                             <td></td>
@@ -206,14 +215,14 @@
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">No. Faktur</label>
                                     <input type="text" name="invoice_number"
-                                           value="{{ old('invoice_number', $invoice) }}"
+                                           value="{{ old('invoice_number', $isEdit ? $sale->invoice_number : $invoice) }}"
                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                   focus:ring-2 focus:ring-blue-500 font-mono bg-gray-50">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">Tanggal</label>
                                     <input type="date" name="sale_date"
-                                           value="{{ old('sale_date', date('Y-m-d')) }}"
+                                           value="{{ old('sale_date', $isEdit ? $sale->sale_date->format('Y-m-d') : date('Y-m-d')) }}"
                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                   focus:ring-2 focus:ring-blue-500">
                                 </div>
@@ -286,16 +295,18 @@
                                 </label>
                                 <input type="text" name="buyer_name"
                                        placeholder="Ketik nama pelanggan..."
+                                       value="{{ old('buyer_name', $isEdit ? $sale->buyer_name : '') }}"
                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                               focus:ring-2 focus:ring-blue-500 bg-gray-50">
                             </div>
 
                             {{-- Catatan --}}
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Catatan</label>
-                                <input type="text" name="notes" placeholder="Opsional..."
-                                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
-                                              focus:ring-2 focus:ring-blue-500 bg-gray-50">
+	                                <label class="block text-xs font-medium text-gray-500 mb-1">Catatan</label>
+	                                <input type="text" name="notes" placeholder="Opsional..."
+	                                       value="{{ old('notes', $isEdit ? $sale->notes : '') }}"
+	                                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
+	                                              focus:ring-2 focus:ring-blue-500 bg-gray-50">
                             </div>
                         </div>
 
@@ -365,7 +376,7 @@
                                     Kurang Rp <span x-text="formatNum(grandTotal + taxAmount - paidAmount)"></span>
                                 </span>
                                 <span x-show="items.length > 0 && (payMethod !== 'cash' || paidAmount >= grandTotal + taxAmount)">
-                                    ✓ Proses Pembayaran
+                                    {{ $isEdit ? 'Simpan Perubahan' : 'Proses Pembayaran' }}
                                 </span>
                             </button>
                         </div>
@@ -378,19 +389,19 @@
 
 @push('scripts')
 <script>
-function kasirForm(defaultTaxRate = 0, grosirSamePriceWarningEnabled = true) {
+function kasirForm(defaultTaxRate = 0, grosirSamePriceWarningEnabled = true, initialData = null) {
     return {
         items:       [],
         searchQuery: '',
         barcodeInput:'',
         results:     [],
         showSearch:  false,
-        priceType:   'eceran',
-        payMethod:   'cash',
-        taxRate:     defaultTaxRate,
+        priceType:   initialData?.price_type ?? 'eceran',
+        payMethod:   initialData?.payment_method ?? 'cash',
+        taxRate:     parseFloat(initialData?.tax_rate ?? defaultTaxRate) || 0,
         taxAmount:   0,
         taxOptions:  [0, 11, 12],
-        paidAmount:  0,
+        paidAmount:  parseFloat(initialData?.paid_amount ?? 0) || 0,
         _key:        0,
         grosirSamePriceWarningEnabled,
 
@@ -407,7 +418,38 @@ function kasirForm(defaultTaxRate = 0, grosirSamePriceWarningEnabled = true) {
             this.taxAmount = Math.round(this.grandTotal * this.taxRate / 100);
         },
 
-        init() {},
+        init() {
+            if (!initialData) {
+                this.calcTax();
+                return;
+            }
+
+            this.items = (initialData.items || []).map(item => {
+                const units = item.units || [];
+                const selectedUnit = units.find(u => String(u.id) === String(item.unit_id)) || units[0] || {};
+                const qty = parseFloat(item.qty) || 0;
+                const sellPrice = parseFloat(item.sell_price) || 0;
+
+                return {
+                    _key:          ++this._key,
+                    product_id:    item.product_id,
+                    product_name:  item.product_name,
+                    unit_id:       String(item.unit_id),
+                    unit_name:     item.unit_name || selectedUnit.unit_name || '',
+                    units,
+                    stock_qty:     parseFloat(item.stock_qty) || 0,
+                    stock_display: item.stock_display ?? selectedUnit.stock_display ?? item.stock_qty ?? 0,
+                    qty,
+                    sell_price:    sellPrice,
+                    subtotal:      parseFloat(item.subtotal) || (qty * sellPrice),
+                    auto_grosir:   false,
+                    grosir_same_price_warning: false,
+                    min_qty_grosir:selectedUnit.min_qty_grosir ?? 0,
+                };
+            });
+
+            this.calcTax();
+        },
 
         formatNum(v) {
             return (parseFloat(v)||0).toLocaleString('id-ID', {maximumFractionDigits:0});
@@ -435,7 +477,8 @@ function kasirForm(defaultTaxRate = 0, grosirSamePriceWarningEnabled = true) {
         },
 
         addProduct(product) {
-            const baseUnit = product.units.find(u => u.is_base) ?? product.units[0];
+            const baseUnit = product.units.find(u => u.is_base)
+                ?? product.units.reduce((min, u) => (u.conversion < min.conversion ? u : min), product.units[0]);
             this.addProductWithUnit(product, baseUnit?.id);
             this.searchQuery = '';
             this.results     = [];

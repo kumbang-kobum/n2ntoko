@@ -14,7 +14,7 @@ class StokOpnameController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:produk.edit'),
+            new Middleware('permission:stok.opname'),
         ];
     }
 
@@ -50,10 +50,10 @@ class StokOpnameController extends Controller implements HasMiddleware
         ]);
 
         $changed = 0;
+        $user    = auth()->user();
 
-        DB::transaction(function () use ($request, &$changed) {
+        DB::transaction(function () use ($request, $user, &$changed) {
             foreach ($request->input('adjustments') as $adj) {
-                // Skip if qty_fisik is not provided
                 if ($adj['qty_fisik'] === null || $adj['qty_fisik'] === '') {
                     continue;
                 }
@@ -61,11 +61,12 @@ class StokOpnameController extends Controller implements HasMiddleware
                 $product  = Product::lockForUpdate()->find($adj['product_id']);
                 if (!$product) continue;
 
-                $qtyFisik = (float) $adj['qty_fisik'];
-                $selisih  = $qtyFisik - (float) $product->stock_qty;
+                $qtyFisik   = (float) $adj['qty_fisik'];
+                $qtySebelum = (float) $product->stock_qty;
+                $selisih    = $qtyFisik - $qtySebelum;
 
                 if (abs($selisih) < 0.0001) {
-                    continue; // tidak ada perubahan
+                    continue;
                 }
 
                 StockLedger::create([
@@ -74,13 +75,32 @@ class StokOpnameController extends Controller implements HasMiddleware
                     'movement_type'   => 'adjustment',
                     'reference_type'  => 'stok_opname',
                     'reference_id'    => null,
-                    'stock_before'    => $product->stock_qty,
+                    'stock_before'    => $qtySebelum,
                     'stock_after'     => $qtyFisik,
                     'cost_per_unit'   => $product->avg_cost,
                     'notes'           => $adj['notes'] ?? 'Stok opname',
                 ]);
 
+                // Update stok tanpa memicu auto-log model (agar tidak duplikat)
+                $product->disableLogging();
                 $product->update(['stock_qty' => $qtyFisik]);
+                $product->enableLogging();
+
+                // Log manual dengan keterangan lengkap
+                activity('stok_opname')
+                    ->causedBy($user)
+                    ->performedOn($product)
+                    ->event('stok_opname')
+                    ->withProperties([
+                        'causer_name'  => $user?->name ?? 'Sistem',
+                        'subject_name' => $product->name,
+                        'qty_sebelum'  => $qtySebelum,
+                        'qty_fisik'    => $qtyFisik,
+                        'selisih'      => $selisih,
+                        'catatan'      => $adj['notes'] ?? '',
+                    ])
+                    ->log('Stok opname: ' . $product->name);
+
                 $changed++;
             }
         });
