@@ -32,8 +32,13 @@ class ProductController extends Controller implements HasMiddleware
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('sku', 'like', "%{$s}%");
+                  ->orWhere('sku', 'like', "%{$s}%")
+                  ->orWhereHas('barcodes', fn($q2) => $q2->where('barcode', 'like', "%{$s}%"));
             });
+        }
+
+        if ($request->filled('barcode')) {
+            $query->whereHas('barcodes', fn($q) => $q->where('barcode', $request->barcode));
         }
 
         if ($request->filled('category')) {

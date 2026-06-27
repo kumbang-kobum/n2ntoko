@@ -40,11 +40,23 @@
 
             {{-- Filter --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                <form method="GET" class="flex flex-wrap gap-3">
+                <form method="GET" id="products-filter-form" class="flex flex-wrap gap-3">
                     <div class="flex-1 min-w-[180px]">
                         <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama / SKU..."
+                            placeholder="Cari nama / SKU / barcode..."
                             class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                    </div>
+                    <div class="relative min-w-[180px]">
+                        <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v1m0 14v1M4 12H3m18 0h-1M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707.707M17.657 6.343l-.707.707"/>
+                            </svg>
+                        </div>
+                        <input type="text" name="barcode" id="barcode-input" value="{{ request('barcode') }}"
+                            placeholder="Scan barcode..."
+                            autocomplete="off"
+                            class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     </div>
                     <select name="category" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Kategori</option>
@@ -64,10 +76,18 @@
                         <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Non-aktif</option>
                     </select>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Cari</button>
-                    @if(request()->hasAny(['search','category','stok','status']))
+                    @if(request()->hasAny(['search','category','stok','status','barcode']))
                     <a href="{{ route('products.index') }}" class="border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Reset</a>
                     @endif
                 </form>
+                <script>
+                    document.getElementById('barcode-input').addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            document.getElementById('products-filter-form').submit();
+                        }
+                    });
+                </script>
             </div>
 
             {{-- Tabel --}}

@@ -322,7 +322,7 @@ function purchaseForm() {
             item.product_id    = product.id;
             item.product_name  = product.name;
             item.units         = product.units;
-            item.unit_id       = product.units.find(u => u.is_base)?.id ?? (product.units[0]?.id ?? '');
+            item.unit_id       = product.units.reduce((max, u) => (u.conversion > max.conversion ? u : max), product.units[0])?.id ?? '';
             item.suggestions   = [];
             item.showSuggestions = false;
         },

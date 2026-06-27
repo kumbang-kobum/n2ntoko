@@ -257,7 +257,7 @@ class PurchaseController extends Controller implements HasMiddleware
             'id'   => $p->id,
             'name' => $p->name,
             'sku'  => $p->sku,
-            'units'=> $p->units->map(fn($u) => [
+            'units'=> $p->units->sortByDesc('conversion')->values()->map(fn($u) => [
                 'id'         => $u->id,
                 'unit_name'  => $u->unit_name,
                 'conversion' => (float) $u->conversion,
@@ -282,7 +282,7 @@ class PurchaseController extends Controller implements HasMiddleware
                 'id'   => $pb->product->id,
                 'name' => $pb->product->name,
                 'sku'  => $pb->product->sku,
-                'units'=> $pb->product->units->map(fn($u) => [
+                'units'=> $pb->product->units->sortByDesc('conversion')->values()->map(fn($u) => [
                     'id'         => $u->id,
                     'unit_name'  => $u->unit_name,
                     'conversion' => (float) $u->conversion,
