@@ -8,17 +8,21 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:user.lihat', only: ['index']),
-            new Middleware('permission:user.tambah', only: ['create', 'store']),
-            new Middleware('permission:user.edit', only: ['edit', 'update']),
-            new Middleware('permission:user.hapus', only: ['destroy']),
+            new Middleware('permission:user.lihat',   only: ['index']),
+            new Middleware('permission:user.tambah',  only: ['create', 'store']),
+            new Middleware('permission:user.edit',    only: ['edit', 'update']),
+            new Middleware('permission:user.hapus',   only: ['destroy']),
+            new Middleware('permission:hakakses.lihat', only: ['permissions']),
+            new Middleware('permission:hakakses.edit',  only: ['updatePermissions']),
         ];
     }
 
@@ -109,5 +113,41 @@ class UserController extends Controller implements HasMiddleware
 
         return redirect()->route('users.index')
             ->with('success', "Pengguna {$name} berhasil dihapus.");
+    }
+
+    public function permissions(User $user)
+    {
+        $allPermissions = Permission::orderBy('name')->get()->groupBy(function ($p) {
+            return explode('.', $p->name)[0];
+        });
+
+        $rolePermNames   = $user->getPermissionsViaRoles()->pluck('name')->flip();
+        $directPermNames = $user->getDirectPermissions()->pluck('name')->flip();
+
+        return view('users.permissions', compact('user', 'allPermissions', 'rolePermNames', 'directPermNames'));
+    }
+
+    public function updatePermissions(Request $request, User $user)
+    {
+        if ($user->hasRole('admin')) {
+            return back()->with('error', 'Permission pengguna Admin tidak dapat diubah secara manual.');
+        }
+
+        $rolePermNames = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        // Hanya izinkan permission yang BUKAN berasal dari role (mencegah redundansi)
+        $requested = collect($request->input('permissions', []))
+            ->diff($rolePermNames)
+            ->values()
+            ->toArray();
+
+        // Validasi: pastikan semua nama permission valid
+        $valid = Permission::whereIn('name', $requested)->pluck('name')->toArray();
+
+        $user->syncPermissions($valid);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $jumlah = count($valid);
+        return back()->with('success', "Hak akses khusus {$user->name} berhasil disimpan ({$jumlah} permission tambahan).");
     }
 }

@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('users',     UserController::class)->except('show');
+    Route::get('users/{user}/permissions',  [UserController::class, 'permissions'])->name('users.permissions');
+    Route::put('users/{user}/permissions',  [UserController::class, 'updatePermissions'])->name('users.permissions.update');
     Route::resource('employees', EmployeeController::class)->except(['create','edit','show']);
 
     // Absensi admin

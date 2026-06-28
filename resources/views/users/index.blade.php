@@ -137,6 +137,18 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-end gap-2">
+                                    @can('hakakses.lihat')
+                                    @if(!$user->hasRole('admin'))
+                                    <a href="{{ route('users.permissions', $user) }}"
+                                        class="text-gray-400 hover:text-purple-600 transition p-1.5 rounded-lg hover:bg-purple-50"
+                                        title="Hak Akses Khusus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                        </svg>
+                                    </a>
+                                    @endif
+                                    @endcan
                                     @can('user.edit')
                                     <a href="{{ route('users.edit', $user) }}"
                                         class="text-gray-400 hover:text-blue-600 transition p-1.5 rounded-lg hover:bg-blue-50"
