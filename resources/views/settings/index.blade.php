@@ -149,6 +149,24 @@
                     <p class="text-xs text-gray-400 mt-2">* Preview ini menggunakan data pengaturan yang tersimpan saat ini</p>
                 </div>
 
+                {{-- Bantuan & Kontak Developer --}}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 mb-5">
+                    <h3 class="font-semibold text-gray-700 text-sm border-b border-gray-100 pb-3">Bantuan & Laporan Bug</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Nomor WhatsApp Developer
+                        </label>
+                        <input type="text" name="wa_developer"
+                               value="{{ old('wa_developer', $settings['wa_developer'] ?? '') }}"
+                               placeholder="Contoh: 6285768790777"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Format internasional tanpa tanda +. Contoh: 6281234567890 (untuk 081234567890).
+                            Digunakan pada menu <strong>Bantuan</strong> agar pengguna bisa lapor masalah langsung ke WhatsApp Anda.
+                        </p>
+                    </div>
+                </div>
+
                 @can('pengaturan.edit')
                 <div class="flex justify-end">
                     <button type="submit"

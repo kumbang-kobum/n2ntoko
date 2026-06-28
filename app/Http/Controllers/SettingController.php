@@ -35,12 +35,14 @@ class SettingController extends Controller implements HasMiddleware
             'nota_header'  => 'nullable|string|max:200',
             'ppn_default'  => 'required|in:0,11,12',
             'grosir_same_price_warning' => 'required|boolean',
+            'wa_developer' => 'nullable|string|max:20',
         ]);
 
         Setting::setMany($request->only([
             'toko_nama', 'toko_tagline', 'toko_alamat',
             'toko_kota', 'toko_telepon', 'struk_footer',
             'nota_header', 'ppn_default', 'grosir_same_price_warning',
+            'wa_developer',
         ]));
 
         return back()->with('success', 'Pengaturan toko berhasil disimpan.');

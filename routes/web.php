@@ -124,6 +124,13 @@ Route::middleware('auth')->group(function () {
     Route::get('activity-log',                        [ActivityLogController::class, 'index'])->name('activity-log.index');
     Route::delete('activity-log/clear',               [ActivityLogController::class, 'destroyAll'])->name('activity-log.destroyAll');
     Route::delete('activity-log/{activity}',          [ActivityLogController::class, 'destroy'])->name('activity-log.destroy');
+
+    Route::get('bantuan', function () {
+        $tokoNama   = \App\Models\Setting::get('toko_nama', config('app.name'));
+        $waDeveloper = \App\Models\Setting::get('wa_developer', '6285768790777');
+        $versi      = config('app.version', '1.0.0');
+        return view('bantuan', compact('tokoNama', 'waDeveloper', 'versi'));
+    })->name('bantuan');
 });
 
 require __DIR__.'/auth.php';

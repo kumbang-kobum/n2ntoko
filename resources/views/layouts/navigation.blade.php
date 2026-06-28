@@ -151,6 +151,9 @@
                         </x-slot>
                     </x-dropdown>
                     @endcanany
+                    <x-nav-link :href="route('bantuan')" :active="request()->routeIs('bantuan')">
+                        Bantuan
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -265,6 +268,7 @@
                     <div class="text-xs text-gray-500 capitalize">{{ Auth::user()->getRoleNames()->first() ?? 'user' }}</div>
                 </div>
             </div>
+            <x-responsive-nav-link :href="route('bantuan')" :active="request()->routeIs('bantuan')">Bantuan</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('profile.edit')">Profil Saya</x-responsive-nav-link>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
