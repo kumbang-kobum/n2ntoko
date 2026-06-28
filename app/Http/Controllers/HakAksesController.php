@@ -63,8 +63,9 @@ class HakAksesController extends Controller implements HasMiddleware
             return back()->with('error', 'Role bawaan sistem tidak bisa dihapus.');
         }
 
-        if ($role->users()->count() > 0) {
-            return back()->with('error', "Role \"{$role->name}\" masih dipakai oleh {$role->users()->count()} pengguna.");
+        $userCount = $role->users()->count();
+        if ($userCount > 0) {
+            return back()->with('error', "Role \"{$role->name}\" masih dipakai oleh {$userCount} pengguna.");
         }
 
         $name = $role->name;

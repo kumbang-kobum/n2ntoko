@@ -59,7 +59,7 @@ class UserController extends Controller implements HasMiddleware
         $user = User::create([
             'name'      => $request->name,
             'email'     => $request->email,
-            'password'  => bcrypt($request->password),
+            'password'  => $request->password,
             'is_active' => $request->boolean('is_active', true),
         ]);
 
@@ -84,7 +84,7 @@ class UserController extends Controller implements HasMiddleware
         ];
 
         if ($request->filled('password')) {
-            $data['password'] = bcrypt($request->password);
+            $data['password'] = $request->password;
         }
 
         $user->update($data);

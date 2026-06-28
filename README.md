@@ -85,6 +85,85 @@ Akses di `http://localhost:8000`. Login default: lihat `ADMIN_EMAIL` dan `ADMIN_
 
 ---
 
+## Cara Kerja HPP & Perubahan Harga Beli
+
+Ini adalah bagian penting yang perlu dipahami agar laporan keuangan terbaca dengan benar.
+
+### Apa itu HPP?
+
+**HPP (Harga Pokok Penjualan)** adalah modal dasar per unit produk yang digunakan sistem untuk menghitung keuntungan. HPP di N2NToko dihitung otomatis menggunakan metode **Rata-rata Bergerak (Moving Average)** — artinya setiap kali Anda menerima pembelian baru dengan harga berbeda, HPP akan disesuaikan secara proporsional dengan stok yang masih ada.
+
+### Skenario: Harga Beli Berubah
+
+Berikut contoh nyata bagaimana sistem menangani perubahan harga beli:
+
+**Kondisi Awal:**
+- Anda membeli **Sampoerna Mild 16** sebanyak 20 Slop @ Rp 24.000/kotak
+- HPP sistem = Rp 24.000/kotak
+
+**Anda menjual 15 Slop → sisa stok 5 Slop.**
+
+**Pembelian Baru (harga turun):**
+- Anda beli lagi 10 Slop @ Rp 23.000/kotak
+- Sistem menghitung HPP baru:
+
+  ```
+  HPP baru = (5 kotak × Rp 24.000) + (10 kotak × Rp 23.000)
+             ──────────────────────────────────────────────────
+                              5 + 10 kotak
+
+           = (Rp 120.000 + Rp 230.000) / 15
+           = Rp 23.333/kotak
+  ```
+
+- HPP produk otomatis diperbarui menjadi **Rp 23.333/kotak** — bukan Rp 24.000, bukan Rp 23.000, tapi rata-rata tertimbang dari stok lama dan baru.
+
+### Apa yang Terjadi di Laporan Keuangan?
+
+Sistem mengunci HPP pada saat barang **dijual** (bukan saat ini). Artinya:
+
+| Waktu Jual | HPP yang Dipakai | Keterangan |
+|---|---|---|
+| Sebelum pembelian baru (15 Slop) | Rp 24.000/kotak | HPP saat transaksi = Rp 24.000 |
+| Setelah pembelian baru | Rp 23.333/kotak | HPP baru berlaku untuk penjualan berikutnya |
+
+Laporan laba di menu **Laporan Keuangan** menghitung:
+- **Laba Kotor** = Total Penjualan − HPP (dikunci saat transaksi)
+- **Laba Bersih** = Laba Kotor − Total Pengeluaran Operasional
+
+> Laporan tidak akan tercampur antara harga lama dan baru — setiap transaksi penjualan sudah tercatat dengan HPP yang berlaku pada saat itu.
+
+### Apakah Harga Jual Ikut Berubah Otomatis?
+
+**Tidak.** Harga jual diatur secara manual di menu **Produk → Harga**. Ini disengaja agar Anda tetap punya kendali penuh atas margin toko — sistem tidak akan tiba-tiba mengubah harga di kasir tanpa sepengetahuan Anda.
+
+**Yang perlu dilakukan saat harga beli berubah signifikan:**
+1. Konfirmasi pembelian baru → HPP otomatis terupdate
+2. Buka menu **Produk** → cari produk tersebut → klik **Edit Harga**
+3. Sesuaikan harga jual eceran/grosir sesuai margin yang Anda inginkan
+
+### Ringkasan Alur HPP
+
+```
+Pembelian Dikonfirmasi
+        │
+        ▼
+  HPP (avg_cost) diperbarui otomatis
+  menggunakan rumus Moving Average
+        │
+        ▼
+  Saat Penjualan Terjadi
+        │
+        ▼
+  HPP saat ini DIKUNCI ke transaksi (hpp_snapshot)
+        │
+        ▼
+  Laporan Laba menggunakan hpp_snapshot
+  (akurat meski HPP produk berubah di kemudian hari)
+```
+
+---
+
 ## Update dari GitHub (Tanpa Kehilangan Data)
 
 Gunakan prosedur ini setiap kali ada pembaruan kode. Data di database dan file upload **tidak akan terhapus** selama mengikuti langkah ini.

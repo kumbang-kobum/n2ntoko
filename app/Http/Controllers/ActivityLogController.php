@@ -92,7 +92,12 @@ class ActivityLogController extends Controller implements HasMiddleware
             $query->where('subject_type', $request->model);
         }
         if ($request->filled('event')) {
-            $query->where('event', $request->event);
+            if ($request->event === 'stok_opname') {
+                $query->where('log_name', 'stok_opname');
+            } else {
+                $query->where('event', $request->event)
+                      ->where('log_name', '!=', 'stok_opname');
+            }
         }
         if ($request->filled('dari')) {
             $query->whereDate('created_at', '>=', $request->dari);

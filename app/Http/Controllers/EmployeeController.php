@@ -97,6 +97,10 @@ class EmployeeController extends Controller implements HasMiddleware
 
     public function destroy(Employee $employee)
     {
+        if ($employee->attendances()->exists()) {
+            return back()->with('error', "Pegawai \"{$employee->name}\" tidak bisa dihapus karena memiliki data absensi. Nonaktifkan saja jika tidak lagi bekerja.");
+        }
+
         $name = $employee->name;
         $employee->delete();
         return back()->with('success', "Pegawai \"{$name}\" berhasil dihapus.");

@@ -84,8 +84,8 @@ class CustomerController extends Controller implements HasMiddleware
 
     public function destroy(Customer $customer)
     {
-        if ($customer->sales()->exists()) {
-            return back()->with('error', "Pelanggan \"{$customer->name}\" tidak bisa dihapus karena memiliki riwayat transaksi.");
+        if ($customer->sales()->where('status', '!=', 'cancelled')->exists()) {
+            return back()->with('error', "Pelanggan \"{$customer->name}\" tidak bisa dihapus karena memiliki riwayat transaksi aktif.");
         }
 
         $customer->delete();

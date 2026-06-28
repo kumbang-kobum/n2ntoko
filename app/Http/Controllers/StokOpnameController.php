@@ -83,9 +83,8 @@ class StokOpnameController extends Controller implements HasMiddleware
                 ]);
 
                 // Update stok tanpa memicu auto-log model (agar tidak duplikat)
-                $product->disableLogging();
-                $product->update(['stock_qty' => $qtyFisik]);
-                $product->enableLogging();
+                $product->stock_qty = $qtyFisik;
+                $product->saveQuietly();
 
                 // Log manual dengan keterangan lengkap
                 activity('stok_opname')

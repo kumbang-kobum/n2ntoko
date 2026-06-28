@@ -6,6 +6,7 @@ use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Validation\Rule;
 
 class ExpenseController extends Controller implements HasMiddleware
 {
@@ -47,7 +48,7 @@ class ExpenseController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $request->validate([
-            'category'     => 'required|in:sewa,listrik,air,gaji,transport,pemeliharaan,lainnya',
+            'category'     => ['required', Rule::in(array_keys(Expense::categoryLabels()))],
             'description'  => 'required|string|max:255',
             'amount'       => 'required|numeric|min:1',
             'expense_date' => 'required|date',
@@ -74,7 +75,7 @@ class ExpenseController extends Controller implements HasMiddleware
     public function update(Request $request, Expense $expense)
     {
         $request->validate([
-            'category'     => 'required|in:sewa,listrik,air,gaji,transport,pemeliharaan,lainnya',
+            'category'     => ['required', Rule::in(array_keys(Expense::categoryLabels()))],
             'description'  => 'required|string|max:255',
             'amount'       => 'required|numeric|min:1',
             'expense_date' => 'required|date',

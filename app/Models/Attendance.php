@@ -14,12 +14,19 @@ class Attendance extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date'      => 'date',
+        'check_in'  => 'datetime:H:i',
+        'check_out' => 'datetime:H:i',
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function getActivitySubjectName(): string
+    {
+        return 'Absensi ' . ($this->employee?->name ?? "ID #{$this->employee_id}") . ' ' . ($this->date?->format('d/m/Y') ?? '');
     }
 
     public function getStatusLabelAttribute(): string

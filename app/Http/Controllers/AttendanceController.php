@@ -7,6 +7,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller implements HasMiddleware
 {
@@ -46,20 +47,40 @@ class AttendanceController extends Controller implements HasMiddleware
         $today    = today()->toDateString();
         $now      = now()->format('H:i:s');
 
-        $attendance = Attendance::firstOrNew(['employee_id' => $employee->id, 'date' => $today]);
-
-        if ($attendance->check_in) {
-            return back()->with('error', "'{$employee->name}' sudah check-in pukul " . substr($attendance->check_in, 0, 5) . '.');
-        }
-
         $photoPath = $this->savePhoto($request->photo, $employee->id, $today, 'in');
 
-        $attendance->fill([
-            'check_in' => $now,
-            'status'   => 'hadir',
-            'input_by' => 'self',
-            'photo_in' => $photoPath,
-        ])->save();
+        try {
+            DB::transaction(function () use ($employee, $today, $now, $photoPath) {
+                $attendance = Attendance::where('employee_id', $employee->id)
+                    ->whereDate('date', $today)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($attendance && $attendance->check_in) {
+                    throw new \Exception("'{$employee->name}' sudah check-in pukul " . substr($attendance->check_in, 0, 5) . '.');
+                }
+
+                if ($attendance) {
+                    $attendance->update([
+                        'check_in' => $now,
+                        'status'   => 'hadir',
+                        'input_by' => 'self',
+                        'photo_in' => $photoPath,
+                    ]);
+                } else {
+                    Attendance::create([
+                        'employee_id' => $employee->id,
+                        'date'        => $today,
+                        'check_in'    => $now,
+                        'status'      => 'hadir',
+                        'input_by'    => 'self',
+                        'photo_in'    => $photoPath,
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', "✓ {$employee->name} berhasil check-in pukul " . substr($now, 0, 5) . '.');
     }

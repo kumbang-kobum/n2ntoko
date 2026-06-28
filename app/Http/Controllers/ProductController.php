@@ -144,7 +144,6 @@ class ProductController extends Controller implements HasMiddleware
 
     public function destroy(Product $product)
     {
-        // Cek apakah ada transaksi yang mereferensikan produk ini
         $hasTransactions = DB::table('purchase_items')->where('product_id', $product->id)->exists()
             || DB::table('sale_items')->where('product_id', $product->id)->exists();
 
@@ -153,11 +152,13 @@ class ProductController extends Controller implements HasMiddleware
         }
 
         $name = $product->name;
-        // Hapus relasi dulu
-        $product->barcodes()->delete();
-        $product->prices()->delete();
-        $product->units()->delete();
-        $product->delete();
+
+        DB::transaction(function () use ($product) {
+            $product->barcodes()->delete();
+            $product->prices()->delete();
+            $product->units()->delete();
+            $product->forceDelete();
+        });
 
         return redirect()->route('products.index')
             ->with('success', "Produk \"{$name}\" berhasil dihapus.");
@@ -214,6 +215,10 @@ class ProductController extends Controller implements HasMiddleware
 
     private function syncUnits(Product $product, array $units, int $baseIndex, bool $update = false): void
     {
+        if ($baseIndex < 0 || $baseIndex >= count($units)) {
+            throw new \InvalidArgumentException('Satuan dasar yang dipilih tidak valid. Silakan pilih kembali.');
+        }
+
         $existingUnits = $update ? $product->units->keyBy('id') : collect();
         $formUnitIds   = collect($units)->pluck('id')->filter()->values();
 

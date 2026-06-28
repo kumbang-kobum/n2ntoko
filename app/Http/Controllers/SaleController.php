@@ -442,36 +442,42 @@ class SaleController extends Controller implements HasMiddleware
 
     public function destroy(Sale $sale)
     {
-        if ($sale->status !== 'paid') {
-            return back()->with('error', 'Hanya penjualan berstatus Lunas yang bisa dibatalkan.');
+        $invoiceNumber = $sale->invoice_number;
+
+        try {
+            DB::transaction(function () use ($sale) {
+                $sale = Sale::whereKey($sale->id)->lockForUpdate()->firstOrFail();
+
+                if ($sale->status !== 'paid') {
+                    throw new \Exception('Hanya penjualan berstatus Lunas yang bisa dibatalkan.');
+                }
+
+                foreach ($sale->items()->get() as $item) {
+                    $product     = Product::whereKey($item->product_id)->lockForUpdate()->firstOrFail();
+                    $stockBefore = (float) $product->stock_qty;
+                    $stockAfter  = $stockBefore + (float) $item->qty_base;
+
+                    StockLedger::create([
+                        'product_id'     => $product->id,
+                        'qty_base'       => (float) $item->qty_base,
+                        'movement_type'  => 'adjustment',
+                        'reference_type' => 'sale_cancel',
+                        'reference_id'   => $sale->id,
+                        'stock_before'   => $stockBefore,
+                        'stock_after'    => $stockAfter,
+                        'cost_per_unit'  => (float) $item->hpp_snapshot,
+                        'notes'          => "Batal penjualan {$sale->invoice_number}",
+                    ]);
+
+                    $product->update(['stock_qty' => $stockAfter]);
+                }
+
+                $sale->update(['status' => 'cancelled']);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
 
-        DB::transaction(function () use ($sale) {
-            $sale->load('items.product');
-
-            foreach ($sale->items as $item) {
-                $product    = $item->product;
-                $stockBefore = (float) $product->stock_qty;
-                $stockAfter  = $stockBefore + (float) $item->qty_base;
-
-                StockLedger::create([
-                    'product_id'     => $product->id,
-                    'qty_base'       => (float) $item->qty_base,
-                    'movement_type'  => 'adjustment',
-                    'reference_type' => 'sale_cancel',
-                    'reference_id'   => $sale->id,
-                    'stock_before'   => $stockBefore,
-                    'stock_after'    => $stockAfter,
-                    'cost_per_unit'  => (float) $item->hpp_snapshot,
-                    'notes'          => "Batal penjualan {$sale->invoice_number}",
-                ]);
-
-                $product->update(['stock_qty' => $stockAfter]);
-            }
-
-            $sale->update(['status' => 'cancelled']);
-        });
-
-        return back()->with('success', "Penjualan {$sale->invoice_number} berhasil dibatalkan. Stok dikembalikan.");
+        return back()->with('success', "Penjualan {$invoiceNumber} berhasil dibatalkan. Stok dikembalikan.");
     }
 }

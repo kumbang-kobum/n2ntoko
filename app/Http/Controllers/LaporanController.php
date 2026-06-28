@@ -170,10 +170,11 @@ class LaporanController extends Controller implements HasMiddleware
 
         $labaKotor = $totalSubtotal - $totalHpp;
 
-        $totalPengeluaran = (float) Expense::whereDate('expense_date', $tanggal)->sum('amount');
+        // Pengeluaran operasional adalah biaya bersama — hanya tampil saat melihat semua kasir,
+        // tidak dikurangi ke laba kasir tertentu karena tidak bisa dialokasikan per individu.
+        $expenses         = Expense::whereDate('expense_date', $tanggal)->with('user')->get();
+        $totalPengeluaran = $kasirId ? 0.0 : (float) $expenses->sum('amount');
         $labaBersih       = $labaKotor - $totalPengeluaran;
-
-        $expenses = Expense::whereDate('expense_date', $tanggal)->with('user')->get();
 
         $byPaymentTotal = $allSales->groupBy('payment_method')->map(fn($g) => [
             'trx'      => $g->count(),

@@ -195,7 +195,11 @@ class PurchaseController extends Controller implements HasMiddleware
             return back()->with('error', 'Status pembelian tidak valid untuk dikonfirmasi.');
         }
 
-        DB::transaction(fn() => $this->confirmPurchase($purchase));
+        try {
+            DB::transaction(fn() => $this->confirmPurchase($purchase));
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', "Pembelian {$purchase->invoice_number} dikonfirmasi. Stok telah diperbarui.");
     }
@@ -213,17 +217,25 @@ class PurchaseController extends Controller implements HasMiddleware
             'bayar.max'      => 'Jumlah bayar melebihi sisa hutang.',
         ]);
 
-        $newPaid  = (float) $purchase->paid_amount + (float) $request->bayar;
-        $lunas    = $newPaid >= (float) $purchase->total_amount;
+        $msg = DB::transaction(function () use ($request, $purchase) {
+            $purchase = Purchase::whereKey($purchase->id)->lockForUpdate()->firstOrFail();
 
-        $purchase->update([
-            'paid_amount' => $newPaid,
-            'status'      => $lunas ? 'paid' : 'confirmed',
-        ]);
+            if ($purchase->status !== 'confirmed') {
+                throw new \Exception('Status pembelian sudah berubah, silakan refresh halaman.');
+            }
 
-        $msg = $lunas
-            ? "Pembelian {$purchase->invoice_number} telah LUNAS."
-            : "Pembayaran Rp " . number_format($request->bayar, 0, ',', '.') . " berhasil dicatat. Sisa hutang: Rp " . number_format($purchase->total_amount - $newPaid, 0, ',', '.') . ".";
+            $newPaid = (float) $purchase->paid_amount + (float) $request->bayar;
+            $lunas   = $newPaid >= (float) $purchase->total_amount;
+
+            $purchase->update([
+                'paid_amount' => $newPaid,
+                'status'      => $lunas ? 'paid' : 'confirmed',
+            ]);
+
+            return $lunas
+                ? "Pembelian {$purchase->invoice_number} telah LUNAS."
+                : "Pembayaran Rp " . number_format($request->bayar, 0, ',', '.') . " berhasil dicatat. Sisa hutang: Rp " . number_format($purchase->total_amount - $newPaid, 0, ',', '.') . ".";
+        });
 
         return back()->with('success', $msg);
     }
@@ -235,8 +247,11 @@ class PurchaseController extends Controller implements HasMiddleware
         }
 
         $invoice = $purchase->invoice_number;
-        $purchase->items()->delete();
-        $purchase->delete();
+
+        DB::transaction(function () use ($purchase) {
+            $purchase->items()->delete();
+            $purchase->delete();
+        });
 
         return redirect()->route('purchases.index')
             ->with('success', "Pembelian {$invoice} berhasil dihapus.");
@@ -336,8 +351,17 @@ class PurchaseController extends Controller implements HasMiddleware
                 throw new \Exception("Satuan dengan ID {$item['unit_id']} tidak ditemukan.");
             }
 
-            $qtyBase  = (float) $item['qty'] * (float) $unit->conversion;
-            $priceBase = (float) $item['buy_price'] / (float) $unit->conversion;
+            if ((int) $unit->product_id !== (int) $item['product_id']) {
+                throw new \Exception("Satuan '{$unit->unit_name}' tidak dimiliki oleh produk yang dipilih.");
+            }
+
+            $conversion = (float) $unit->conversion;
+            if ($conversion <= 0) {
+                throw new \Exception("Konversi satuan '{$unit->unit_name}' tidak valid.");
+            }
+
+            $qtyBase   = (float) $item['qty'] * $conversion;
+            $priceBase = (float) $item['buy_price'] / $conversion;
             $subtotal  = (float) $item['qty'] * (float) $item['buy_price'];
 
             $purchase->items()->create([
@@ -358,10 +382,16 @@ class PurchaseController extends Controller implements HasMiddleware
 
     private function confirmPurchase(Purchase $purchase): void
     {
+        // Lock purchase untuk cegah double-confirm dari dua request bersamaan
+        $purchase = Purchase::whereKey($purchase->id)->lockForUpdate()->firstOrFail();
+
+        if ($purchase->isConfirmed()) {
+            throw new \Exception('Pembelian ini sudah dikonfirmasi oleh proses lain.');
+        }
+
         $purchase->load('items');
 
         foreach ($purchase->items as $item) {
-            // lockForUpdate: cegah race condition saat konfirmasi bersamaan
             $product = \App\Models\Product::lockForUpdate()->findOrFail($item->product_id);
 
             // Hitung avg_cost baru (moving average)

@@ -63,7 +63,9 @@ class Product extends Model
 
     public static function generateSku(): string
     {
-        $last = static::withTrashed()->latest('id')->value('id') ?? 0;
+        // lockForUpdate efektif jika dipanggil dalam DB::transaction (di ProductController::store/update).
+        // Di luar transaksi, berperilaku sebagai SELECT biasa untuk preview SKU di form.
+        $last = static::withTrashed()->lockForUpdate()->latest('id')->value('id') ?? 0;
         return 'PRD-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
     }
 }

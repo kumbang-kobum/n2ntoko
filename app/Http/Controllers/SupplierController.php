@@ -68,8 +68,10 @@ class SupplierController extends Controller implements HasMiddleware
             'contact_person' => 'nullable|string|max:100',
         ]);
 
-        $supplier->update($request->only(['name','phone','email','address','contact_person']));
-        $supplier->update(['is_active' => $request->boolean('is_active', true)]);
+        $supplier->update(array_merge(
+            $request->only(['name', 'phone', 'email', 'address', 'contact_person']),
+            ['is_active' => $request->boolean('is_active', true)]
+        ));
 
         return back()->with('success', "Supplier \"{$supplier->name}\" berhasil diperbarui.");
     }
